@@ -220,7 +220,7 @@ workflows:
           # Write the App Store Connect API private key to a temp file for notarytool.
           # The integration injects APP_STORE_CONNECT_PRIVATE_KEY, KEY_IDENTIFIER,
           # and ISSUER_ID as env vars.
-          printf '%b' "$APP_STORE_CONNECT_PRIVATE_KEY" | tr -d '\r' > /tmp/asc_key.p8
+          echo "$ASC_API_KEY_B64" | base64 --decode > /tmp/asc_key.p8
           xcrun notarytool submit "$CM_BUILD_DIR/chessbook-reader.dmg" \
             --key /tmp/asc_key.p8 \
             --key-id "$APP_STORE_CONNECT_KEY_IDENTIFIER" \
