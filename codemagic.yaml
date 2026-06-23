@@ -217,10 +217,15 @@ workflows:
           APP=$(ls -d build/macos/Build/Products/Release/*.app | head -1)
           hdiutil create -volname "ChessBook Reader" -srcfolder "$APP" \
             -ov -format UDZO "$CM_BUILD_DIR/chessbook-reader.dmg"
-          # Notarize the .dmg with the App Store Connect API key (the integration
-          # injects APP_STORE_CONNECT_* env vars), then staple the ticket so it
-          # validates offline.
-          app-store-connect notarize "$CM_BUILD_DIR/chessbook-reader.dmg"
+          # Write the App Store Connect API private key to a temp file for notarytool.
+          # The integration injects APP_STORE_CONNECT_PRIVATE_KEY, KEY_IDENTIFIER,
+          # and ISSUER_ID as env vars.
+          echo "$APP_STORE_CONNECT_PRIVATE_KEY" > /tmp/asc_key.p8
+          xcrun notarytool submit "$CM_BUILD_DIR/chessbook-reader.dmg" \
+            --key /tmp/asc_key.p8 \
+            --key-id "$APP_STORE_CONNECT_KEY_IDENTIFIER" \
+            --issuer "$APP_STORE_CONNECT_ISSUER_ID" \
+            --wait
           xcrun stapler staple "$CM_BUILD_DIR/chessbook-reader.dmg"
     artifacts:
       - chessbook-reader.dmg
