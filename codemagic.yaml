@@ -272,16 +272,21 @@ workflows:
           # Mac Installer Distribution cert — needed by xcodebuild -exportArchive
           # to sign the .pkg. It has no provisioning profile so fetch-signing-files
           # won't fetch it; use the certificates subcommand directly.
-          # On first run: list finds nothing (exits 1) → create runs.
-          # On subsequent runs: list finds the existing cert → saves it → create skipped.
+          # `certificates list` exits 0 even when empty, so || doesn't work.
+          # Instead, count .p12 files before/after to detect whether a cert was saved.
+          _cert_dir=~/Library/Developer/Xcode/UserData/Certificates
+          _before=$(ls "$_cert_dir"/*.p12 2>/dev/null | wc -l)
           app-store-connect certificates list \
             --type MAC_INSTALLER_DISTRIBUTION \
             --certificate-key "@env:CERTIFICATE_PRIVATE_KEY" \
-            --save \
-          || app-store-connect certificates create \
+            --save
+          _after=$(ls "$_cert_dir"/*.p12 2>/dev/null | wc -l)
+          if [ "$_after" -le "$_before" ]; then
+            app-store-connect certificates create \
               --type MAC_INSTALLER_DISTRIBUTION \
               --certificate-key "@env:CERTIFICATE_PRIVATE_KEY" \
               --save
+          fi
           keychain add-certificates
           xcode-project use-profiles
       - name: Flutter pub get + build
