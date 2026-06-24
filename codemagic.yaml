@@ -312,22 +312,17 @@ workflows:
             CURRENT_PROJECT_VERSION="$PROJECT_BUILD_NUMBER"
       - name: Export .pkg
         script: |
-          cat > /tmp/export_options.plist << 'PLIST'
-          <?xml version="1.0" encoding="UTF-8"?>
-          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-          <plist version="1.0">
-          <dict>
-            <key>method</key>
-            <string>app-store-connect</string>
-            <key>destination</key>
-            <string>export</string>
-          </dict>
-          </plist>
-          PLIST
+          # xcode-project use-profiles saved /Users/builder/export_options.plist
+          # with the correct provisioning profile already wired up, but it sets
+          # method=ad-hoc for MAC_APP_STORE profiles. Patch it to app-store-connect
+          # so exportArchive produces a signed .pkg instead of a bare .app.
+          sed -i '' \
+            's|<string>ad-hoc</string>|<string>app-store-connect</string>|' \
+            /Users/builder/export_options.plist
           xcodebuild -exportArchive \
             -archivePath /tmp/Runner.xcarchive \
             -exportPath /tmp/mas-export \
-            -exportOptionsPlist /tmp/export_options.plist
+            -exportOptionsPlist /Users/builder/export_options.plist
     artifacts:
       - /tmp/mas-export/*.pkg
       - /tmp/xcodebuild_logs/*.log
