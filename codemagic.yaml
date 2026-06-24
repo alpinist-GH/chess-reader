@@ -260,25 +260,21 @@ workflows:
       vars:
         FLUTTER_PROJECT: chess_reader
         BUNDLE_ID: com.alpinist.chessBookReader
-        # App Store Connect resource ID for the bundle ID (stable — from ASC portal).
-        BUNDLE_ID_RESOURCE_ID: LP534HTRF4
     scripts:
       - name: Set up code signing
         script: |
           keychain initialize
-
-          # Step 1: Mac App Distribution cert. fetch-signing-files also creates a
-          # MAC_APP_STORE profile, but that profile only includes the app cert.
-          # We will delete it and create a proper one in step 4.
+          # Mac App Distribution cert + MAC_APP_STORE provisioning profile.
           app-store-connect fetch-signing-files "$BUNDLE_ID" \
             --type MAC_APP_STORE \
             --certificate-key "@env:CERTIFICATE_PRIVATE_KEY" \
             --create
-
-          # Step 2: Mac Installer Distribution cert (dedicated key for stable .p12).
-          # MAC_INSTALLER_KEY is a separate RSA key stored in Codemagic. The CLI
-          # generates a random ephemeral key when --certificate-key is omitted,
-          # making the cert unusable on subsequent runs.
+          # Mac Installer Distribution cert — needed by xcodebuild -exportArchive
+          # to sign the .pkg. It has no provisioning profile so fetch-signing-files
+          # won't fetch it; use the certificates subcommand directly.
+          # MAC_INSTALLER_KEY is a SEPARATE RSA key stored in Codemagic (PKCS#1
+          # RSA format). A dedicated key guarantees the .p12 saved by
+          # `certificates create` always contains the matching private key.
           # `certificates list` exits 0 even when empty, so count .p12 files
           # before/after to detect whether a cert was actually saved.
           _cert_dir=~/Library/Developer/Xcode/UserData/Certificates
@@ -294,36 +290,6 @@ workflows:
               --certificate-key "@env:MAC_INSTALLER_KEY" \
               --save
           fi
-
-          # Step 3: Extract cert resource IDs from the saved .p12 filenames.
-          # The CLI names files: TYPE_RESOURCE-ID_RANDOM.p12
-          APP_CERT_ID=$(ls "$_cert_dir"/DISTRIBUTION_*.p12 2>/dev/null \
-            | head -1 | xargs basename 2>/dev/null \
-            | sed 's/^DISTRIBUTION_\([^_]*\)_.*/\1/')
-          INSTALLER_CERT_ID=$(ls "$_cert_dir"/MAC_INSTALLER_DISTRIBUTION_*.p12 2>/dev/null \
-            | head -1 | xargs basename 2>/dev/null \
-            | sed 's/^MAC_INSTALLER_DISTRIBUTION_\([^_]*\)_.*/\1/')
-          echo "App cert ID: $APP_CERT_ID"
-          echo "Installer cert ID: $INSTALLER_CERT_ID"
-
-          # Step 4: Delete the profile fetch-signing-files just created (it only
-          # lists the app cert). Create a replacement that lists BOTH certs.
-          # xcodebuild -exportArchive with signingStyle=manual requires the
-          # installer cert to be explicitly listed in the MAC_APP_STORE profile.
-          _profile_dir=~/"Library/Developer/Xcode/UserData/Provisioning Profiles"
-          for pf in "$_profile_dir"/MAC_APP_STORE_*.provisionprofile; do
-            [ -f "$pf" ] || continue
-            pid=$(basename "$pf" | sed 's/^MAC_APP_STORE_\([^_]*\)_.*/\1/')
-            app-store-connect profiles delete "$pid" || true
-            rm -f "$pf"
-          done
-          app-store-connect profiles create \
-            --name "ChessBook Reader mac_app_store" \
-            --type MAC_APP_STORE \
-            --bundle-id-resource-id "$BUNDLE_ID_RESOURCE_ID" \
-            --certificate-resource-ids "$APP_CERT_ID" "$INSTALLER_CERT_ID" \
-            --save
-
           keychain add-certificates
           xcode-project use-profiles
       - name: Flutter pub get + build
