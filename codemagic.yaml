@@ -272,19 +272,24 @@ workflows:
           # Mac Installer Distribution cert — needed by xcodebuild -exportArchive
           # to sign the .pkg. It has no provisioning profile so fetch-signing-files
           # won't fetch it; use the certificates subcommand directly.
+          # MAC_INSTALLER_KEY is a SEPARATE RSA key stored in Codemagic (distinct
+          # from CERTIFICATE_PRIVATE_KEY). Using a dedicated key guarantees the
+          # .p12 saved by `certificates create` always contains the matching
+          # private key — the CLI generates a random key when --certificate-key
+          # is omitted, making the cert unusable on subsequent runs.
           # `certificates list` exits 0 even when empty, so || doesn't work.
           # Instead, count .p12 files before/after to detect whether a cert was saved.
           _cert_dir=~/Library/Developer/Xcode/UserData/Certificates
           _before=$(ls "$_cert_dir"/*.p12 2>/dev/null | wc -l)
           app-store-connect certificates list \
             --type MAC_INSTALLER_DISTRIBUTION \
-            --certificate-key "@env:CERTIFICATE_PRIVATE_KEY" \
+            --certificate-key "@env:MAC_INSTALLER_KEY" \
             --save
           _after=$(ls "$_cert_dir"/*.p12 2>/dev/null | wc -l)
           if [ "$_after" -le "$_before" ]; then
             app-store-connect certificates create \
               --type MAC_INSTALLER_DISTRIBUTION \
-              --certificate-key "@env:CERTIFICATE_PRIVATE_KEY" \
+              --certificate-key "@env:MAC_INSTALLER_KEY" \
               --save
           fi
           keychain add-certificates
@@ -314,11 +319,22 @@ workflows:
         script: |
           # xcode-project use-profiles saved /Users/builder/export_options.plist
           # with the correct provisioning profile already wired up, but it sets
-          # method=ad-hoc for MAC_APP_STORE profiles. Patch it to app-store-connect
-          # so exportArchive produces a signed .pkg instead of a bare .app.
-          sed -i '' \
-            's|<string>ad-hoc</string>|<string>app-store-connect</string>|' \
-            /Users/builder/export_options.plist
+          # method=ad-hoc. Use Python's plistlib to patch method + add explicit
+          # packageSigningCertificate so xcodebuild picks the right installer cert.
+          python3 - <<'PYEOF'
+          import plistlib
+          path = '/Users/builder/export_options.plist'
+          with open(path, 'rb') as f:
+              p = plistlib.load(f)
+          p['method'] = 'app-store-connect'
+          p['packageSigningCertificate'] = '3rd Party Mac Developer Installer'
+          with open(path, 'wb') as f:
+              plistlib.dump(p, f)
+          PYEOF
+          echo "=== export_options.plist ==="
+          cat /Users/builder/export_options.plist
+          echo "=== signing identities in keychain ==="
+          security find-identity -v -p codesigning
           xcodebuild -exportArchive \
             -archivePath /tmp/Runner.xcarchive \
             -exportPath /tmp/mas-export \
