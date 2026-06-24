@@ -315,18 +315,49 @@ workflows:
             CURRENT_PROJECT_VERSION="$PROJECT_BUILD_NUMBER"
       - name: Export .pkg
         script: |
-          # xcode-project use-profiles saved /Users/builder/export_options.plist
-          # with the correct provisioning profile already wired up, but it sets
-          # method=ad-hoc. Use Python's plistlib to patch method + add explicit
-          # packageSigningCertificate so xcodebuild picks the right installer cert.
+          # xcode-project use-profiles generates /Users/builder/export_options.plist
+          # but intermittently produces <array/> for provisioningProfiles when it
+          # cannot match the saved profile to the keychain. Write the plist from
+          # scratch: find the saved .provisionprofile, decode it with `security cms`
+          # to extract the profile name, then build a complete plist ourselves.
           python3 - <<'PYEOF'
-          import plistlib
-          path = '/Users/builder/export_options.plist'
-          with open(path, 'rb') as f:
-              p = plistlib.load(f)
-          p['method'] = 'app-store-connect'
-          p['packageSigningCertificate'] = '3rd Party Mac Developer Installer'
-          with open(path, 'wb') as f:
+          import glob, os, plistlib, subprocess, sys
+
+          BUNDLE_ID = 'com.alpinist.chessBookReader'
+          TEAM_ID   = '8CZSU66MX5'
+
+          # Locate the MAC_APP_STORE provisioning profile saved by fetch-signing-files.
+          search_dirs = [
+              os.path.expanduser(
+                  '~/Library/Developer/Xcode/UserData/Provisioning Profiles'),
+              os.path.expanduser(
+                  '~/Library/MobileDevice/Provisioning Profiles'),
+          ]
+          prof_file = None
+          for d in search_dirs:
+              hits = glob.glob(os.path.join(d, 'MAC_APP_STORE_*.provisionprofile'))
+              if hits:
+                  prof_file = hits[0]
+                  break
+          if not prof_file:
+              sys.exit('ERROR: no MAC_APP_STORE .provisionprofile found')
+
+          # Decode the CMS-signed profile envelope and read the Name key.
+          cms = subprocess.check_output(['security', 'cms', '-D', '-i', prof_file])
+          prof = plistlib.loads(cms)
+          prof_name = prof['Name']
+          print(f'Profile: {prof_name}')
+
+          p = {
+              'destination':               'export',
+              'method':                    'app-store-connect',
+              'signingStyle':              'manual',
+              'teamID':                    TEAM_ID,
+              'signingCertificate':        'Apple Distribution',
+              'packageSigningCertificate': '3rd Party Mac Developer Installer',
+              'provisioningProfiles':      {BUNDLE_ID: prof_name},
+          }
+          with open('/Users/builder/export_options.plist', 'wb') as f:
               plistlib.dump(p, f)
           PYEOF
           echo "=== export_options.plist ==="
