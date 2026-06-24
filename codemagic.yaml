@@ -264,14 +264,24 @@ workflows:
       - name: Set up code signing
         script: |
           keychain initialize
-          # MAC_APP_STORE fetches both the Mac App Distribution cert and the
-          # MAC_APP_STORE provisioning profile. The Mac Installer Distribution
-          # cert (needed by productbuild inside exportArchive) cannot be fetched
-          # via this CLI — xcodebuild -exportArchive creates/uses it automatically.
+          # Mac App Distribution cert + MAC_APP_STORE provisioning profile.
           app-store-connect fetch-signing-files "$BUNDLE_ID" \
             --type MAC_APP_STORE \
             --certificate-key "@env:CERTIFICATE_PRIVATE_KEY" \
             --create
+          # Mac Installer Distribution cert — needed by xcodebuild -exportArchive
+          # to sign the .pkg. It has no provisioning profile so fetch-signing-files
+          # won't fetch it; use the certificates subcommand directly.
+          # On first run: list finds nothing (exits 1) → create runs.
+          # On subsequent runs: list finds the existing cert → saves it → create skipped.
+          app-store-connect certificates list \
+            --type MAC_INSTALLER_DISTRIBUTION \
+            --certificate-key "@env:CERTIFICATE_PRIVATE_KEY" \
+            --save \
+          || app-store-connect certificates create \
+              --type MAC_INSTALLER_DISTRIBUTION \
+              --certificate-key "@env:CERTIFICATE_PRIVATE_KEY" \
+              --save
           keychain add-certificates
           xcode-project use-profiles
       - name: Flutter pub get + build
@@ -303,7 +313,7 @@ workflows:
           <plist version="1.0">
           <dict>
             <key>method</key>
-            <string>app-store</string>
+            <string>app-store-connect</string>
             <key>destination</key>
             <string>export</string>
           </dict>
