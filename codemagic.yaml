@@ -264,22 +264,25 @@ workflows:
       - name: Set up code signing
         script: |
           keychain initialize
-          # Mac App Distribution cert + MAC_APP_STORE provisioning profile.
+          # MAC_APP_STORE fetches both the Mac App Distribution cert and the
+          # MAC_APP_STORE provisioning profile. The Mac Installer Distribution
+          # cert (needed by productbuild inside exportArchive) cannot be fetched
+          # via this CLI — xcodebuild -exportArchive creates/uses it automatically.
           app-store-connect fetch-signing-files "$BUNDLE_ID" \
             --type MAC_APP_STORE \
             --certificate-key "@env:CERTIFICATE_PRIVATE_KEY" \
             --create
-          # Mac Installer Distribution cert (productbuild inside exportArchive).
-          app-store-connect fetch-signing-files "$BUNDLE_ID" \
-            --type MAC_INSTALLER_DISTRIBUTION \
-            --certificate-key "@env:CERTIFICATE_PRIVATE_KEY" \
-            --create
           keychain add-certificates
           xcode-project use-profiles
-      - name: Flutter pub get
+      - name: Flutter pub get + build
         script: |
           cd "$FLUTTER_PROJECT"
           flutter pub get
+          # flutter build macos generates the ephemeral files (FlutterInputs/
+          # FlutterOutputs.xcfilelist, FlutterGeneratedPluginSwiftPackage/
+          # Package.swift) that xcodebuild archive needs before it can start.
+          flutter build macos --release \
+            --build-number="$PROJECT_BUILD_NUMBER"
       - name: Archive
         script: |
           cd "$FLUTTER_PROJECT"
