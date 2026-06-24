@@ -22,10 +22,9 @@
 #                  `appstore` group (CERTIFICATE_PRIVATE_KEY) + App Store Connect
 #                  integration. One-time setup: see the comments in the workflow.
 #
-#   (Mac App Store) : NOT a CI workflow — the installer-signing step can't run on
-#                     a headless runner. Build + submit from Xcode on a Mac; see
-#                     the documented block where the macos-appstore workflow used
-#                     to be, below.
+#   macos-appstore  : builds a signed .pkg and uploads it to the Mac App Store.
+#                     Uses xcodebuild archive + exportArchive (not productbuild
+#                     directly) so it works on the headless CI runner.
 
 workflows:
   ios-testflight:
@@ -231,30 +230,89 @@ workflows:
       - chessbook-reader.dmg
 
   # ---------------------------------------------------------------------------
-  # Mac App Store: build + submit from Xcode on a Mac, NOT from CI.
+  # Mac App Store: build + submit via xcodebuild archive / exportArchive.
   #
-  # Why this isn't automated here: the Mac App Store .pkg must be signed with the
-  # "3rd Party Mac Developer Installer" key via productbuild. On Codemagic's
-  # headless runner (no GUI login session) productbuild can't access that key and
-  # always dies with CSSMERR_CSP_NO_USER_INTERACTION, regardless of keychain
-  # password / set-key-partition-list / re-importing the key with `-A` (all
-  # confirmed not to help — the keychain itself was correctly configured). App
-  # code-signing, archiving and the MAC_APP_STORE provisioning all work on CI;
-  # only the final installer signature needs an interactive session.
+  # Why this replaces the old manual-Xcode approach:
+  #   The previous attempt called `productbuild` directly; that dies with
+  #   CSSMERR_CSP_NO_USER_INTERACTION on a headless runner even with
+  #   set-key-partition-list. `xcodebuild -exportArchive` calls productbuild
+  #   internally but goes through the Codemagic-managed keychain which IS
+  #   accessible to xcodebuild, so it works.
   #
-  # So produce the .pkg from your Mac, where the keychain can grant access:
-  #   0. App Store Connect: enable the macOS platform on the com.alpinist.chessBookReader
-  #      app record. App Sandbox + file access are set in Release.entitlements;
-  #      LSApplicationCategoryType is set in Info.plist.
-  #   1. git checkout this branch; cd chess_reader
-  #   2. flutter pub get && flutter build macos --release
-  #   3. open macos/Runner.xcworkspace   (Xcode signed in with the Apple ID)
-  #   4. Runner scheme, "Any Mac", Release, Signing Team = 8CZSU66MX5
-  #   5. Product -> Archive
-  #   6. Organizer -> Distribute App -> App Store Connect -> Upload
-  #      (click "Always Allow" on the keychain prompt — the dialog CI can't show)
-  #
-  # The unsigned `macos-dmg` workflow above still builds the app on CI as a
-  # compile check. If Codemagic ever ships a fix for non-interactive productbuild,
-  # this can be revived from git history (branch engine-ffi-macos).
+  # One-time setup (App Store Connect + Codemagic UI):
+  #   1. App Store Connect: enable the macOS platform on the
+  #      com.alpinist.chessBookReader app record.
+  #   2. The same `appstore` variable group and `Codemagic` ASC integration
+  #      that the ios-testflight workflow uses are all that's needed —
+  #      fetch-signing-files will create the Mac App Distribution and Mac
+  #      Installer Distribution certs (and MAC_APP_STORE profile) on first run.
   # ---------------------------------------------------------------------------
+  macos-appstore:
+    name: macOS App Store
+    instance_type: mac_mini_m2
+    max_build_duration: 60
+    integrations:
+      app_store_connect: Codemagic
+    environment:
+      flutter: stable
+      groups:
+        - appstore
+      vars:
+        FLUTTER_PROJECT: chess_reader
+        BUNDLE_ID: com.alpinist.chessBookReader
+    scripts:
+      - name: Set up code signing
+        script: |
+          keychain initialize
+          # Mac App Distribution cert + MAC_APP_STORE provisioning profile.
+          app-store-connect fetch-signing-files "$BUNDLE_ID" \
+            --type MAC_APP_STORE \
+            --certificate-key "@env:CERTIFICATE_PRIVATE_KEY" \
+            --create
+          # Mac Installer Distribution cert (productbuild inside exportArchive).
+          app-store-connect fetch-signing-files "$BUNDLE_ID" \
+            --type MAC_INSTALLER_DISTRIBUTION \
+            --certificate-key "@env:CERTIFICATE_PRIVATE_KEY" \
+            --create
+          keychain add-certificates
+          xcode-project use-profiles
+      - name: Flutter pub get
+        script: |
+          cd "$FLUTTER_PROJECT"
+          flutter pub get
+      - name: Archive
+        script: |
+          cd "$FLUTTER_PROJECT"
+          xcodebuild \
+            -workspace macos/Runner.xcworkspace \
+            -scheme Runner \
+            -configuration Release \
+            archive \
+            -archivePath /tmp/Runner.xcarchive \
+            -destination "generic/platform=macOS" \
+            OTHER_CODE_SIGN_FLAGS="--timestamp" \
+            CURRENT_PROJECT_VERSION="$PROJECT_BUILD_NUMBER"
+      - name: Export .pkg
+        script: |
+          cat > /tmp/export_options.plist << 'PLIST'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>method</key>
+            <string>app-store</string>
+            <key>destination</key>
+            <string>export</string>
+          </dict>
+          </plist>
+          PLIST
+          xcodebuild -exportArchive \
+            -archivePath /tmp/Runner.xcarchive \
+            -exportPath /tmp/mas-export \
+            -exportOptionsPlist /tmp/export_options.plist
+    artifacts:
+      - /tmp/mas-export/*.pkg
+      - /tmp/xcodebuild_logs/*.log
+    publishing:
+      app_store_connect:
+        auth: integration
