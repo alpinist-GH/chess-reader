@@ -88,6 +88,9 @@ flutter:
   assets:
     - assets/models/arrow_seg.onnx
     - assets/models/square_classifier2.onnx
+    - assets/models/ocr_det.onnx
+    - assets/models/ocr_rec.onnx
+    - assets/models/ocr_keys.txt
     - assets/sample/My System.pdf
 
   # To add assets to your application, add an assets section, like this:

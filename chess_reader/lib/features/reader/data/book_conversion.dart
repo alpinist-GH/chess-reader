@@ -6,6 +6,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:pdfrx/pdfrx.dart';
 
 import '../../../core/async/semaphore.dart';
+import '../../ocr/data/onnx_text_recognizer.dart';
 import '../../vision/data/diagram_recognizer.dart';
 import 'epub_book.dart';
 
@@ -145,7 +146,10 @@ class BookConversion {
   // v6: mask-aware recognition (arrow segmenter + 2-channel classifier) reads
   //     through drawn arrows/annotations, so v5 caches with phantom pieces on
   //     arrow squares must be recomputed.
-  static const _version = 6;
+  // v7: OCR text layer for scanned PDFs — pages whose embedded text layer is
+  //     sparse are now read with the ONNX OCR pipeline, so v6 caches that
+  //     stored empty page text for image-only books must be recomputed.
+  static const _version = 7;
 
   Map<String, dynamic> toJson() => {
         'v': _version,
@@ -180,6 +184,7 @@ class CachedBook {
 Future<BookConversion> loadOrConvert(
   String path,
   DiagramRecognizer recognizer, {
+  OcrTextRecognizer? ocr,
   void Function(double progress)? onProgress,
 }) async {
   final cached = await _readCache(path);
@@ -189,10 +194,18 @@ Future<BookConversion> loadOrConvert(
   }
   final conversion = path.toLowerCase().endsWith('.epub')
       ? await convertEpub(path, recognizer, onProgress: onProgress)
-      : await convertPdf(path, recognizer, onProgress: onProgress);
+      : await convertPdf(path, recognizer, ocr: ocr, onProgress: onProgress);
   await _writeCache(path, conversion);
   return conversion;
 }
+
+/// Whether a page's embedded text layer is too sparse to use — the per-page
+/// equivalent of [BookConversion.hasExtractableText], used to decide when to
+/// fall back to OCR. A real digital page has hundreds of non-whitespace chars;
+/// a scanned page has ~0.
+bool _pageTextIsSparse(String text) =>
+    text.replaceAll(RegExp(r'\s'), '').length <
+        BookConversion._minTextCharsPerPage;
 
 /// How many pages are recognized concurrently. The per-page locate step runs
 /// in its own isolate (`compute`), so several pages overlap across CPU cores;
@@ -209,6 +222,7 @@ const int _conversionConcurrency = 4;
 Future<BookConversion> convertPdf(
   String path,
   DiagramRecognizer recognizer, {
+  OcrTextRecognizer? ocr,
   void Function(double progress)? onProgress,
 }) async {
   const scale = 200 / 72; // PDF points (72 dpi) → ~200 dpi raster.
@@ -238,12 +252,24 @@ Future<BookConversion> convertPdf(
 
       Future<void> recognize() async {
         final diagrams = <ConvertedDiagram>[];
+        var pageText = text;
         if (image != null) {
           final recognized = await recognizer.recognizePage(
             bgra: image.pixels,
             width: image.width,
             height: image.height,
           );
+          // Scanned/image-only page: recover its body text via OCR so the
+          // reflowed reading view (and search/move resolution) work. Reuses the
+          // raster already rendered for diagram recognition — no extra render.
+          if (ocr != null && _pageTextIsSparse(text)) {
+            final ocrText = await ocr.recognizePage(
+              bgra: image.pixels,
+              width: image.width,
+              height: image.height,
+            );
+            if (ocrText.trim().isNotEmpty) pageText = ocrText;
+          }
           image.dispose();
           for (final r in recognized) {
             diagrams.add(ConvertedDiagram(
@@ -263,7 +289,7 @@ Future<BookConversion> convertPdf(
           }
         }
         results[index] =
-            ConvertedPage(index: pageNumber, text: text, diagrams: diagrams);
+            ConvertedPage(index: pageNumber, text: pageText, diagrams: diagrams);
         completed++;
         onProgress?.call(completed / total);
       }

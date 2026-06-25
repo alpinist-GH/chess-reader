@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../ocr/data/onnx_text_recognizer.dart';
 import '../../vision/data/diagram_recognizer.dart';
 import '../data/book_conversion.dart';
 
@@ -22,11 +23,16 @@ final conversionProgressProvider =
 final conversionProvider =
     FutureProvider.family<BookConversion, String>((ref, path) async {
   final recognizer = DiagramRecognizer();
+  // Lazily-loaded: the OCR models are only loaded when a page's text layer is
+  // sparse, so digital PDFs and cache hits pay nothing for it.
+  final ocr = OcrTextRecognizer();
   ref.onDispose(recognizer.dispose);
+  ref.onDispose(ocr.dispose);
   ref.read(conversionProgressProvider.notifier).set(path, 0);
   final conversion = await loadOrConvert(
     path,
     recognizer,
+    ocr: ocr,
     onProgress: (pr) =>
         ref.read(conversionProgressProvider.notifier).set(path, pr),
   );
