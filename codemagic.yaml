@@ -357,12 +357,14 @@ workflows:
       - name: Archive
         script: |
           cd "$FLUTTER_PROJECT"
-          # Force manual signing with the app cert + MAC_APP_STORE profile so the
-          # archived .app is unambiguously distribution-signed AND has the profile
-          # embedded (Contents/embedded.provisionprofile) — both required for the
-          # Mac App Store. Don't rely on xcode-project use-profiles having matched;
-          # only the app cert is in the keychain so "Apple Distribution" resolves
-          # uniquely. The profile is referenced by name (use-profiles installed it).
+          # Signing is configured by `xcode-project use-profiles`, which sets manual
+          # signing + the MAC_APP_STORE profile on the RUNNER target only. Do NOT
+          # pass CODE_SIGN_IDENTITY / PROVISIONING_PROFILE_SPECIFIER as global
+          # build settings here: that applies them to every target, and the Swift
+          # Package Manager plugin targets (url_launcher_macos, share_plus, etc.)
+          # reject a manual profile ("does not support provisioning profiles").
+          # Only the app cert is in the keychain, so the Runner target signs with
+          # Apple Distribution unambiguously and embeds the profile.
           xcodebuild \
             -workspace macos/Runner.xcworkspace \
             -scheme Runner \
@@ -370,10 +372,6 @@ workflows:
             archive \
             -archivePath /tmp/Runner.xcarchive \
             -destination "generic/platform=macOS" \
-            CODE_SIGN_STYLE=Manual \
-            DEVELOPMENT_TEAM=8CZSU66MX5 \
-            CODE_SIGN_IDENTITY="Apple Distribution" \
-            PROVISIONING_PROFILE_SPECIFIER="ChessBook Reader mac_app_store" \
             OTHER_CODE_SIGN_FLAGS="--timestamp" \
             CURRENT_PROJECT_VERSION="$PROJECT_BUILD_NUMBER"
       - name: Export .pkg
