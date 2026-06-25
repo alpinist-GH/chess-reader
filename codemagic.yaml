@@ -313,12 +313,15 @@ workflows:
             app-store-connect profiles delete "$pid" || true
             rm -f "$pf"
           done
+          # Flag names per `profiles create` usage: bundle id is a POSITIONAL
+          # arg (not --bundle-id-resource-id), and the cert flag is
+          # --certificate-ids (not --certificate-resource-ids).
           app-store-connect profiles create \
             --name "ChessBook Reader mac_app_store" \
             --type MAC_APP_STORE \
-            --bundle-id-resource-id LP534HTRF4 \
-            --certificate-resource-ids "$APP_CERT_ID" "$INSTALLER_CERT_ID" \
-            --save
+            --certificate-ids "$APP_CERT_ID" "$INSTALLER_CERT_ID" \
+            --save \
+            LP534HTRF4
 
           keychain add-certificates
           xcode-project use-profiles
