@@ -265,9 +265,15 @@ workflows:
         script: |
           keychain initialize
 
-          # Step 1: Mac App Distribution cert + an initial MAC_APP_STORE profile.
-          # fetch-signing-files only lists the app cert in the profile; we replace
-          # it with a two-cert profile after fetching the installer cert (step 4).
+          # Step 1: Mac App Distribution cert + the MAC_APP_STORE provisioning
+          # profile. The profile lists ONLY the app-signing (Apple Distribution)
+          # cert. The Mac Installer Distribution cert is deliberately NOT part of
+          # the profile — putting it there makes `xcode-project use-profiles` set
+          # the app's CODE_SIGN_IDENTITY to the installer cert, which then fails
+          # the build with "this identity cannot be used for signing code". Per
+          # Codemagic's macOS signing docs the installer cert is used separately,
+          # only to sign the final .pkg (packageSigningCertificate in the export
+          # options).
           app-store-connect fetch-signing-files "$BUNDLE_ID" \
             --type MAC_APP_STORE \
             --certificate-key "@env:CERTIFICATE_PRIVATE_KEY" \
@@ -275,7 +281,8 @@ workflows:
 
           # Step 2: Mac Installer Distribution cert (dedicated MAC_INSTALLER_KEY,
           # PKCS#1 RSA format stored in Codemagic). A dedicated key guarantees the
-          # .p12 always has the matching private key across runs.
+          # .p12 always has the matching private key across runs. Added to the
+          # keychain only — exportArchive picks it up by name for the .pkg.
           # `certificates list` exits 0 even when empty — count .p12 files to detect
           # whether a cert was actually saved before deciding to create a new one.
           _cert_dir=~/Library/Developer/Xcode/UserData/Certificates
@@ -291,37 +298,6 @@ workflows:
               --certificate-key "@env:MAC_INSTALLER_KEY" \
               --save
           fi
-
-          # Step 3: Extract cert resource IDs from saved .p12 filenames.
-          # The Codemagic CLI names files TYPE_RESOURCE-ID_RANDOM.p12.
-          APP_CERT_ID=$(ls "$_cert_dir"/DISTRIBUTION_*.p12 2>/dev/null \
-            | head -1 | xargs basename 2>/dev/null \
-            | sed 's/^DISTRIBUTION_\([^_]*\)_.*/\1/')
-          INSTALLER_CERT_ID=$(ls "$_cert_dir"/MAC_INSTALLER_DISTRIBUTION_*.p12 2>/dev/null \
-            | head -1 | xargs basename 2>/dev/null \
-            | sed 's/^MAC_INSTALLER_DISTRIBUTION_\([^_]*\)_.*/\1/')
-          echo "App cert: $APP_CERT_ID  Installer cert: $INSTALLER_CERT_ID"
-
-          # Step 4: Replace the single-cert profile with one that lists BOTH certs.
-          # xcodebuild -exportArchive with signingStyle=manual requires the
-          # Mac Installer Distribution cert to be listed in the profile.
-          # LP534HTRF4 is the stable ASC resource ID for com.alpinist.chessBookReader.
-          _profile_dir=~/"Library/Developer/Xcode/UserData/Provisioning Profiles"
-          for pf in "$_profile_dir"/MAC_APP_STORE_*.provisionprofile; do
-            [ -f "$pf" ] || continue
-            pid=$(basename "$pf" | sed 's/^MAC_APP_STORE_\([^_]*\)_.*/\1/')
-            app-store-connect profiles delete "$pid" || true
-            rm -f "$pf"
-          done
-          # Flag names per `profiles create` usage: bundle id is a POSITIONAL
-          # arg (not --bundle-id-resource-id), and the cert flag is
-          # --certificate-ids (not --certificate-resource-ids).
-          app-store-connect profiles create \
-            --name "ChessBook Reader mac_app_store" \
-            --type MAC_APP_STORE \
-            --certificate-ids "$APP_CERT_ID" "$INSTALLER_CERT_ID" \
-            --save \
-            LP534HTRF4
 
           keychain add-certificates
           xcode-project use-profiles
