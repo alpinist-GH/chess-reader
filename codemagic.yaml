@@ -348,6 +348,12 @@ workflows:
       - name: Archive
         script: |
           cd "$FLUTTER_PROJECT"
+          # Force manual signing with the app cert + MAC_APP_STORE profile so the
+          # archived .app is unambiguously distribution-signed AND has the profile
+          # embedded (Contents/embedded.provisionprofile) — both required for the
+          # Mac App Store. Don't rely on xcode-project use-profiles having matched;
+          # only the app cert is in the keychain so "Apple Distribution" resolves
+          # uniquely. The profile is referenced by name (use-profiles installed it).
           xcodebuild \
             -workspace macos/Runner.xcworkspace \
             -scheme Runner \
@@ -355,86 +361,47 @@ workflows:
             archive \
             -archivePath /tmp/Runner.xcarchive \
             -destination "generic/platform=macOS" \
+            CODE_SIGN_STYLE=Manual \
+            DEVELOPMENT_TEAM=8CZSU66MX5 \
+            CODE_SIGN_IDENTITY="Apple Distribution" \
+            PROVISIONING_PROFILE_SPECIFIER="ChessBook Reader mac_app_store" \
             OTHER_CODE_SIGN_FLAGS="--timestamp" \
             CURRENT_PROJECT_VERSION="$PROJECT_BUILD_NUMBER"
       - name: Export .pkg
         script: |
-          # The build + archive ran with only the app cert in the keychain (so
-          # they couldn't sign with the installer cert). Now add the Mac Installer
-          # Distribution cert so exportArchive's internal productbuild can sign the
-          # .pkg (packageSigningCertificate in export_options.plist below).
+          # xcodebuild -exportArchive proved unusable here: with the installer cert
+          # listed in the profile (which exportArchive *requires* for packaging) it
+          # re-signs the app CODE with the installer cert and dies ("this identity
+          # cannot be used for signing code"), ignoring signingCertificate. So we
+          # skip exportArchive and follow Codemagic's documented macOS path: the
+          # archived .app is already distribution-signed with the profile embedded
+          # (see the Archive step), so just wrap it in a component .pkg and sign the
+          # package with the Mac Installer Distribution cert.
           _cert_dir=~/Library/Developer/Xcode/UserData/Certificates
           _installer_p12=$(ls "$_cert_dir"/MAC_INSTALLER_DISTRIBUTION_*.p12 2>/dev/null | head -1)
           keychain add-certificates --certificate "$_installer_p12"
 
-          # xcode-project use-profiles generates /Users/builder/export_options.plist
-          # but intermittently produces <array/> for provisioningProfiles when it
-          # cannot match the saved profile to the keychain. Write the plist from
-          # scratch: find the installed profile by decoding each candidate and
-          # matching this app's bundle ID, then build a complete plist ourselves.
-          python3 - <<'PYEOF'
-          import glob, os, plistlib, subprocess, sys
-
-          BUNDLE_ID = 'com.alpinist.chessBookReader'
-          TEAM_ID   = '8CZSU66MX5'
-          APP_ID    = f'{TEAM_ID}.{BUNDLE_ID}'
-
-          # Profiles may be named MAC_APP_STORE_*.provisionprofile (by
-          # fetch-signing-files), <profile-name>.provisionprofile (by
-          # `profiles create --save`), or <UUID>.provisionprofile (after
-          # `xcode-project use-profiles` installs them). Don't rely on the name:
-          # decode every candidate in both dirs and match on the bundle ID.
-          search_dirs = [
-              os.path.expanduser(
-                  '~/Library/Developer/Xcode/UserData/Provisioning Profiles'),
-              os.path.expanduser(
-                  '~/Library/MobileDevice/Provisioning Profiles'),
-          ]
-          candidates = []
-          for d in search_dirs:
-              for ext in ('*.provisionprofile', '*.mobileprovision'):
-                  candidates.extend(glob.glob(os.path.join(d, ext)))
-
-          prof_name = None
-          for pf in candidates:
-              try:
-                  cms = subprocess.check_output(['security', 'cms', '-D', '-i', pf])
-                  prof = plistlib.loads(cms)
-              except Exception as e:
-                  print(f'skip {pf}: {e}')
-                  continue
-              # Entitlements carry TEAM_ID.BUNDLE_ID in application-identifier.
-              ent = prof.get('Entitlements', {})
-              app_id = ent.get('com.apple.application-identifier', '')
-              if app_id == APP_ID:
-                  prof_name = prof['Name']
-                  print(f'Matched profile {prof_name!r} in {pf}')
-                  break
-
-          if not prof_name:
-              print('Candidates scanned:', candidates)
-              sys.exit(f'ERROR: no provisioning profile found for {APP_ID}')
-
-          p = {
-              'destination':               'export',
-              'method':                    'app-store-connect',
-              'signingStyle':              'manual',
-              'teamID':                    TEAM_ID,
-              'signingCertificate':        'Apple Distribution',
-              'packageSigningCertificate': '3rd Party Mac Developer Installer',
-              'provisioningProfiles':      {BUNDLE_ID: prof_name},
-          }
-          with open('/Users/builder/export_options.plist', 'wb') as f:
-              plistlib.dump(p, f)
-          PYEOF
-          echo "=== export_options.plist ==="
-          cat /Users/builder/export_options.plist
+          APP=$(ls -d /tmp/Runner.xcarchive/Products/Applications/*.app | head -1)
+          echo "App: $APP"
+          echo "=== app code signature ==="
+          codesign -dvvv "$APP" 2>&1 || true
+          echo "=== embedded provisioning profile ==="
+          ls -l "$APP/Contents/embedded.provisionprofile" || \
+            echo "WARNING: no embedded.provisionprofile in the archived app"
           echo "=== signing identities in keychain ==="
           security find-identity -v
-          xcodebuild -exportArchive \
-            -archivePath /tmp/Runner.xcarchive \
-            -exportPath /tmp/mas-export \
-            -exportOptionsPlist /Users/builder/export_options.plist
+
+          mkdir -p /tmp/mas-export
+          # --component <app> /Applications builds a distribution installer that
+          # drops the app into /Applications; --sign signs the .pkg with the
+          # installer identity (full name → unambiguous).
+          xcrun productbuild \
+            --component "$APP" /Applications \
+            --sign "3rd Party Mac Developer Installer: Vu-Hung Quan (8CZSU66MX5)" \
+            /tmp/mas-export/ChessBookReader.pkg
+          echo "=== built package ==="
+          ls -l /tmp/mas-export/*.pkg
+          pkgutil --check-signature /tmp/mas-export/ChessBookReader.pkg || true
     artifacts:
       - /tmp/mas-export/*.pkg
       - /tmp/xcodebuild_logs/*.log
