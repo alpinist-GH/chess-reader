@@ -322,7 +322,14 @@ workflows:
             --save \
             LP534HTRF4
 
-          keychain add-certificates
+          # Add ONLY the app (Apple Distribution) cert to the keychain for the
+          # build + archive. The installer cert is added later (Export step). If
+          # both are present now, xcodebuild's signing — which falls back to
+          # Automatic when use-profiles can't match — picks the installer cert
+          # (it sorts first) and fails: "this identity cannot be used for signing
+          # code". With only the app cert available, the build can't pick wrong.
+          _app_p12=$(ls "$_cert_dir"/DISTRIBUTION_*.p12 2>/dev/null | head -1)
+          keychain add-certificates --certificate "$_app_p12"
           xcode-project use-profiles
       - name: Flutter pub get + build
         script: |
@@ -347,6 +354,14 @@ workflows:
             CURRENT_PROJECT_VERSION="$PROJECT_BUILD_NUMBER"
       - name: Export .pkg
         script: |
+          # The build + archive ran with only the app cert in the keychain (so
+          # they couldn't sign with the installer cert). Now add the Mac Installer
+          # Distribution cert so exportArchive's internal productbuild can sign the
+          # .pkg (packageSigningCertificate in export_options.plist below).
+          _cert_dir=~/Library/Developer/Xcode/UserData/Certificates
+          _installer_p12=$(ls "$_cert_dir"/MAC_INSTALLER_DISTRIBUTION_*.p12 2>/dev/null | head -1)
+          keychain add-certificates --certificate "$_installer_p12"
+
           # xcode-project use-profiles generates /Users/builder/export_options.plist
           # but intermittently produces <array/> for provisioningProfiles when it
           # cannot match the saved profile to the keychain. Write the plist from
