@@ -348,35 +348,50 @@ workflows:
           # xcode-project use-profiles generates /Users/builder/export_options.plist
           # but intermittently produces <array/> for provisioningProfiles when it
           # cannot match the saved profile to the keychain. Write the plist from
-          # scratch: find the saved .provisionprofile, decode it with `security cms`
-          # to extract the profile name, then build a complete plist ourselves.
+          # scratch: find the installed profile by decoding each candidate and
+          # matching this app's bundle ID, then build a complete plist ourselves.
           python3 - <<'PYEOF'
           import glob, os, plistlib, subprocess, sys
 
           BUNDLE_ID = 'com.alpinist.chessBookReader'
           TEAM_ID   = '8CZSU66MX5'
+          APP_ID    = f'{TEAM_ID}.{BUNDLE_ID}'
 
-          # Locate the MAC_APP_STORE provisioning profile saved by fetch-signing-files.
+          # Profiles may be named MAC_APP_STORE_*.provisionprofile (by
+          # fetch-signing-files), <profile-name>.provisionprofile (by
+          # `profiles create --save`), or <UUID>.provisionprofile (after
+          # `xcode-project use-profiles` installs them). Don't rely on the name:
+          # decode every candidate in both dirs and match on the bundle ID.
           search_dirs = [
               os.path.expanduser(
                   '~/Library/Developer/Xcode/UserData/Provisioning Profiles'),
               os.path.expanduser(
                   '~/Library/MobileDevice/Provisioning Profiles'),
           ]
-          prof_file = None
+          candidates = []
           for d in search_dirs:
-              hits = glob.glob(os.path.join(d, 'MAC_APP_STORE_*.provisionprofile'))
-              if hits:
-                  prof_file = hits[0]
-                  break
-          if not prof_file:
-              sys.exit('ERROR: no MAC_APP_STORE .provisionprofile found')
+              for ext in ('*.provisionprofile', '*.mobileprovision'):
+                  candidates.extend(glob.glob(os.path.join(d, ext)))
 
-          # Decode the CMS-signed profile envelope and read the Name key.
-          cms = subprocess.check_output(['security', 'cms', '-D', '-i', prof_file])
-          prof = plistlib.loads(cms)
-          prof_name = prof['Name']
-          print(f'Profile: {prof_name}')
+          prof_name = None
+          for pf in candidates:
+              try:
+                  cms = subprocess.check_output(['security', 'cms', '-D', '-i', pf])
+                  prof = plistlib.loads(cms)
+              except Exception as e:
+                  print(f'skip {pf}: {e}')
+                  continue
+              # Entitlements carry TEAM_ID.BUNDLE_ID in application-identifier.
+              ent = prof.get('Entitlements', {})
+              app_id = ent.get('com.apple.application-identifier', '')
+              if app_id == APP_ID:
+                  prof_name = prof['Name']
+                  print(f'Matched profile {prof_name!r} in {pf}')
+                  break
+
+          if not prof_name:
+              print('Candidates scanned:', candidates)
+              sys.exit(f'ERROR: no provisioning profile found for {APP_ID}')
 
           p = {
               'destination':               'export',
