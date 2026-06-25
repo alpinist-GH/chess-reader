@@ -295,19 +295,24 @@ workflows:
               --save
           fi
 
-          # Step 3: rebuild the MAC_APP_STORE profile so it lists ONLY the app cert.
-          # The installer cert must NOT be in the profile: if it is,
-          # `xcode-project use-profiles` sets the app's CODE_SIGN_IDENTITY to the
-          # installer cert and `flutter build macos` fails with
-          # "3rd Party Mac Developer Installer: this identity cannot be used for
-          # signing code". We can't rely on fetch-signing-files' profile because it
-          # reuses a possibly-stale ASC profile, so delete it and recreate clean.
+          # Step 3: rebuild the MAC_APP_STORE profile so it lists BOTH the app cert
+          # AND the installer cert. exportArchive (Export step) refuses to package
+          # the .pkg unless the Mac Installer Distribution cert is listed in the
+          # profile ("Provisioning profile doesn't include signing certificate ...").
+          # Having the installer cert in the profile does NOT make the build sign
+          # with it, because the keychain holds ONLY the app cert during build (the
+          # installer cert is added to the keychain later, in the Export step).
+          # We can't rely on fetch-signing-files' profile because it reuses a
+          # possibly-stale ASC profile, so delete it and recreate clean.
           # Bundle id is a POSITIONAL arg; cert flag is --certificate-ids.
           # LP534HTRF4 is the stable ASC resource ID for com.alpinist.chessBookReader.
           APP_CERT_ID=$(ls "$_cert_dir"/DISTRIBUTION_*.p12 2>/dev/null \
             | head -1 | xargs basename 2>/dev/null \
             | sed 's/^DISTRIBUTION_\([^_]*\)_.*/\1/')
-          echo "App cert: $APP_CERT_ID"
+          INSTALLER_CERT_ID=$(ls "$_cert_dir"/MAC_INSTALLER_DISTRIBUTION_*.p12 2>/dev/null \
+            | head -1 | xargs basename 2>/dev/null \
+            | sed 's/^MAC_INSTALLER_DISTRIBUTION_\([^_]*\)_.*/\1/')
+          echo "App cert: $APP_CERT_ID  Installer cert: $INSTALLER_CERT_ID"
           _profile_dir=~/"Library/Developer/Xcode/UserData/Provisioning Profiles"
           for pf in "$_profile_dir"/MAC_APP_STORE_*.provisionprofile; do
             [ -f "$pf" ] || continue
@@ -318,7 +323,7 @@ workflows:
           app-store-connect profiles create \
             --name "ChessBook Reader mac_app_store" \
             --type MAC_APP_STORE \
-            --certificate-ids "$APP_CERT_ID" \
+            --certificate-ids "$APP_CERT_ID" "$INSTALLER_CERT_ID" \
             --save \
             LP534HTRF4
 
