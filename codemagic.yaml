@@ -23,8 +23,10 @@
 #                  integration. One-time setup: see the comments in the workflow.
 #
 #   macos-appstore  : builds a signed .pkg and uploads it to the Mac App Store.
-#                     Uses xcodebuild archive + exportArchive (not productbuild
-#                     directly) so it works on the headless CI runner.
+#                     Uses `xcodebuild archive` to produce a distribution-signed
+#                     .app, then `productbuild --sign` to build the installer
+#                     .pkg. (exportArchive was abandoned: it re-signs the app
+#                     code with the installer cert and fails on the CI runner.)
 
 workflows:
   ios-testflight:
@@ -230,14 +232,21 @@ workflows:
       - chessbook-reader.dmg
 
   # ---------------------------------------------------------------------------
-  # Mac App Store: build + submit via xcodebuild archive / exportArchive.
+  # Mac App Store: build + submit via xcodebuild archive + productbuild.
   #
-  # Why this replaces the old manual-Xcode approach:
-  #   The previous attempt called `productbuild` directly; that dies with
-  #   CSSMERR_CSP_NO_USER_INTERACTION on a headless runner even with
-  #   set-key-partition-list. `xcodebuild -exportArchive` calls productbuild
-  #   internally but goes through the Codemagic-managed keychain which IS
-  #   accessible to xcodebuild, so it works.
+  # Signing approach (hard-won — see the long comments in each step):
+  #   * `xcodebuild archive` produces a distribution-signed .app with the
+  #     MAC_APP_STORE profile embedded (explicit manual signing, Apple
+  #     Distribution cert).
+  #   * `xcrun productbuild --sign` wraps it in an installer .pkg signed with the
+  #     Mac Installer Distribution cert.
+  #   * `xcodebuild -exportArchive` was tried and abandoned: it insists the
+  #     installer cert be listed in the profile, then re-signs the app code with
+  #     that installer cert and fails ("this identity cannot be used for signing
+  #     code"). productbuild on the already-signed .app sidesteps that entirely.
+  #     (The old fear that bare productbuild fails headless with
+  #     CSSMERR_CSP_NO_USER_INTERACTION only applies to a hand-built keychain;
+  #     Codemagic's `keychain add-certificates` sets the key partition list.)
   #
   # One-time setup (App Store Connect + Codemagic UI):
   #   1. App Store Connect: enable the macOS platform on the
