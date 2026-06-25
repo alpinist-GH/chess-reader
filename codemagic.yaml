@@ -265,15 +265,10 @@ workflows:
         script: |
           keychain initialize
 
-          # Step 1: Mac App Distribution cert + the MAC_APP_STORE provisioning
-          # profile. The profile lists ONLY the app-signing (Apple Distribution)
-          # cert. The Mac Installer Distribution cert is deliberately NOT part of
-          # the profile — putting it there makes `xcode-project use-profiles` set
-          # the app's CODE_SIGN_IDENTITY to the installer cert, which then fails
-          # the build with "this identity cannot be used for signing code". Per
-          # Codemagic's macOS signing docs the installer cert is used separately,
-          # only to sign the final .pkg (packageSigningCertificate in the export
-          # options).
+          # Step 1: Mac App Distribution (Apple Distribution) cert. fetch-signing-files
+          # also fetches/creates a MAC_APP_STORE profile, but we REBUILD that profile
+          # in step 3 — fetch reuses whatever profile already exists in App Store
+          # Connect, and an earlier run left one that ALSO listed the installer cert.
           app-store-connect fetch-signing-files "$BUNDLE_ID" \
             --type MAC_APP_STORE \
             --certificate-key "@env:CERTIFICATE_PRIVATE_KEY" \
@@ -282,7 +277,8 @@ workflows:
           # Step 2: Mac Installer Distribution cert (dedicated MAC_INSTALLER_KEY,
           # PKCS#1 RSA format stored in Codemagic). A dedicated key guarantees the
           # .p12 always has the matching private key across runs. Added to the
-          # keychain only — exportArchive picks it up by name for the .pkg.
+          # keychain only — NOT to the profile — and used solely to sign the .pkg
+          # (packageSigningCertificate in export_options.plist).
           # `certificates list` exits 0 even when empty — count .p12 files to detect
           # whether a cert was actually saved before deciding to create a new one.
           _cert_dir=~/Library/Developer/Xcode/UserData/Certificates
@@ -298,6 +294,33 @@ workflows:
               --certificate-key "@env:MAC_INSTALLER_KEY" \
               --save
           fi
+
+          # Step 3: rebuild the MAC_APP_STORE profile so it lists ONLY the app cert.
+          # The installer cert must NOT be in the profile: if it is,
+          # `xcode-project use-profiles` sets the app's CODE_SIGN_IDENTITY to the
+          # installer cert and `flutter build macos` fails with
+          # "3rd Party Mac Developer Installer: this identity cannot be used for
+          # signing code". We can't rely on fetch-signing-files' profile because it
+          # reuses a possibly-stale ASC profile, so delete it and recreate clean.
+          # Bundle id is a POSITIONAL arg; cert flag is --certificate-ids.
+          # LP534HTRF4 is the stable ASC resource ID for com.alpinist.chessBookReader.
+          APP_CERT_ID=$(ls "$_cert_dir"/DISTRIBUTION_*.p12 2>/dev/null \
+            | head -1 | xargs basename 2>/dev/null \
+            | sed 's/^DISTRIBUTION_\([^_]*\)_.*/\1/')
+          echo "App cert: $APP_CERT_ID"
+          _profile_dir=~/"Library/Developer/Xcode/UserData/Provisioning Profiles"
+          for pf in "$_profile_dir"/MAC_APP_STORE_*.provisionprofile; do
+            [ -f "$pf" ] || continue
+            pid=$(basename "$pf" | sed 's/^MAC_APP_STORE_\([^_]*\)_.*/\1/')
+            app-store-connect profiles delete "$pid" || true
+            rm -f "$pf"
+          done
+          app-store-connect profiles create \
+            --name "ChessBook Reader mac_app_store" \
+            --type MAC_APP_STORE \
+            --certificate-ids "$APP_CERT_ID" \
+            --save \
+            LP534HTRF4
 
           keychain add-certificates
           xcode-project use-profiles
