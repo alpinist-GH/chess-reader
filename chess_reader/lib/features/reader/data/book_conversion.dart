@@ -98,6 +98,7 @@ class BookConversion {
     required this.format,
     required this.pages,
     this.sourcePath = '',
+    this.ocrAttempted = true,
   });
 
   final String title;
@@ -109,6 +110,13 @@ class BookConversion {
   /// Absolute path of the source book (recorded so the converted-books library
   /// can list and reopen cached books).
   final String sourcePath;
+
+  /// Whether OCR was run during this conversion. A scanned PDF opened with
+  /// "Keep original" is converted without OCR (`false`), so the reader can offer
+  /// a "Run OCR" action; `true` means OCR already ran (succeeded, or failed on a
+  /// poor scan — re-running wouldn't help), so the action is not offered. Older
+  /// caches (which always ran OCR) default to `true`.
+  final bool ocrAttempted;
 
   /// Diagrams for a given PDF page number / EPUB chapter index.
   List<ConvertedDiagram> diagramsFor(int index) =>
@@ -159,6 +167,7 @@ class BookConversion {
         'title': title,
         'format': format,
         'sourcePath': sourcePath,
+        'ocrAttempted': ocrAttempted,
         'pages': [for (final p in pages) p.toJson()],
       };
 
@@ -166,6 +175,7 @@ class BookConversion {
         title: j['title'] as String,
         format: j['format'] as String,
         sourcePath: j['sourcePath'] as String? ?? '',
+        ocrAttempted: j['ocrAttempted'] as bool? ?? true,
         pages: [
           for (final pg in (j['pages'] as List))
             ConvertedPage.fromJson(pg as Map<String, dynamic>)
@@ -304,6 +314,7 @@ Future<BookConversion> convertPdf(
       title: p.basenameWithoutExtension(path),
       format: 'pdf',
       sourcePath: path,
+      ocrAttempted: ocr != null,
       pages: [for (final pg in results) pg!],
     );
   } finally {
@@ -385,6 +396,37 @@ int _insertOffsetForDiagram({
     if (centreY <= diagramTopPdfY) return i;
   }
   return textLength;
+}
+
+/// Quickly decides whether a PDF is scanned/image-only — i.e. it has no usable
+/// embedded text layer — by sampling the text of a spread of pages. It only
+/// reads the text layer (no rendering, no OCR), so it returns in well under a
+/// second even for a long book, and is used to decide whether to offer the
+/// (slow) OCR conversion before the heavy work starts.
+///
+/// EPUB is always text, so it is never image-only.
+Future<bool> pdfIsImageOnly(String path) async {
+  if (path.toLowerCase().endsWith('.epub')) return false;
+  final doc = await PdfDocument.openFile(path);
+  try {
+    final total = doc.pages.length;
+    if (total == 0) return false;
+    // Sample up to ~12 pages evenly spread across the book.
+    const sampleTarget = 12;
+    final step = (total / sampleTarget).ceil().clamp(1, total);
+    var sampled = 0;
+    var chars = 0;
+    for (var i = 0; i < total; i += step) {
+      final text = (await doc.pages[i].loadStructuredText()).fullText;
+      chars += text.replaceAll(RegExp(r'\s'), '').length;
+      sampled++;
+    }
+    return chars < sampled * BookConversion._minTextCharsPerPage;
+  } catch (_) {
+    return false; // If we can't tell, don't gate — convert normally.
+  } finally {
+    doc.dispose();
+  }
 }
 
 /// Whether a cached conversion exists for [path]'s current contents.

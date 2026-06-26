@@ -16,6 +16,7 @@ import '../../library/converted_library_screen.dart';
 import '../../library/library_home.dart';
 import '../../library/open_book_button.dart';
 import '../../settings/settings_screen.dart';
+import '../data/book_conversion.dart';
 import '../data/book_exporter.dart';
 import '../data/epub_book.dart';
 import '../data/pdf_html_builder.dart';
@@ -42,6 +43,7 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
   bool _boardVisibleNarrow = true;
   String? _promptedPath;
   String? _noTextWarnedPath;
+  String? _ocrPromptedPath;
 
   @override
   void initState() {
@@ -59,6 +61,15 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
   /// if even OCR couldn't read this scan — warn and steer to Original pages.
   void _handleOpenedPdf(String path) {
     if (_isEpub(path)) return;
+    // A freshly-opened scanned PDF (no cache yet) is gated: OCR is slow, so ask
+    // whether to run it before the conversion proceeds. The conversion stays in
+    // a loading state until the answer is recorded.
+    final cached = ref.watch(conversionCachedProvider(path)).value ?? false;
+    final imageOnly = ref.watch(pdfImageOnlyProvider(path)).value ?? false;
+    if (!cached && imageOnly && ref.watch(ocrDecisionProvider(path)) == null) {
+      _maybePromptOcr(path);
+      return;
+    }
     ref.watch(conversionProvider(path)).whenOrNull(data: (c) {
       if (c.hasExtractableText) {
         _maybePromptView(path);
@@ -66,6 +77,105 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
         _maybeWarnNoText(path);
       }
     });
+  }
+
+  /// A scanned/image-only PDF: ask once whether to convert it with on-device
+  /// OCR (a reflowed Reading view, but slow) or keep the original pages. The
+  /// answer unblocks [conversionProvider]; "Keep original" also pins the
+  /// Original-pages view and suppresses the later no-text warning, while
+  /// "Convert with OCR" pre-selects the Reading view.
+  void _maybePromptOcr(String path) {
+    if (_ocrPromptedPath == path) return;
+    _ocrPromptedPath = path;
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted) return;
+      final runOcr = await showDialog<bool>(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => AlertDialog(
+          title: const Text('Scanned PDF'),
+          content: const Text(
+            'This book is a scanned PDF — its pages are images with no text '
+            'layer.\n\n'
+            'It can be converted with on-device text recognition (OCR) so you '
+            'get a reflowed Reading view with searchable text and tappable '
+            'moves. OCR runs entirely on your device and can take several '
+            'minutes for a long book.\n\n'
+            'You can keep the original pages instead — diagrams are still '
+            'detected and playable either way.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('Keep original'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text('Convert with OCR'),
+            ),
+          ],
+        ),
+      );
+      if (!mounted) return;
+      final decision = runOcr ?? false; // dismissed → keep original
+      final library = ref.read(libraryStoreProvider.notifier);
+      if (decision) {
+        library.setViewMode(path, 'html'); // they asked for the reading view
+        _promptedPath = path; // don't also ask which view to use
+      } else {
+        library.setViewMode(path, 'pdf');
+        _promptedPath = path;
+        _noTextWarnedPath = path; // no OCR → no text; don't nag about it
+      }
+      ref.read(ocrDecisionProvider(path).notifier).decide(decision);
+    });
+  }
+
+  /// Whether to offer the "Run OCR" action: a scanned PDF that was converted
+  /// without OCR (opened with "Keep original"), so no text was recovered yet.
+  bool _canRunOcr(String path) {
+    if (_isEpub(path)) return false;
+    final c = ref.watch(conversionProvider(path)).value;
+    return c != null &&
+        c.format == 'pdf' &&
+        !c.hasExtractableText &&
+        !c.ocrAttempted;
+  }
+
+  /// Re-runs the conversion with OCR enabled for a scanned PDF that was opened
+  /// with "Keep original". Drops the no-OCR cache, switches to the Reading view,
+  /// and clears the one-shot prompt guards so that — if OCR still can't read the
+  /// scan — the no-text warning fires again and steers back to Original pages.
+  Future<void> _runOcrNow(String path) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Run OCR now?'),
+        content: const Text(
+          'Text recognition runs on your device and can take several minutes '
+          'for a long book. When it finishes, the Reading view with searchable '
+          'text and tappable moves becomes available.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Run OCR'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+    await deleteCachedConversion(path);
+    _noTextWarnedPath = null; // let the warning re-fire if OCR still fails
+    _promptedPath = path; // they've chosen the Reading view; don't re-ask
+    ref.read(ocrDecisionProvider(path).notifier).decide(true);
+    ref.read(libraryStoreProvider.notifier).setViewMode(path, 'html');
+    ref.invalidate(conversionCachedProvider(path));
+    ref.invalidate(conversionProvider(path));
   }
 
   /// A scanned PDF that even on-device OCR couldn't read (poor/low-res scan):
@@ -196,12 +306,19 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
     final bookPath = ref.watch(openedBookProvider);
     if (bookPath != null) _handleOpenedPdf(bookPath);
     final showViewToggle = bookPath != null && !_isEpub(bookPath);
+    final canRunOcr = bookPath != null && _canRunOcr(bookPath);
 
     return Scaffold(
       endDrawer: bookPath != null ? ReaderDrawer(path: bookPath) : null,
       appBar: AppBar(
         title: const Text('ChessBook Reader'),
         actions: [
+          if (canRunOcr)
+            TextButton.icon(
+              onPressed: () => _runOcrNow(bookPath),
+              icon: const Icon(Icons.document_scanner_outlined),
+              label: const Text('Run OCR'),
+            ),
           if (showViewToggle) _ViewToggle(path: bookPath),
           OpenBookButton(tooltip: bookPath == null ? null : 'Open another book'),
           if (bookPath != null)
