@@ -11,6 +11,7 @@ import '../../../core/persistence/library_store.dart';
 import '../../../core/settings/app_settings.dart';
 import '../../board/board_panel.dart';
 import '../../library/about.dart';
+import '../../library/book_import.dart';
 import '../../library/converted_library_screen.dart';
 import '../../library/library_home.dart';
 import '../../library/open_book_button.dart';
@@ -41,6 +42,17 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
   bool _boardVisibleNarrow = true;
   String? _promptedPath;
   String? _noTextWarnedPath;
+
+  @override
+  void initState() {
+    super.initState();
+    // First launch: surface the bundled sample as a library tile (once).
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref
+          .read(libraryStoreProvider.notifier)
+          .ensureSampleSeeded(extractSampleBook);
+    });
+  }
 
   /// Once the conversion is ready, either warn that the PDF has no text layer
   /// (image-only scan) or — if it does — offer the reading-view choice.
