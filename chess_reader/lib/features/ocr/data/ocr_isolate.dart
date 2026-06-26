@@ -7,8 +7,12 @@ import '../domain/ocr_box.dart';
 /// PP-OCR recognition model's fixed input height (PP-OCRv4/v5 mobile: 48).
 const int kRecHeight = 48;
 
-/// Max width of a recognizer input strip; longer lines are squashed to fit.
-const int kRecMaxWidth = 320;
+/// Safety ceiling on a recognizer strip width. The PP-OCR recognizer is fully
+/// convolutional in width, so a line is fed at its *natural* width (height 48,
+/// width ∝ aspect) — NOT squashed to a small fixed width, which overlaps glyphs
+/// and yields garbage. This cap only bounds pathological inputs (e.g. a full
+/// horizontal rule mis-detected as text); real body-text lines stay well under.
+const int kRecMaxWidth = 3200;
 
 /// ImageNet normalization used by the PP-OCR *detection* model (RGB, /255).
 const List<double> _detMean = [0.485, 0.456, 0.406];
@@ -132,27 +136,27 @@ List<OcrRecInput> _buildRecInputs(OcrRecRequest r) {
   for (final box in r.boxes) {
     final crop = img.copyCrop(page,
         x: box.left, y: box.top, width: box.width, height: box.height);
-    // Keep aspect ratio at the fixed height, capped to kRecMaxWidth.
+    // Keep aspect ratio at the fixed height. Feed the line at its natural width
+    // (only the safety ceiling caps it) so glyphs aren't horizontally crushed.
     var w = (kRecHeight * box.width / box.height).round();
     if (w < 1) w = 1;
     if (w > kRecMaxWidth) w = kRecMaxWidth;
     final strip = img.copyResize(crop, width: w, height: kRecHeight);
 
-    // Right-pad to kRecMaxWidth with zeros (post-normalization), so every
-    // strip is the same width and CTC has trailing blanks to absorb.
-    const stripW = kRecMaxWidth;
-    final tensor = Float32List(3 * kRecHeight * stripW);
-    final plane = kRecHeight * stripW;
+    // Each strip is run on its own (batch size 1), so the tensor is exactly the
+    // strip's width — no padding to a fixed canvas.
+    final tensor = Float32List(3 * kRecHeight * w);
+    final plane = kRecHeight * w;
     for (var y = 0; y < kRecHeight; y++) {
       for (var x = 0; x < w; x++) {
         final p = strip.getPixel(x, y);
-        final idx = y * stripW + x;
+        final idx = y * w + x;
         tensor[idx] = (p.r / 255.0 - 0.5) / 0.5;
         tensor[plane + idx] = (p.g / 255.0 - 0.5) / 0.5;
         tensor[2 * plane + idx] = (p.b / 255.0 - 0.5) / 0.5;
       }
     }
-    out.add(OcrRecInput(tensor: tensor, stripWidth: stripW));
+    out.add(OcrRecInput(tensor: tensor, stripWidth: w));
   }
   return out;
 }

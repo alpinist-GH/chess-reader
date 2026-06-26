@@ -149,7 +149,10 @@ class BookConversion {
   // v7: OCR text layer for scanned PDFs — pages whose embedded text layer is
   //     sparse are now read with the ONNX OCR pipeline, so v6 caches that
   //     stored empty page text for image-only books must be recomputed.
-  static const _version = 7;
+  // v8: OCR recognizer now feeds each text line at its natural width instead of
+  //     squashing it into a 320px strip (which crushed glyphs and produced
+  //     garbled/empty lines), so v7 OCR caches must be recomputed.
+  static const _version = 8;
 
   Map<String, dynamic> toJson() => {
         'v': _version,
