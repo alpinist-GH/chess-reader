@@ -54,8 +54,9 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
     });
   }
 
-  /// Once the conversion is ready, either warn that the PDF has no text layer
-  /// (image-only scan) or — if it does — offer the reading-view choice.
+  /// Once the conversion is ready, either offer the reading-view choice (the
+  /// PDF has usable text, whether from its own layer or recovered by OCR) or —
+  /// if even OCR couldn't read this scan — warn and steer to Original pages.
   void _handleOpenedPdf(String path) {
     if (_isEpub(path)) return;
     ref.watch(conversionProvider(path)).whenOrNull(data: (c) {
@@ -67,8 +68,9 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
     });
   }
 
-  /// A scanned/image-only PDF: clickable moves and the reading view can't work.
-  /// Warn once, force Original pages, and suppress the reading-view prompt.
+  /// A scanned PDF that even on-device OCR couldn't read (poor/low-res scan):
+  /// clickable moves and the reading view can't work. Warn once, force Original
+  /// pages, and suppress the reading-view prompt.
   void _maybeWarnNoText(String path) {
     if (_noTextWarnedPath == path) return;
     _noTextWarnedPath = path;
@@ -81,14 +83,14 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
         builder: (context) => AlertDialog(
           title: const Text('Scanned PDF — diagrams still work'),
           content: const Text(
-            'This PDF looks like scanned page images, so it has no extractable '
-            'text. The good news: the original pages display normally and '
-            'diagram detection still reads the printed positions onto the '
-            'board — just tap a diagram to play through it.\n\n'
-            'Only two text-based features are unavailable: tapping moves in the '
-            'text and the reflowed Reading view. To enable those as well, run '
-            'the file through an OCR tool (e.g. OCRmyPDF) to add a text layer, '
-            'then reopen it.',
+            'This PDF is scanned page images. Automatic text recognition (OCR) '
+            'ran during conversion but couldn\'t recover enough reliable text '
+            'from this scan, so the reflowed Reading view and tapping moves in '
+            'the text aren\'t available.\n\n'
+            'The original pages still display normally, and diagram detection '
+            'reads the printed positions onto the board — just tap a diagram to '
+            'play through it.\n\n'
+            'A cleaner, higher-resolution scan usually recognizes better.',
           ),
           actions: [
             TextButton(
