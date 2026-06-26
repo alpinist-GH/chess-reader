@@ -69,3 +69,13 @@ Future<String> extractSampleBook() async {
   await dest.writeAsBytes(bytes, flush: true);
   return dest.path;
 }
+
+/// Whether [path] is the bundled sample book (materialised by
+/// [extractSampleBook] into the `books/samples/` directory). The freemium meter
+/// uses this to keep the sample free — opening it never spends a conversion.
+bool isSampleBookPath(String path) {
+  final segments = p.split(path);
+  return segments.length >= 2 &&
+      segments[segments.length - 2] == 'samples' &&
+      p.basename(path) == p.basename(_kSampleAsset);
+}

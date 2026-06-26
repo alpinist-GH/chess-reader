@@ -2,7 +2,10 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../library/book_import.dart';
 import '../../ocr/data/onnx_text_recognizer.dart';
+import '../../purchase/billing_config.dart';
+import '../../purchase/purchase_controller.dart';
 import '../../vision/data/diagram_recognizer.dart';
 import '../data/book_conversion.dart';
 
@@ -56,6 +59,22 @@ final conversionProvider =
   ref.onDispose(recognizer.dispose);
   ref.onDispose(ocr.dispose);
 
+  final cached = await ref.watch(conversionCachedProvider(path).future);
+  // A genuinely new conversion — not a cache re-open, not the free sample book.
+  // Only these count against the freemium meter.
+  final isFresh = !cached && !isSampleBookPath(path);
+
+  // Freemium gate: once the free allowance is spent (and Pro isn't unlocked),
+  // hold a fresh conversion in a loading state — the reader shows the paywall
+  // instead of the progress bar. Watching the controller re-runs this provider
+  // when the lifetime unlock lands, so the book then converts automatically.
+  if (isFresh && kBillingEnabled) {
+    ref.watch(purchaseControllerProvider);
+    if (!ref.read(purchaseControllerProvider.notifier).canConvert()) {
+      return Completer<BookConversion>().future;
+    }
+  }
+
   // A scanned/image-only PDF is gated behind a user choice, because recovering
   // its text with OCR is slow. Until the open-book dialog records that choice,
   // keep the conversion in a loading state (a never-completing future); the
@@ -63,8 +82,7 @@ final conversionProvider =
   // this entirely and convert straight away.
   final decision = ref.watch(ocrDecisionProvider(path));
   var runOcr = true;
-  if (!await ref.watch(conversionCachedProvider(path).future) &&
-      await ref.watch(pdfImageOnlyProvider(path).future)) {
+  if (!cached && await ref.watch(pdfImageOnlyProvider(path).future)) {
     if (decision == null) return Completer<BookConversion>().future;
     runOcr = decision;
   }
@@ -77,5 +95,19 @@ final conversionProvider =
     onProgress: (pr) =>
         ref.read(conversionProgressProvider.notifier).set(path, pr),
   );
+  // Count the conversion only after it actually completed.
+  if (isFresh) ref.read(purchaseControllerProvider.notifier).recordConversion();
   return conversion;
+});
+
+/// Whether opening [path] right now is blocked by the freemium paywall: a fresh
+/// (uncached, non-sample) conversion once the free allowance is spent and Pro
+/// isn't unlocked. The reader watches this to show the paywall in place of the
+/// conversion progress bar. Always false when billing is disabled (desktop).
+final conversionGatedProvider = Provider.family<bool, String>((ref, path) {
+  if (!kBillingEnabled) return false;
+  final cached = ref.watch(conversionCachedProvider(path)).value ?? false;
+  if (cached || isSampleBookPath(path)) return false;
+  ref.watch(purchaseControllerProvider);
+  return !ref.read(purchaseControllerProvider.notifier).canConvert();
 });

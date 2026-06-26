@@ -52,6 +52,7 @@ dependencies:
   path: ^1.9.1
   shared_preferences: ^2.5.5
   scrollable_positioned_list: ^0.3.8
+  purchases_flutter: ^10.3.0
 
 # Use a vendored fork of multistockfish_sf16 that adds a macOS native build,
 # so the FFI Stockfish engine runs on macOS too (required for a sandboxed Mac
