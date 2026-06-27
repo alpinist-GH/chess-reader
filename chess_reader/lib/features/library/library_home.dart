@@ -72,7 +72,8 @@ class LibraryHome extends ConsumerWidget {
                     mainAxisSpacing: 12,
                   ),
                   itemCount: recent.length,
-                  itemBuilder: (context, i) => _RecentCover(path: recent[i]),
+                  itemBuilder: (context, i) =>
+                      _RecentCover(key: ValueKey(recent[i]), path: recent[i]),
                 ),
               ),
             ],
@@ -84,7 +85,7 @@ class LibraryHome extends ConsumerWidget {
 }
 
 class _RecentCover extends ConsumerWidget {
-  const _RecentCover({required this.path});
+  const _RecentCover({super.key, required this.path});
   final String path;
 
   @override

@@ -59,6 +59,7 @@ class _ConvertedLibraryScreenState
               final book = books[i];
               final exists = File(book.path).existsSync();
               return BookCoverTile(
+                key: ValueKey(book.path),
                 path: book.path,
                 title: book.title,
                 isEpub: book.format == 'epub',
