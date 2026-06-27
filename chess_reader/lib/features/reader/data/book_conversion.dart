@@ -160,7 +160,11 @@ class BookConversion {
   // v8: OCR recognizer now feeds each text line at its natural width instead of
   //     squashing it into a 320px strip (which crushed glyphs and produced
   //     garbled/empty lines), so v7 OCR caches must be recomputed.
-  static const _version = 8;
+  // v9: OCR detector pads line boxes more generously sideways (~60% of line
+  //     height, was 30%) so the first/last glyph isn't clipped (a capital "T"
+  //     no longer reads as "I", leading punctuation is kept), so v8 OCR caches
+  //     must be recomputed.
+  static const _version = 9;
 
   Map<String, dynamic> toJson() => {
         'v': _version,

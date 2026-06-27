@@ -27,8 +27,13 @@ OUT = ROOT / "dist" / "ocr_diag"
 
 DET_MEAN = np.array([0.485, 0.456, 0.406], np.float32)
 DET_STD = np.array([0.229, 0.224, 0.225], np.float32)
+# Recognizer strip height (PP-OCR mobile fixed input) and the *safety ceiling*
+# on strip width. MUST match lib/features/ocr/data/ocr_isolate.dart: a line is
+# fed at its natural width (height 48, width ∝ aspect), NOT squashed to a small
+# fixed canvas — that was the pre-v8 bug. This cap only bounds pathological
+# inputs.
 REC_H = 48
-REC_MAXW = 320
+REC_MAXW = 3200
 
 
 def render_page(page_idx: int, dpi: int) -> np.ndarray:
@@ -59,8 +64,9 @@ def run_det(sess: ort.InferenceSession, rgb: np.ndarray, max_side: int):
     return prob[0, 0], inW, inH, w / inW, h / inH
 
 
-def our_boxes(prob: np.ndarray, bin_thr=0.3, min_area=16, min_h=4):
-    """Replicates TextDetector.detect: threshold + connected components + 30% pad."""
+def our_boxes(prob: np.ndarray, bin_thr=0.3, min_area=16, min_h=4, padx_frac=0.3, pady_frac=0.15):
+    """Replicates TextDetector.detect: threshold + connected components + pad.
+    padx_frac/pady_frac are the horizontal/vertical pad as a fraction of box height."""
     binary = (prob >= bin_thr).astype(np.uint8)
     n, _, stats, _ = cv2.connectedComponentsWithStats(binary, connectivity=8)
     boxes = []
@@ -68,9 +74,9 @@ def our_boxes(prob: np.ndarray, bin_thr=0.3, min_area=16, min_h=4):
         x, y, bw, bh, area = stats[i]
         if area < min_area or bh < min_h:
             continue
-        pad = int(np.clip(round(bh * 0.3), 1, bh))
-        pady = int(np.clip(round(pad / 2), 1, bh))
-        boxes.append((max(0, x - pad), max(0, y - pady), bw + 2 * pad, bh + 2 * pady))
+        padx = int(np.clip(round(bh * padx_frac), 1, bh))
+        pady = int(np.clip(round(bh * pady_frac), 1, bh))
+        boxes.append((max(0, x - padx), max(0, y - pady), bw + 2 * padx, bh + 2 * pady))
     return boxes, binary
 
 
@@ -88,9 +94,9 @@ def run_rec(sess: ort.InferenceSession, rgb: np.ndarray, box, vocab):
     w = int(round(REC_H * bw / bh))
     w = max(1, min(REC_MAXW, w))
     strip = cv2.resize(crop, (w, REC_H))
-    canvas = np.zeros((REC_H, REC_MAXW, 3), np.float32)
-    canvas[:, :w] = (strip.astype(np.float32) / 255.0 - 0.5) / 0.5
-    inp = canvas.transpose(2, 0, 1)[None]
+    # Feed the strip at its natural width, no fixed-canvas padding (batch=1) —
+    # matches _buildRecInputs/runRec in the app since v8.
+    inp = ((strip.astype(np.float32) / 255.0 - 0.5) / 0.5).transpose(2, 0, 1)[None]
     name = sess.get_inputs()[0].name
     out = sess.run(None, {name: inp})[0][0]  # [steps, classes]
     ids = out.argmax(1)
@@ -107,6 +113,8 @@ def main():
     ap.add_argument("--page", type=int, default=4)
     ap.add_argument("--dpi", type=int, default=200)
     ap.add_argument("--max-side", type=int, default=960)
+    ap.add_argument("--padx", type=float, default=0.3, help="horizontal pad as fraction of box height")
+    ap.add_argument("--pady", type=float, default=0.15, help="vertical pad as fraction of box height")
     args = ap.parse_args()
     OUT.mkdir(parents=True, exist_ok=True)
 
@@ -120,7 +128,7 @@ def main():
     prob, inW, inH, sx, sy = run_det(det, rgb, args.max_side)
     print(f"\n[OURS] det input {inW}x{inH}  prob: max={prob.max():.2f} "
           f"mean={prob.mean():.3f}  frac>0.3={(prob >= 0.3).mean():.3f}")
-    boxes, binary = our_boxes(prob)
+    boxes, binary = our_boxes(prob, padx_frac=args.padx, pady_frac=args.pady)
     hs = sorted(b[3] for b in boxes)
     print(f"[OURS] {len(boxes)} boxes; height px min/med/max="
           f"{hs[0] if hs else 0}/{hs[len(hs)//2] if hs else 0}/{hs[-1] if hs else 0}")

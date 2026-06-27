@@ -67,10 +67,16 @@ class TextDetector {
       final bw = maxX - minX + 1;
       final bh = maxY - minY + 1;
       if (area < minBoxArea || bh < minBoxHeight) continue;
-      // Pad by ~30% of the line height to recover the under-covered extent.
-      final pad = (bh * 0.3).round().clamp(1, bh);
+      // Pad to recover the glyph extent the probability map under-covers.
+      // DBNet shrinks a line's ends the most, so a tight box clips the first/
+      // last glyph (a capital "T" reads as "I", a leading "(" is lost). Pad
+      // generously sideways (~60% of line height ≈ one character) but only
+      // ~15% vertically so tightly-spaced lines don't merge. Measured against
+      // RapidOCR (same models, proper unclip) via tool/ocr/diag_compare.py.
+      final padX = (bh * 0.6).round().clamp(1, bh);
+      final padY = (bh * 0.15).round().clamp(1, bh);
       boxes.add(TextBox(left: minX, top: minY, width: bw, height: bh)
-          .padded(pad, (pad / 2).round().clamp(1, bh), w, h));
+          .padded(padX, padY, w, h));
     }
     return boxes;
   }
