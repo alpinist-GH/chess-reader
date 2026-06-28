@@ -4,6 +4,17 @@ All notable changes to ChessBook Reader are documented here. The project loosely
 follows [Keep a Changelog](https://keepachangelog.com/) and
 [Semantic Versioning](https://semver.org/).
 
+## [1.4.0] — 2026-06-28
+
+### Changed
+- **Better OCR for scanned books.** On iPhone and Android, scanned books are now
+  read with the device's built‑in text recognizer (Apple Vision / Google ML
+  Kit) by default — faster and more accurate than the previously bundled engine,
+  which also lets the mobile app ship ~13 MB smaller. No setting to configure.
+- On Windows and macOS the bundled OCR engine was upgraded (PP‑OCRv4), and on
+  macOS it now runs with CoreML hardware acceleration. Diagram recognition is
+  CoreML‑accelerated on Apple devices too.
+
 ## [1.2.0] — 2026-06-28
 
 ### Added
