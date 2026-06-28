@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/settings/app_settings.dart';
+import '../purchase/billing_config.dart';
+import '../purchase/paywall_view.dart';
+import '../purchase/purchase_controller.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -131,8 +134,68 @@ class SettingsScreen extends ConsumerWidget {
               onChanged: (v) => notifier.setTextScale(v),
             ),
           ),
+          if (kBillingEnabled) ...[
+            const Divider(),
+            const _SectionHeader('ChessBook Pro'),
+            const _ProSection(),
+          ],
         ],
       ),
+    );
+  }
+}
+
+/// Purchase status + buy/restore, shown only on store builds. Lets a user who
+/// hasn't hit the paywall yet unlock early, and gives everyone a Restore path.
+class _ProSection extends ConsumerWidget {
+  const _ProSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(purchaseControllerProvider);
+    final controller = ref.read(purchaseControllerProvider.notifier);
+
+    if (state.proUnlocked) {
+      return const ListTile(
+        leading: Icon(Icons.workspace_premium),
+        title: Text('Pro unlocked'),
+        subtitle: Text('Unlimited book conversions. Thank you!'),
+      );
+    }
+
+    return Column(
+      children: [
+        ListTile(
+          leading: const Icon(Icons.workspace_premium_outlined),
+          title: const Text('Unlock unlimited conversions'),
+          subtitle: Text('${state.freeRemaining} free '
+              '${state.freeRemaining == 1 ? 'conversion' : 'conversions'} left'),
+          trailing: FilledButton(
+            onPressed: () => Navigator.of(context).push(MaterialPageRoute(
+              builder: (_) => Scaffold(
+                appBar: AppBar(title: const Text('ChessBook Pro')),
+                body: const PaywallView(),
+              ),
+            )),
+            child: const Text('Unlock'),
+          ),
+        ),
+        ListTile(
+          title: const Text('Restore purchase'),
+          trailing: TextButton(
+            onPressed: () async {
+              final messenger = ScaffoldMessenger.of(context);
+              final ok = await controller.restore();
+              messenger.showSnackBar(SnackBar(
+                content: Text(ok
+                    ? 'Purchase restored.'
+                    : 'No previous purchase found.'),
+              ));
+            },
+            child: const Text('Restore'),
+          ),
+        ),
+      ],
     );
   }
 }

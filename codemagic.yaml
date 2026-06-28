@@ -27,6 +27,20 @@
 #                     .app, then `productbuild --sign` to build the installer
 #                     .pkg. (exportArchive was abandoned: it re-signs the app
 #                     code with the installer cert and fails on the CI runner.)
+#
+# In-app purchase (freemium meter + RevenueCat lifetime unlock):
+#   The meter/paywall are gated by the compile-time `ENABLE_IAP` dart-define and
+#   only injected into the STORE workflows below — ios-testflight and
+#   macos-appstore. The sideload/DMG/devid workflows deliberately omit it so
+#   those builds stay fully unlocked (RevenueCat's SDK can't take payment via a
+#   free-Apple-ID sideload or a direct-download DMG). Create a `revenuecat`
+#   variable group in the Codemagic UI holding the RevenueCat *public* SDK keys:
+#       REVENUECAT_IOS_KEY    (appl_… key for the iOS app)
+#       REVENUECAT_MACOS_KEY  (appl_… key for the macOS app)
+#   These are embedded in the shipped binary (not secret), but live in a group
+#   so they aren't committed. An unset key just leaves metering local (no crash).
+#   (No Android workflow exists here — set ENABLE_IAP + REVENUECAT_ANDROID_KEY
+#   wherever the Google Play build is produced.)
 
 workflows:
   ios-testflight:
@@ -47,6 +61,8 @@ workflows:
         # CERTIFICATE_PRIVATE_KEY. It is only injected into the build if listed
         # here. The key itself is NEVER stored in this file.
         - appstore
+        # RevenueCat public SDK keys (REVENUECAT_IOS_KEY). Store workflow only.
+        - revenuecat
       vars:
         FLUTTER_PROJECT: chess_reader
         BUNDLE_ID: com.alpinist.chessBookReader
@@ -84,8 +100,12 @@ workflows:
           cd "$FLUTTER_PROJECT"
           # $PROJECT_BUILD_NUMBER is Codemagic's monotonic per-project counter,
           # so each upload to TestFlight gets a unique, increasing build number.
+          # ENABLE_IAP turns on the freemium meter + paywall; the RevenueCat
+          # public key wires up StoreKit purchases. Store build only.
           flutter build ipa --release \
             --build-number=$PROJECT_BUILD_NUMBER \
+            --dart-define=ENABLE_IAP=true \
+            --dart-define=REVENUECAT_IOS_KEY="$REVENUECAT_IOS_KEY" \
             --export-options-plist=/Users/builder/export_options.plist
     artifacts:
       - $FLUTTER_PROJECT/build/ios/ipa/*.ipa
@@ -266,6 +286,8 @@ workflows:
       flutter: stable
       groups:
         - appstore
+        # RevenueCat public SDK keys (REVENUECAT_MACOS_KEY). Store workflow only.
+        - revenuecat
       vars:
         FLUTTER_PROJECT: chess_reader
         BUNDLE_ID: com.alpinist.chessBookReader
@@ -352,11 +374,35 @@ workflows:
           # flutter build macos generates the ephemeral files (FlutterInputs/
           # FlutterOutputs.xcfilelist, FlutterGeneratedPluginSwiftPackage/
           # Package.swift) that xcodebuild archive needs before it can start.
+          # The --dart-define values are persisted into Flutter-Generated.xcconfig
+          # (DART_DEFINES), so the later `xcodebuild archive` inherits them and the
+          # freemium meter + RevenueCat key are compiled into the App Store build.
           flutter build macos --release \
-            --build-number="$PROJECT_BUILD_NUMBER"
+            --build-number="$PROJECT_BUILD_NUMBER" \
+            --dart-define=ENABLE_IAP=true \
+            --dart-define=REVENUECAT_MACOS_KEY="$REVENUECAT_MACOS_KEY"
       - name: Archive
         script: |
           cd "$FLUTTER_PROJECT"
+          # Belt-and-suspenders for the dart-defines (ENABLE_IAP + the RevenueCat
+          # key): `flutter build macos` already wrote them into
+          # Flutter-Generated.xcconfig as DART_DEFINES (comma-joined base64), which
+          # xcodebuild reads via the Runner config — but pass that exact value
+          # explicitly too so the freemium build can't silently fall back to the
+          # unlocked path if the xcconfig isn't picked up. We forward the value
+          # Flutter wrote (not a hand-built one) so its own internal defines are
+          # preserved. Only add the override when it's actually present, or an
+          # empty DART_DEFINES= would clobber the xcconfig.
+          DART_DEFINES=$(grep '^DART_DEFINES=' \
+            macos/Flutter/ephemeral/Flutter-Generated.xcconfig 2>/dev/null \
+            | head -1 | cut -d= -f2-)
+          DART_DEFINES_ARG=""
+          if [ -n "$DART_DEFINES" ]; then
+            DART_DEFINES_ARG="DART_DEFINES=$DART_DEFINES"
+            echo "Forwarding DART_DEFINES to xcodebuild ($DART_DEFINES_ARG)"
+          else
+            echo "WARNING: no DART_DEFINES in Flutter-Generated.xcconfig"
+          fi
           # Signing is configured by `xcode-project use-profiles`, which sets manual
           # signing + the MAC_APP_STORE profile on the RUNNER target only. Do NOT
           # pass CODE_SIGN_IDENTITY / PROVISIONING_PROFILE_SPECIFIER as global
@@ -365,6 +411,8 @@ workflows:
           # reject a manual profile ("does not support provisioning profiles").
           # Only the app cert is in the keychain, so the Runner target signs with
           # Apple Distribution unambiguously and embeds the profile.
+          # $DART_DEFINES_ARG is unquoted on purpose: it's either empty or a single
+          # whitespace-free KEY=base64,base64 token, so it can't word-split badly.
           xcodebuild \
             -workspace macos/Runner.xcworkspace \
             -scheme Runner \
@@ -373,7 +421,8 @@ workflows:
             -archivePath /tmp/Runner.xcarchive \
             -destination "generic/platform=macOS" \
             OTHER_CODE_SIGN_FLAGS="--timestamp" \
-            CURRENT_PROJECT_VERSION="$PROJECT_BUILD_NUMBER"
+            CURRENT_PROJECT_VERSION="$PROJECT_BUILD_NUMBER" \
+            $DART_DEFINES_ARG
       - name: Export .pkg
         script: |
           # xcodebuild -exportArchive proved unusable here: with the installer cert

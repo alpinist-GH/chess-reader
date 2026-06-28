@@ -15,6 +15,9 @@ import '../../library/book_import.dart';
 import '../../library/converted_library_screen.dart';
 import '../../library/library_home.dart';
 import '../../library/open_book_button.dart';
+import '../../purchase/billing_config.dart';
+import '../../purchase/paywall_view.dart';
+import '../../purchase/purchase_controller.dart';
 import '../../settings/settings_screen.dart';
 import '../data/book_conversion.dart';
 import '../data/book_exporter.dart';
@@ -53,6 +56,9 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
       ref
           .read(libraryStoreProvider.notifier)
           .ensureSampleSeeded(extractSampleBook);
+      // Prime RevenueCat early (configures + refreshes the entitlement on first
+      // read) so a returning Pro user isn't briefly metered. No-op on desktop.
+      if (kBillingEnabled) ref.read(purchaseControllerProvider);
     });
   }
 
@@ -60,6 +66,9 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
   /// PDF has usable text, whether from its own layer or recovered by OCR) or —
   /// if even OCR couldn't read this scan — warn and steer to Original pages.
   void _handleOpenedPdf(String path) {
+    // Paywalled: the reader shows the paywall instead of converting, so skip the
+    // OCR / reading-view prompts until the user unlocks (then the gate clears).
+    if (ref.watch(conversionGatedProvider(path))) return;
     if (_isEpub(path)) return;
     // A freshly-opened scanned PDF (no cache yet) is gated: OCR is slow, so ask
     // whether to run it before the conversion proceeds. The conversion stays in
@@ -588,6 +597,9 @@ class _BookPane extends ConsumerWidget {
   }
 
   Widget _book(BuildContext context, WidgetRef ref, String path) {
+    // Freemium paywall: a fresh conversion past the free allowance shows the
+    // paywall instead of the progress bar (and the conversion stays pending).
+    if (ref.watch(conversionGatedProvider(path))) return const PaywallView();
     // Up-front diagram detection gates the reader (progress bar) for both
     // formats; results are cached so reopening is instant.
     final conversion = ref.watch(conversionProvider(path));
