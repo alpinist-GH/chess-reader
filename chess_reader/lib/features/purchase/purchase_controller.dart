@@ -41,6 +41,7 @@ class PurchaseState {
 /// and [canConvert] always returns true.
 class PurchaseController extends Notifier<PurchaseState> {
   static const _kProUnlocked = 'pro_unlocked';
+  static const _kPromoUnlocked = 'promo_unlocked';
   static const _kConvertedCount = 'converted_count';
 
   bool _configured = false;
@@ -51,7 +52,10 @@ class PurchaseController extends Notifier<PurchaseState> {
   PurchaseState build() {
     final p = _prefs;
     final initial = PurchaseState(
-      proUnlocked: p.getBool(_kProUnlocked) ?? false,
+      // Either the store entitlement (mirrored from RevenueCat) or a redeemed
+      // promo code unlocks Pro.
+      proUnlocked:
+          (p.getBool(_kProUnlocked) ?? false) || _promoUnlocked,
       convertedCount: p.getInt(_kConvertedCount) ?? 0,
     );
     if (kBillingEnabled) {
@@ -77,16 +81,29 @@ class PurchaseController extends Notifier<PurchaseState> {
     }
   }
 
+  bool get _promoUnlocked => _prefs.getBool(_kPromoUnlocked) ?? false;
+
   void _onCustomerInfo(CustomerInfo info) {
-    final unlocked = info.entitlements.active.containsKey(kEntitlementId);
-    _setProUnlocked(unlocked);
+    final entitled = info.entitlements.active.containsKey(kEntitlementId);
+    _prefs.setBool(_kProUnlocked, entitled);
+    // A redeemed promo keeps Pro on even when the store reports no entitlement.
+    _applyUnlocked(entitled || _promoUnlocked);
   }
 
-  void _setProUnlocked(bool unlocked) {
-    _prefs.setBool(_kProUnlocked, unlocked);
+  void _applyUnlocked(bool unlocked) {
     if (state.proUnlocked != unlocked) {
       state = state.copyWith(proUnlocked: unlocked);
     }
+  }
+
+  /// Redeems the secret promo code. Returns true if [code] matched and Pro is
+  /// now unlocked on this device. The flag is persisted separately from the
+  /// store entitlement so a later RevenueCat sync can't revoke it.
+  bool unlockWithPromo(String code) {
+    if (code.trim().toLowerCase() != kPromoCode) return false;
+    _prefs.setBool(_kPromoUnlocked, true);
+    _applyUnlocked(true);
+    return true;
   }
 
   /// Whether a fresh conversion is currently allowed. Order matters: a paid

@@ -47,6 +47,34 @@ void main() {
         0);
   });
 
+  group('promo code unlock', () {
+    test('valid code unlocks Pro; persists across a fresh controller',
+        () async {
+      final c = await _container();
+      final pc = c.read(purchaseControllerProvider.notifier);
+      expect(c.read(purchaseControllerProvider).proUnlocked, isFalse);
+
+      expect(pc.unlockWithPromo('  MaxPromo '), isTrue,
+          reason: 'trimmed + case-insensitive match');
+      expect(c.read(purchaseControllerProvider).proUnlocked, isTrue);
+
+      // A redeemed promo survives a fresh controller (separate pref key).
+      final prefs = c.read(sharedPrefsProvider);
+      final c2 = ProviderContainer(
+        overrides: [sharedPrefsProvider.overrideWithValue(prefs)],
+      );
+      addTearDown(c2.dispose);
+      expect(c2.read(purchaseControllerProvider).proUnlocked, isTrue);
+    });
+
+    test('wrong code does not unlock', () async {
+      final c = await _container();
+      final pc = c.read(purchaseControllerProvider.notifier);
+      expect(pc.unlockWithPromo('nope'), isFalse);
+      expect(c.read(purchaseControllerProvider).proUnlocked, isFalse);
+    });
+  });
+
   group(
     'metering gate (store builds only)',
     () {

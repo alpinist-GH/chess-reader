@@ -22,6 +22,12 @@ const int kFreeConversionLimit = 3;
 /// the paywall still names a price.
 const String kFallbackPrice = '\$4.99';
 
+/// Secret promo code that grants the lifetime unlock locally, bypassing the
+/// store purchase. Compared case-insensitively after trimming. Used for
+/// give-aways / press / review copies — it sets the entitlement on this device
+/// only (it doesn't touch RevenueCat), and survives store entitlement syncs.
+const String kPromoCode = 'maxpromo';
+
 /// RevenueCat **public** SDK key for the current platform, supplied at build
 /// time. These are not secrets (they're embedded in the shipped binary), but we
 /// keep them out of source so each store build injects its own.

@@ -73,6 +73,48 @@ class _PaywallViewState extends ConsumerState<PaywallView> {
     }
   }
 
+  Future<void> _enterPromoCode() async {
+    final controller = TextEditingController();
+    final messenger = ScaffoldMessenger.of(context);
+    final code = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Enter promo code'),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          autocorrect: false,
+          textCapitalization: TextCapitalization.none,
+          decoration: const InputDecoration(
+            hintText: 'Promo code',
+            border: OutlineInputBorder(),
+          ),
+          onSubmitted: (value) => Navigator.of(context).pop(value),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(controller.text),
+            child: const Text('Redeem'),
+          ),
+        ],
+      ),
+    );
+    controller.dispose();
+    if (code == null || !mounted) return;
+    // On success the entitlement flips and the conversion provider dismisses the
+    // paywall automatically; we only need to surface a failure.
+    final ok =
+        ref.read(purchaseControllerProvider.notifier).unlockWithPromo(code);
+    if (!ok) {
+      messenger.showSnackBar(
+          const SnackBar(content: Text('Invalid promo code.')));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -112,6 +154,10 @@ class _PaywallViewState extends ConsumerState<PaywallView> {
               TextButton(
                 onPressed: _busy ? null : _restore,
                 child: const Text('Restore purchase'),
+              ),
+              TextButton(
+                onPressed: _busy ? null : _enterPromoCode,
+                child: const Text('Have a promo code?'),
               ),
               const SizedBox(height: 8),
               Text(
