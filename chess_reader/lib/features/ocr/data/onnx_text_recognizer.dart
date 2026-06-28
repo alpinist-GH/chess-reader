@@ -7,6 +7,7 @@ import '../domain/ctc_decoder.dart';
 import '../domain/ocr_box.dart';
 import '../domain/reading_order.dart';
 import '../domain/text_detector.dart';
+import '../domain/text_page_recognizer.dart';
 import 'ocr_isolate.dart';
 
 /// PP-OCR mobile detection (v3) + recognition (v4) models, exported to ONNX.
@@ -31,7 +32,7 @@ const String kOcrKeysAsset = 'assets/models/ocr_keys.txt';
 /// [DiagramRecognizer]. Platform-channel based (flutter_onnxruntime), so it
 /// must live on the main isolate; the heavy pixel preprocessing runs in
 /// `compute()` isolates (see ocr_isolate.dart).
-class OcrTextRecognizer {
+class OcrTextRecognizer implements TextPageRecognizer {
   OcrTextRecognizer();
 
   _OcrModels? _models;
@@ -60,6 +61,7 @@ class OcrTextRecognizer {
   /// Recognizes the page body text from a rendered page (BGRA pixels, e.g. from
   /// pdfrx). Returns the empty string if the models are unavailable or no text
   /// lines are found.
+  @override
   Future<String> recognizePage({
     required Uint8List bgra,
     required int width,
@@ -90,6 +92,7 @@ class OcrTextRecognizer {
     return linesToPageText(lines);
   }
 
+  @override
   Future<void> dispose() async {
     await _loadFuture; // wait for any in-flight load so we close the real session
     await _models?.dispose();

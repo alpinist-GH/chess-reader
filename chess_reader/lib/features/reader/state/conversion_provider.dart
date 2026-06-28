@@ -2,7 +2,10 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/settings/app_settings.dart';
+import '../../ocr/data/native_text_recognizer.dart';
 import '../../ocr/data/onnx_text_recognizer.dart';
+import '../../ocr/domain/text_page_recognizer.dart';
 import '../../vision/data/diagram_recognizer.dart';
 import '../data/book_conversion.dart';
 
@@ -50,9 +53,14 @@ final ocrDecisionProvider = NotifierProvider.family<OcrDecision, bool?, String>(
 final conversionProvider =
     FutureProvider.family<BookConversion, String>((ref, path) async {
   final recognizer = DiagramRecognizer();
-  // Lazily-loaded: the OCR models are only loaded when a page's text layer is
-  // sparse, so digital PDFs and cache hits pay nothing for it.
-  final ocr = OcrTextRecognizer();
+  // Opt-in on mobile: use the device's native OCR (Apple Vision / ML Kit) if the
+  // user enabled it, otherwise the bundled ONNX pipeline. Both are lazily used —
+  // only invoked when a page's text layer is sparse — so digital PDFs and cache
+  // hits pay nothing for it.
+  final useDeviceOcr =
+      ref.read(settingsProvider).useDeviceOcr && NativeTextRecognizer.isSupported;
+  final TextPageRecognizer ocr =
+      useDeviceOcr ? NativeTextRecognizer() : OcrTextRecognizer();
   ref.onDispose(recognizer.dispose);
   ref.onDispose(ocr.dispose);
 

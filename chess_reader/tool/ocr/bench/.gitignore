@@ -1,0 +1,3 @@
+# Downloaded benchmark models (large) and export cache — not vendored.
+models/
+_cache/
