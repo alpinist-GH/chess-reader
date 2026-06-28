@@ -70,5 +70,18 @@ end
 post_install do |installer|
   installer.pods_project.targets.each do |target|
     flutter_additional_ios_build_settings(target)
+
+    # permission_handler_apple compiles every permission OUT by default
+    # (PermissionHandlerEnums.h defaults each PERMISSION_* macro to 0). Without
+    # this, Permission.camera.request() never calls AVFoundation, so iOS never
+    # registers the app as a camera user and no camera toggle ever appears in
+    # Settings. We only use the camera (for the paper-book scanner), so enable
+    # just that one and leave the rest disabled to keep App Store review clean.
+    target.build_configurations.each do |config|
+      defs = config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] || ['$(inherited)']
+      defs = [defs] if defs.is_a?(String)
+      defs << 'PERMISSION_CAMERA=1' unless defs.include?('PERMISSION_CAMERA=1')
+      config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] = defs
+    end
   end
 end
