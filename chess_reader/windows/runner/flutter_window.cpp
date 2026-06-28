@@ -3,6 +3,7 @@
 #include <optional>
 
 #include "flutter/generated_plugin_registrant.h"
+#include "native_ocr.h"
 
 FlutterWindow::FlutterWindow(const flutter::DartProject& project)
     : project_(project) {}
@@ -25,6 +26,11 @@ bool FlutterWindow::OnCreate() {
     return false;
   }
   RegisterPlugins(flutter_controller_->engine());
+
+  // Register the native OCR channel (Windows.Media.Ocr). Not a pub plugin, so
+  // it's wired up here directly on the engine's messenger.
+  native_ocr_ = NativeOcr::Register(flutter_controller_->engine()->messenger());
+
   SetChildContent(flutter_controller_->view()->GetNativeWindow());
 
   flutter_controller_->engine()->SetNextFrameCallback([&]() {
@@ -40,6 +46,7 @@ bool FlutterWindow::OnCreate() {
 }
 
 void FlutterWindow::OnDestroy() {
+  native_ocr_ = nullptr;
   if (flutter_controller_) {
     flutter_controller_ = nullptr;
   }

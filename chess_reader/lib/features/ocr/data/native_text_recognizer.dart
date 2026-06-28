@@ -8,13 +8,13 @@ import '../domain/text_page_recognizer.dart';
 
 /// Page-text OCR backed by the operating system's on-device text recognizer:
 /// Apple Vision (`VNRecognizeTextRequest`) on iOS and macOS, Google ML Kit Text
-/// on Android. Reached over a platform channel; the native side receives the raw
-/// BGRA raster and returns recognized lines with pixel bounding boxes, which we
-/// reassemble into page text with the same reading-order logic as the ONNX path.
+/// on Android, and Windows.Media.Ocr on Windows. Reached over a platform
+/// channel; the native side receives the raw BGRA raster and returns recognized
+/// lines with pixel bounding boxes, which we reassemble into page text with the
+/// same reading-order logic the (now unused) ONNX path used.
 ///
-/// Available on iOS, Android and macOS — see [isSupported]; only Windows still
-/// uses the bundled ONNX recognizer. On any other platform (or if the channel
-/// errors), [recognizePage] returns the empty string so the caller falls back
+/// Available on every supported platform — see [isSupported]. If the channel
+/// errors, [recognizePage] returns the empty string so the caller falls back
 /// exactly as if no text were found.
 class NativeTextRecognizer implements TextPageRecognizer {
   NativeTextRecognizer();
@@ -24,7 +24,10 @@ class NativeTextRecognizer implements TextPageRecognizer {
 
   /// Whether a native recognizer exists on this platform.
   static bool get isSupported =>
-      Platform.isIOS || Platform.isAndroid || Platform.isMacOS;
+      Platform.isIOS ||
+      Platform.isAndroid ||
+      Platform.isMacOS ||
+      Platform.isWindows;
 
   @override
   Future<String> recognizePage({

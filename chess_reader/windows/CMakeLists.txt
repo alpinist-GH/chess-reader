@@ -114,18 +114,10 @@ install(FILES "${AOT_LIBRARY}" DESTINATION "${INSTALL_BUNDLE_DATA_DIR}"
   CONFIGURATIONS Profile;Release
   COMPONENT Runtime)
 
-# Bundle the OCR model files. They used to ride along as Flutter assets, but
-# mobile now uses the device's native recognizer, so they were removed from the
-# asset bundle to keep them out of the mobile app. Desktop loads them from
-# data/models/ next to the executable (see lib/.../ocr_model_locator.dart).
-set(OCR_MODELS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../assets/models")
-foreach(OCR_MODEL ocr_det.onnx ocr_rec.onnx ocr_keys.txt)
-  if(EXISTS "${OCR_MODELS_DIR}/${OCR_MODEL}")
-    install(FILES "${OCR_MODELS_DIR}/${OCR_MODEL}"
-      DESTINATION "${INSTALL_BUNDLE_DATA_DIR}/models"
-      COMPONENT Runtime)
-  endif()
-endforeach()
+# Windows uses the OS on-device OCR engine (Windows.Media.Ocr, wired up in
+# runner/native_ocr.cpp), so the ONNX OCR models are no longer bundled here —
+# nothing on Windows loads them. (macOS still bundles them via its Xcode "Bundle
+# OCR models" phase until it too moves to native OCR.)
 
 # Bundle the Stockfish engine binary when present (it is downloaded by
 # tool/fetch_stockfish.ps1, not committed: ~110 MB). The app looks it up at
