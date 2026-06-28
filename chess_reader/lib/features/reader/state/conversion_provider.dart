@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../ocr/data/native_text_recognizer.dart';
-import '../../ocr/data/onnx_text_recognizer.dart';
 import '../../ocr/domain/text_page_recognizer.dart';
 import '../../vision/data/diagram_recognizer.dart';
 import '../data/book_conversion.dart';
@@ -52,15 +51,13 @@ final ocrDecisionProvider = NotifierProvider.family<OcrDecision, bool?, String>(
 final conversionProvider =
     FutureProvider.family<BookConversion, String>((ref, path) async {
   final recognizer = DiagramRecognizer();
-  // Every platform uses its OS-native OCR (Apple Vision on iOS/macOS, ML Kit on
-  // Android, Windows.Media.Ocr on Windows) — faster, more accurate, and lets us
-  // ship without the ~13 MB ONNX OCR models. The ONNX OcrTextRecognizer remains
-  // only as a fallback for any platform without a native recognizer. OCR is
-  // lazily used — only when a page's text layer is sparse — so digital PDFs and
-  // cache hits pay nothing for it.
-  final TextPageRecognizer ocr = NativeTextRecognizer.isSupported
-      ? NativeTextRecognizer()
-      : OcrTextRecognizer();
+  // OCR uses the OS-native text recognizer on every platform (Apple Vision on
+  // iOS/macOS, ML Kit on Android, Windows.Media.Ocr on Windows) — faster, more
+  // accurate, and lets us ship without the ~13 MB ONNX OCR models. On any
+  // platform without a native recognizer it simply yields no text. OCR is lazily
+  // used — only when a page's text layer is sparse — so digital PDFs and cache
+  // hits pay nothing for it.
+  final TextPageRecognizer ocr = NativeTextRecognizer();
   ref.onDispose(recognizer.dispose);
   ref.onDispose(ocr.dispose);
 

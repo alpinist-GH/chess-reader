@@ -4,6 +4,16 @@ All notable changes to ChessBook Reader are documented here. The project loosely
 follows [Keep a Changelog](https://keepachangelog.com/) and
 [Semantic Versioning](https://semver.org/).
 
+## [1.4.1] — 2026-06-28
+
+### Changed
+- **Native OCR everywhere.** Scanned books are now read with the operating
+  system's built‑in text recognizer on every platform — Apple Vision on
+  iOS/macOS, Google ML Kit on Android, and Windows.Media.Ocr on Windows. This is
+  faster and more accurate than the previously bundled engine and lets every
+  build ship ~13 MB smaller (the bundled ONNX OCR models are gone). Diagram
+  recognition is unchanged.
+
 ## [1.4.0] — 2026-06-28
 
 ### Changed
@@ -49,6 +59,8 @@ follows [Keep a Changelog](https://keepachangelog.com/) and
 - Rebranded to **ChessBook Reader** with a new app identity, full‑bleed icon, and
   a bundled sample book.
 
+[1.4.1]: https://github.com/alpinist-GH/chess-reader/releases/tag/chessbook-v1.4.1
+[1.4.0]: https://github.com/alpinist-GH/chess-reader/releases/tag/chessbook-v1.4.0
 [1.2.0]: https://github.com/alpinist-GH/chess-reader/releases/tag/chessbook-v1.2.0
 [1.1.3]: https://github.com/alpinist-GH/chess-reader/releases/tag/chessbook-v1.1.3
 [1.1.2]: https://github.com/alpinist-GH/chess-reader/releases/tag/chessbook-v1.1.2

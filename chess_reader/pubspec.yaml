@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.4.0+9
+version: 1.4.1+10
 
 environment:
   sdk: ^3.12.2
@@ -100,12 +100,11 @@ flutter:
   uses-material-design: true
 
   assets:
+    # ONNX models for diagram recognition (board square classifier + arrow
+    # segmentation). Text OCR no longer ships ONNX models — every platform uses
+    # its OS-native recognizer (see native_text_recognizer.dart).
     - assets/models/arrow_seg.onnx
     - assets/models/square_classifier2.onnx
-    # assets: every platform now uses its OS-native text recognizer (Apple Vision
-    # on iOS/macOS, ML Kit on Android, Windows.Media.Ocr on Windows), so the ONNX
-    # OCR models are no longer bundled or loaded anywhere. The square classifier
-    # below is still ONNX (diagram recognition). See native_text_recognizer.dart.
     - assets/sample/My System.pdf
 
   # To add assets to your application, add an assets section, like this:
