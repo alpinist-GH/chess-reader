@@ -203,6 +203,12 @@ workflows:
           cd "$FLUTTER_PROJECT"
           flutter build macos --release
           APP=$(ls -d build/macos/Build/Products/Release/*.app | head -1)
+          # --- diagnostics: confirm the freshly built .app actually has its
+          # frameworks embedded (a hollow app => tiny DMG). ---
+          echo "=== built APP: $APP ==="
+          du -sh "$APP"
+          echo "=== Contents/Frameworks (expect FlutterMacOS, multistockfish, onnxruntime) ==="
+          ls -la "$APP/Contents/Frameworks/" || echo "NO Frameworks dir — app is hollow"
           # Re-sign every nested binary (frameworks, the multistockfish FFI
           # framework, dylibs) and the app with the Developer ID cert + hardened
           # runtime + timestamp — all required for notarization.
@@ -216,8 +222,16 @@ workflows:
         script: |
           cd "$FLUTTER_PROJECT"
           APP=$(ls -d build/macos/Build/Products/Release/*.app | head -1)
+          # --- diagnostics: report the app size we're about to image ---
+          echo "=== packaging APP: $APP ==="
+          du -sh "$APP"
+          ls -la "$APP/Contents/Frameworks/" || echo "NO Frameworks dir — app is hollow"
           hdiutil create -volname "ChessBook Reader" -srcfolder "$APP" \
             -ov -format UDZO "$CM_BUILD_DIR/chessbook-reader.dmg"
+          # Fail loudly instead of notarizing/shipping a hollow image.
+          DMG_SIZE=$(stat -f%z "$CM_BUILD_DIR/chessbook-reader.dmg")
+          echo "=== DMG size: $DMG_SIZE bytes ==="
+          [ "$DMG_SIZE" -gt 50000000 ] || { echo "ERROR: DMG only $DMG_SIZE bytes — frameworks missing, aborting"; exit 1; }
           # Write the App Store Connect API private key to a temp file for notarytool.
           # The integration injects APP_STORE_CONNECT_PRIVATE_KEY, KEY_IDENTIFIER,
           # and ISSUER_ID as env vars.
