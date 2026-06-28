@@ -11,7 +11,7 @@ The Flutter app lives in [`chess_reader/`](chess_reader/).
 ## Download
 
 **Windows:** download the installer from the latest release —
-[**chessbook-reader-setup-1.1.3.exe**](https://github.com/alpinist-GH/chess-reader/releases/download/chessbook-v1.1.3/chessbook-reader-setup-1.1.3.exe)
+[**chessbook-reader-setup-1.2.0.exe**](https://github.com/alpinist-GH/chess-reader/releases/download/chessbook-v1.2.0/chessbook-reader-setup-1.2.0.exe)
 ([all releases](https://github.com/alpinist-GH/chess-reader/releases/latest)).
 
 It's a per‑user install (no administrator rights needed). The installer is
@@ -33,6 +33,10 @@ Other platforms: build from source (see [Building](#building)).
 - **Two reading views for PDF** — the original printed pages, or a reflowed HTML
   reading view (easier on small screens). Choose at open, switch anytime; EPUB
   is always HTML.
+- **Scan a paper book** *(mobile)* — photograph the pages of a physical chess
+  book with the device's document scanner (auto‑crop and de‑skew); the pages are
+  combined into a PDF, text is recovered with on‑device OCR, and diagrams are
+  recognised — just like opening a scanned PDF.
 - **Automatic diagram recognition** — every printed diagram in the book is
   detected on open, shown with its detected FEN, and **tap to load it onto the
   board**. Results are cached to disk so reopening is instant.

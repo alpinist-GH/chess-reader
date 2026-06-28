@@ -9,6 +9,7 @@ import '../reader/state/book_providers.dart';
 import 'book_cover.dart';
 import 'book_import.dart';
 import 'open_book_button.dart';
+import 'scan_book_button.dart';
 
 /// Shown when no book is open: a prominent "open" action plus a bookshelf grid
 /// of recently-opened books (cover art extracted from each file) for one-tap
@@ -33,6 +34,7 @@ class LibraryHome extends ConsumerWidget {
               const SizedBox(height: 16),
               const OpenBookButton(filled: true),
               const SizedBox(height: 8),
+              const ScanBookButton(),
               TextButton.icon(
                 icon: const Icon(Icons.auto_stories),
                 label: const Text('Try the sample book'),
@@ -56,6 +58,7 @@ class LibraryHome extends ConsumerWidget {
             children: [
               const SizedBox(height: 8),
               const OpenBookButton(filled: true),
+              const ScanBookButton(),
               const SizedBox(height: 24),
               Align(
                 alignment: Alignment.centerLeft,
