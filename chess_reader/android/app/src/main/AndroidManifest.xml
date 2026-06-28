@@ -9,7 +9,7 @@
         android:required="false"
         tools:replace="android:required" />
     <application
-        android:label="ChessBook Reader"
+        android:label="ChessBook"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
