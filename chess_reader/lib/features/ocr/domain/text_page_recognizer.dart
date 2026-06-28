@@ -4,9 +4,9 @@ import 'dart:typed_data';
 ///
 /// Two implementations share this contract so the conversion pipeline can pick
 /// one at runtime:
-///   * `OcrTextRecognizer` — the bundled on-device ONNX pipeline (all platforms).
+///   * `OcrTextRecognizer` — the bundled on-device ONNX pipeline (used on macOS).
 ///   * `NativeTextRecognizer` — the OS text recognizer (Apple Vision on iOS,
-///     Google ML Kit on Android), available only on mobile and opt-in.
+///     Google ML Kit on Android, Windows.Media.Ocr on Windows).
 abstract class TextPageRecognizer {
   /// Returns the page's body text, or the empty string if nothing is read or
   /// the recognizer is unavailable. [bgra] is row-major BGRA8888.

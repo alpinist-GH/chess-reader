@@ -52,11 +52,11 @@ final ocrDecisionProvider = NotifierProvider.family<OcrDecision, bool?, String>(
 final conversionProvider =
     FutureProvider.family<BookConversion, String>((ref, path) async {
   final recognizer = DiagramRecognizer();
-  // Mobile uses the device's native OCR (Apple Vision / ML Kit) — faster, more
-  // accurate, and lets us ship without the ~13 MB ONNX OCR models. Desktop uses
-  // the bundled ONNX pipeline (CoreML-accelerated on macOS). Both are lazily
-  // used — only when a page's text layer is sparse — so digital PDFs and cache
-  // hits pay nothing for it.
+  // Use the OS native OCR where we have one (Apple Vision on iOS, ML Kit on
+  // Android, Windows.Media.Ocr on Windows) — faster, more accurate, and lets us
+  // ship without the ~13 MB ONNX OCR models. macOS still uses the bundled ONNX
+  // pipeline (CoreML-accelerated). Both are lazily used — only when a page's
+  // text layer is sparse — so digital PDFs and cache hits pay nothing for it.
   final TextPageRecognizer ocr = NativeTextRecognizer.isSupported
       ? NativeTextRecognizer()
       : OcrTextRecognizer();

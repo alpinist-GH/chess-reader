@@ -30,9 +30,24 @@ target_compile_definitions(${BINARY_NAME} PRIVATE "FLUTTER_VERSION_BUILD=${FLUTT
 # Disable Windows macros that collide with C++ standard library functions.
 target_compile_definitions(${BINARY_NAME} PRIVATE "NOMINMAX")
 
+# Native Windows OCR (Windows.Media.Ocr) backing the chess_reader/native_ocr
+# channel. Built as a separate library on purpose: C++/WinRT requires C++
+# exceptions, but the runner is compiled with _HAS_EXCEPTIONS=0 (Flutter's
+# default, set in apply_standard_settings). Keeping the WinRT code in its own
+# target with exceptions enabled is exactly how WinRT-using Flutter plugins
+# coexist with the runner. Links windowsapp.lib (the WinRT umbrella import lib).
+add_library(native_ocr STATIC "native_ocr.cpp")
+target_compile_features(native_ocr PRIVATE cxx_std_17)
+target_compile_options(native_ocr PRIVATE /EHsc)
+target_compile_definitions(native_ocr PRIVATE "NOMINMAX" "WIN32_LEAN_AND_MEAN")
+target_include_directories(native_ocr PRIVATE "${CMAKE_SOURCE_DIR}")
+target_link_libraries(native_ocr PRIVATE flutter flutter_wrapper_app windowsapp)
+add_dependencies(native_ocr flutter_assemble)
+
 # Add dependency libraries and include directories. Add any application-specific
 # dependencies here.
 target_link_libraries(${BINARY_NAME} PRIVATE flutter flutter_wrapper_app)
+target_link_libraries(${BINARY_NAME} PRIVATE native_ocr)
 target_link_libraries(${BINARY_NAME} PRIVATE "dwmapi.lib")
 target_include_directories(${BINARY_NAME} PRIVATE "${CMAKE_SOURCE_DIR}")
 

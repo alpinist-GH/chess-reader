@@ -103,9 +103,9 @@ flutter:
     - assets/models/arrow_seg.onnx
     - assets/models/square_classifier2.onnx
     # OCR models (ocr_det/ocr_rec/ocr_keys) are intentionally NOT bundled as
-    # assets: mobile uses the device's native OCR, and desktop loads these from
-    # files placed next to the app by the platform build (windows/CMakeLists.txt
-    # and the macOS Runner "Bundle OCR models" phase). See ocr_model_locator.dart.
+    # assets: iOS/Android use native OCR, Windows uses Windows.Media.Ocr, so only
+    # macOS still needs the ONNX models — bundled as files by the macOS Runner
+    # "Bundle OCR models" Xcode phase and loaded via ocr_model_locator.dart.
     - assets/sample/My System.pdf
 
   # To add assets to your application, add an assets section, like this:
