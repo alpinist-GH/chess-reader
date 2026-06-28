@@ -12,9 +12,10 @@ class MainFlutterWindow: NSWindow {
 
     // Native on-device OCR (Apple Vision) — see NativeOcrPlugin / the Dart
     // NativeTextRecognizer. Registered manually since it isn't a pub plugin.
-    if let registrar = flutterViewController.registrar(forPlugin: "NativeOcrPlugin") {
-      NativeOcrPlugin.register(with: registrar)
-    }
+    // On macOS registrar(forPlugin:) returns a non-optional registrar (unlike
+    // iOS), so bind it directly rather than with `if let`.
+    let registrar = flutterViewController.registrar(forPlugin: "NativeOcrPlugin")
+    NativeOcrPlugin.register(with: registrar)
 
     super.awakeFromNib()
   }
