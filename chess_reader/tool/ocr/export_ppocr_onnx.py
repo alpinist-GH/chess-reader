@@ -12,6 +12,12 @@ PP-OCR preprocessing conventions these models expect:
   * recognition input: RGB, (x/255-0.5)/0.5, height 48, NCHW
   * recognition head : CTC over ['<blank>', *dict_lines, ' ']
 
+Detector: PP-OCRv3 mobile (bundled in the rapidocr package).
+Recognizer: PP-OCRv4 mobile — a drop-in upgrade over v3 (same size and dict,
+fewer errors on degraded scans; see tool/ocr/bench/bench.py). The v4 rec isn't
+bundled in rapidocr, so it's fetched from the same RapidOCR model repo on
+Hugging Face.
+
 Usage:
     pip install rapidocr-onnxruntime
     python tool/ocr/export_ppocr_onnx.py
@@ -37,8 +43,15 @@ REC_OUT = ASSETS / "ocr_rec.onnx"
 KEYS_OUT = ASSETS / "ocr_keys.txt"
 
 
-def _locate_rapidocr_models() -> tuple[Path, Path]:
-    """Return (det_onnx, rec_onnx) bundled with rapidocr-onnxruntime."""
+# PP-OCRv4 mobile recognizer in the RapidOCR Hugging Face model repo.
+REC_V4_URL = (
+    "https://huggingface.co/SWHL/RapidOCR/resolve/main/"
+    "PP-OCRv4/ch_PP-OCRv4_rec_infer.onnx"
+)
+
+
+def _locate_det() -> Path:
+    """Return the PP-OCRv3 mobile detector bundled with rapidocr-onnxruntime."""
     try:
         import rapidocr_onnxruntime as ro
     except ImportError as exc:  # pragma: no cover - environment guard
@@ -49,15 +62,24 @@ def _locate_rapidocr_models() -> tuple[Path, Path]:
         ) from exc
 
     models_dir = Path(ro.__file__).resolve().parent / "models"
+    hits = sorted(p for p in models_dir.glob("*det*.onnx"))
+    if not hits:
+        raise SystemExit(f"No detector model under {models_dir}")
+    # Prefer the smallest match — the *mobile* model, not a server one.
+    return min(hits, key=lambda p: p.stat().st_size)
 
-    def _find(token: str) -> Path:
-        hits = sorted(p for p in models_dir.glob("*.onnx") if token in p.name)
-        if not hits:
-            raise SystemExit(f"No {token!r} model under {models_dir}")
-        # Prefer the smallest match — the *mobile* model, not a server one.
-        return min(hits, key=lambda p: p.stat().st_size)
 
-    return _find("det"), _find("rec")
+def _fetch_rec_v4() -> Path:
+    """Download the PP-OCRv4 mobile recognizer to a cache next to this script."""
+    import urllib.request
+
+    cache = Path(__file__).resolve().parent / "_cache"
+    cache.mkdir(exist_ok=True)
+    dest = cache / "ch_PP-OCRv4_rec_infer.onnx"
+    if not dest.exists():
+        print(f"downloading {REC_V4_URL} ...")
+        urllib.request.urlretrieve(REC_V4_URL, dest)
+    return dest
 
 
 def _extract_dict(rec_onnx: Path) -> list[str]:
@@ -79,7 +101,8 @@ def _extract_dict(rec_onnx: Path) -> list[str]:
 
 def main() -> int:
     ASSETS.mkdir(parents=True, exist_ok=True)
-    det, rec = _locate_rapidocr_models()
+    det = _locate_det()
+    rec = _fetch_rec_v4()
     chars = _extract_dict(rec)
 
     shutil.copyfile(det, DET_OUT)

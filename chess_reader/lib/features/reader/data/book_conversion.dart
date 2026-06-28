@@ -164,7 +164,10 @@ class BookConversion {
   //     height, was 30%) so the first/last glyph isn't clipped (a capital "T"
   //     no longer reads as "I", leading punctuation is kept), so v8 OCR caches
   //     must be recomputed.
-  static const _version = 9;
+  // v10: OCR recognizer upgraded from PP-OCRv3 to PP-OCRv4 mobile (same size and
+  //     dictionary, measurably fewer errors on degraded scans), so v9 OCR
+  //     caches must be recomputed.
+  static const _version = 10;
 
   Map<String, dynamic> toJson() => {
         'v': _version,

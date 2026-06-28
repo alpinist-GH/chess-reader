@@ -9,7 +9,9 @@ import '../domain/reading_order.dart';
 import '../domain/text_detector.dart';
 import 'ocr_isolate.dart';
 
-/// PP-OCRv5 mobile detection + recognition models, exported to ONNX.
+/// PP-OCR mobile detection (v3) + recognition (v4) models, exported to ONNX.
+/// The v4 recognizer is a drop-in upgrade over v3 — same size and character
+/// dictionary, but measurably fewer errors on degraded scans.
 const String kOcrDetAsset = 'assets/models/ocr_det.onnx';
 const String kOcrRecAsset = 'assets/models/ocr_rec.onnx';
 
