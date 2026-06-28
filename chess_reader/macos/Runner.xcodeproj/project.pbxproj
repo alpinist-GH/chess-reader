@@ -213,6 +213,7 @@
 				33CC10EB2044A3C60003C045 /* Resources */,
 				33CC110E2044A8840003C045 /* Bundle Framework */,
 				3399D490228B24CF009A79C7 /* ShellScript */,
+				A0C0DE0200000000000000B1 /* Bundle OCR models */,
 			);
 			buildRules = (
 			);
@@ -301,6 +302,21 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		A0C0DE0200000000000000B1 /* Bundle OCR models */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Bundle OCR models";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Copy the OCR model files into the app bundle's Resources. They are no\n# longer Flutter assets (kept out of the mobile build); desktop loads them\n# from ../Resources/models/ — see lib/.../ocr_model_locator.dart.\nset -e\nSRC=\"$SRCROOT/../assets/models\"\nDEST=\"$BUILT_PRODUCTS_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH/models\"\nmkdir -p \"$DEST\"\nfor f in ocr_det.onnx ocr_rec.onnx ocr_keys.txt; do\n  if [ -f \"$SRC/$f\" ]; then cp \"$SRC/$f\" \"$DEST/\"; fi\ndone\n";
+		};
 		3399D490228B24CF009A79C7 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
 			alwaysOutOfDate = 1;

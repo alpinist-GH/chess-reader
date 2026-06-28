@@ -1,25 +1,30 @@
+import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_onnxruntime/flutter_onnxruntime.dart';
 
+import '../../../core/onnx/onnx_session_options.dart';
 import '../domain/ctc_decoder.dart';
 import '../domain/ocr_box.dart';
 import '../domain/reading_order.dart';
 import '../domain/text_detector.dart';
 import '../domain/text_page_recognizer.dart';
 import 'ocr_isolate.dart';
+import 'ocr_model_locator.dart';
 
-/// PP-OCR mobile detection (v3) + recognition (v4) models, exported to ONNX.
-/// The v4 recognizer is a drop-in upgrade over v3 — same size and character
-/// dictionary, but measurably fewer errors on degraded scans.
-const String kOcrDetAsset = 'assets/models/ocr_det.onnx';
-const String kOcrRecAsset = 'assets/models/ocr_rec.onnx';
+/// PP-OCR mobile detection (v3) + recognition (v4) model file names, exported to
+/// ONNX. The v4 recognizer is a drop-in upgrade over v3 — same size and
+/// character dictionary, but measurably fewer errors on degraded scans.
+///
+/// These are bundled on **desktop only** (resolved via [locateOcrModel]); mobile
+/// uses the device's native recognizer, so the models are not shipped there.
+const String kOcrDetFile = 'ocr_det.onnx';
+const String kOcrRecFile = 'ocr_rec.onnx';
 
 /// Recognition character dictionary (one char per line). The full class list is
 /// `['<blank>', ...keys, ' ']` — index 0 is the CTC blank, a trailing space is
 /// appended, matching PaddleOCR's decoding convention.
-const String kOcrKeysAsset = 'assets/models/ocr_keys.txt';
+const String kOcrKeysFile = 'ocr_keys.txt';
 
 /// Reads the body text of a rendered page with a two-stage ONNX OCR pipeline
 /// (DBNet detector → CRNN/SVTR recognizer + greedy CTC decode), entirely on
@@ -114,21 +119,27 @@ class _OcrModels {
 
   static Future<_OcrModels?> tryLoad() async {
     try {
+      final detPath = locateOcrModel(kOcrDetFile);
+      final recPath = locateOcrModel(kOcrRecFile);
+      final keysPath = locateOcrModel(kOcrKeysFile);
+      if (detPath == null || recPath == null || keysPath == null) return null;
       final rt = OnnxRuntime();
-      final det = await rt.createSessionFromAsset(kOcrDetAsset);
-      final rec = await rt.createSessionFromAsset(kOcrRecAsset);
+      final opts = acceleratedSessionOptions();
+      final det = await rt.createSession(detPath, options: opts);
+      final rec = await rt.createSession(recPath, options: opts);
       final detIn = det.inputNames.isNotEmpty ? det.inputNames.first : 'x';
       final recIn = rec.inputNames.isNotEmpty ? rec.inputNames.first : 'x';
-      return _OcrModels(det, detIn, rec, recIn, CtcDecoder(await _loadVocab()));
+      return _OcrModels(
+          det, detIn, rec, recIn, CtcDecoder(await _loadVocab(keysPath)));
     } catch (_) {
-      // Model/dictionary assets absent or runtime unavailable: caller falls
-      // back to the (empty) text layer, exactly as before OCR existed.
+      // Models/dictionary absent or runtime unavailable: caller falls back to
+      // the (empty) text layer, exactly as before OCR existed.
       return null;
     }
   }
 
-  static Future<List<String>> _loadVocab() async {
-    final raw = await rootBundle.loadString(kOcrKeysAsset);
+  static Future<List<String>> _loadVocab(String path) async {
+    final raw = await File(path).readAsString();
     final keys = raw
         .split('\n')
         .map((l) => l.replaceAll('\r', ''))

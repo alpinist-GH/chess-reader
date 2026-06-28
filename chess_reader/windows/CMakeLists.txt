@@ -114,6 +114,19 @@ install(FILES "${AOT_LIBRARY}" DESTINATION "${INSTALL_BUNDLE_DATA_DIR}"
   CONFIGURATIONS Profile;Release
   COMPONENT Runtime)
 
+# Bundle the OCR model files. They used to ride along as Flutter assets, but
+# mobile now uses the device's native recognizer, so they were removed from the
+# asset bundle to keep them out of the mobile app. Desktop loads them from
+# data/models/ next to the executable (see lib/.../ocr_model_locator.dart).
+set(OCR_MODELS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../assets/models")
+foreach(OCR_MODEL ocr_det.onnx ocr_rec.onnx ocr_keys.txt)
+  if(EXISTS "${OCR_MODELS_DIR}/${OCR_MODEL}")
+    install(FILES "${OCR_MODELS_DIR}/${OCR_MODEL}"
+      DESTINATION "${INSTALL_BUNDLE_DATA_DIR}/models"
+      COMPONENT Runtime)
+  endif()
+endforeach()
+
 # Bundle the Stockfish engine binary when present (it is downloaded by
 # tool/fetch_stockfish.ps1, not committed: ~110 MB). The app looks it up at
 # data/engines/stockfish.exe relative to the executable.

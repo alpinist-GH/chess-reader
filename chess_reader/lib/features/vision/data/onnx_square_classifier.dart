@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:flutter_onnxruntime/flutter_onnxruntime.dart';
 
+import '../../../core/onnx/onnx_session_options.dart';
 import '../domain/board_slicer.dart';
 import '../domain/square_classifier.dart';
 
@@ -58,8 +59,10 @@ class OnnxSquareClassifier {
   static Future<OnnxSquareClassifier?> tryLoad() async {
     try {
       final rt = OnnxRuntime();
-      final seg = await rt.createSessionFromAsset(kArrowSegAsset);
-      final cls = await rt.createSessionFromAsset(kSquareModelAsset);
+      final opts = acceleratedSessionOptions();
+      final seg = await rt.createSessionFromAsset(kArrowSegAsset, options: opts);
+      final cls =
+          await rt.createSessionFromAsset(kSquareModelAsset, options: opts);
       final segIn = seg.inputNames.isNotEmpty ? seg.inputNames.first : 'board';
       final clsIn = cls.inputNames.isNotEmpty ? cls.inputNames.first : 'cells';
       return OnnxSquareClassifier._(seg, segIn, cls, clsIn);

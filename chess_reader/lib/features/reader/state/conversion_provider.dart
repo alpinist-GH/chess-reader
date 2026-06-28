@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/settings/app_settings.dart';
 import '../../ocr/data/native_text_recognizer.dart';
 import '../../ocr/data/onnx_text_recognizer.dart';
 import '../../ocr/domain/text_page_recognizer.dart';
@@ -53,14 +52,14 @@ final ocrDecisionProvider = NotifierProvider.family<OcrDecision, bool?, String>(
 final conversionProvider =
     FutureProvider.family<BookConversion, String>((ref, path) async {
   final recognizer = DiagramRecognizer();
-  // Opt-in on mobile: use the device's native OCR (Apple Vision / ML Kit) if the
-  // user enabled it, otherwise the bundled ONNX pipeline. Both are lazily used —
-  // only invoked when a page's text layer is sparse — so digital PDFs and cache
+  // Mobile uses the device's native OCR (Apple Vision / ML Kit) — faster, more
+  // accurate, and lets us ship without the ~13 MB ONNX OCR models. Desktop uses
+  // the bundled ONNX pipeline (CoreML-accelerated on macOS). Both are lazily
+  // used — only when a page's text layer is sparse — so digital PDFs and cache
   // hits pay nothing for it.
-  final useDeviceOcr =
-      ref.read(settingsProvider).useDeviceOcr && NativeTextRecognizer.isSupported;
-  final TextPageRecognizer ocr =
-      useDeviceOcr ? NativeTextRecognizer() : OcrTextRecognizer();
+  final TextPageRecognizer ocr = NativeTextRecognizer.isSupported
+      ? NativeTextRecognizer()
+      : OcrTextRecognizer();
   ref.onDispose(recognizer.dispose);
   ref.onDispose(ocr.dispose);
 
