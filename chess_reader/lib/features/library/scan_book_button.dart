@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:cunning_document_scanner/cunning_document_scanner.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import '../reader/state/book_providers.dart';
 import 'scan_to_pdf.dart';
@@ -25,6 +26,12 @@ class _ScanBookButtonState extends ConsumerState<ScanBookButton> {
   Future<void> _scan() async {
     setState(() => _busy = true);
     try {
+      // The native scanner throws an opaque "permission not granted" error if
+      // the camera was denied, with no way to recover, so we drive the
+      // permission flow ourselves: request once, and if the user has
+      // permanently denied it, offer to open the OS settings.
+      if (!await _ensureCameraPermission()) return;
+
       // Opens the native scanner (iOS VisionKit / Android ML Kit), which also
       // triggers the OS camera-permission prompt on first use. Returns the
       // captured, cropped page-image paths, or null/empty if the user cancels.
@@ -43,6 +50,49 @@ class _ScanBookButtonState extends ConsumerState<ScanBookButton> {
     } finally {
       if (mounted) setState(() => _busy = false);
     }
+  }
+
+  /// Returns true once the camera is usable. Requests the permission on first
+  /// use; if the user has permanently denied (or restricted) it, prompts them
+  /// to open the OS settings, since iOS/Android will not re-show the system
+  /// dialog after the first denial.
+  Future<bool> _ensureCameraPermission() async {
+    var status = await Permission.camera.status;
+    if (status.isGranted || status.isLimited) return true;
+
+    if (status.isDenied) {
+      status = await Permission.camera.request();
+      if (status.isGranted || status.isLimited) return true;
+    }
+
+    if (mounted && (status.isPermanentlyDenied || status.isRestricted)) {
+      await _showOpenSettingsDialog();
+    }
+    return false;
+  }
+
+  Future<void> _showOpenSettingsDialog() async {
+    final open = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Camera access needed'),
+        content: const Text(
+          'To scan the pages of a printed book, allow camera access for '
+          'ChessBook Reader in Settings.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Not now'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Open Settings'),
+          ),
+        ],
+      ),
+    );
+    if (open ?? false) await openAppSettings();
   }
 
   @override

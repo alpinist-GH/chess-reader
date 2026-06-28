@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.2.0+6
+version: 1.2.1+7
 
 environment:
   sdk: ^3.12.2
@@ -55,6 +55,9 @@ dependencies:
   # Native document scanner (iOS VisionKit / Android ML Kit) for capturing the
   # pages of a printed book; returns cropped, de-skewed page images. Mobile-only.
   cunning_document_scanner: ^1.3.0
+  # Check/request the camera permission before scanning, and route the user to
+  # the OS settings when they've permanently denied it.
+  permission_handler: ^12.0.3
   # Assemble the captured page images into a single PDF that flows through the
   # existing import + OCR/conversion pipeline.
   pdf: ^3.11.1
