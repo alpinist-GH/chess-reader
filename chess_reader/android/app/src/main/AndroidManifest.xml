@@ -1,4 +1,13 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+    <!-- The document-scanner plugin declares the camera as a *required* feature,
+         which would hide the app on the Play Store from camera-less devices.
+         Scanning is optional (you can still open PDFs/EPUBs without it), so we
+         override it to optional to keep the app installable everywhere. -->
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false"
+        tools:replace="android:required" />
     <application
         android:label="ChessBook Reader"
         android:name="${applicationName}"
