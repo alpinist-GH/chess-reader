@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/settings/app_settings.dart';
+import '../ocr/data/native_text_recognizer.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -131,6 +132,21 @@ class SettingsScreen extends ConsumerWidget {
               onChanged: (v) => notifier.setTextScale(v),
             ),
           ),
+          // Native OCR only exists on mobile; desktop always uses ONNX.
+          if (NativeTextRecognizer.isSupported) ...[
+            const Divider(),
+            const _SectionHeader('Scanning (OCR)'),
+            SwitchListTile(
+              title: const Text('Use device OCR'),
+              subtitle: const Text(
+                'Read scanned books with this device’s built-in text '
+                'recognizer instead of the bundled engine. Often faster and '
+                'more accurate. Changes apply to books converted from now on.',
+              ),
+              value: settings.useDeviceOcr,
+              onChanged: notifier.setUseDeviceOcr,
+            ),
+          ],
         ],
       ),
     );

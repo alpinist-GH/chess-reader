@@ -6,7 +6,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:pdfrx/pdfrx.dart';
 
 import '../../../core/async/semaphore.dart';
-import '../../ocr/data/onnx_text_recognizer.dart';
+import '../../ocr/domain/text_page_recognizer.dart';
 import '../../vision/data/diagram_recognizer.dart';
 import 'epub_book.dart';
 
@@ -204,7 +204,7 @@ class CachedBook {
 Future<BookConversion> loadOrConvert(
   String path,
   DiagramRecognizer recognizer, {
-  OcrTextRecognizer? ocr,
+  TextPageRecognizer? ocr,
   void Function(double progress)? onProgress,
 }) async {
   final cached = await _readCache(path);
@@ -242,7 +242,7 @@ const int _conversionConcurrency = 4;
 Future<BookConversion> convertPdf(
   String path,
   DiagramRecognizer recognizer, {
-  OcrTextRecognizer? ocr,
+  TextPageRecognizer? ocr,
   void Function(double progress)? onProgress,
 }) async {
   const scale = 200 / 72; // PDF points (72 dpi) → ~200 dpi raster.

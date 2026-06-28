@@ -43,3 +43,9 @@ kotlin {
 flutter {
     source = "../.."
 }
+
+dependencies {
+    // On-device Latin text recognition for the opt-in "Use device OCR" option.
+    // The bundled model variant keeps OCR working fully offline.
+    implementation("com.google.mlkit:text-recognition:16.0.1")
+}

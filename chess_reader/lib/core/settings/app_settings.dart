@@ -19,6 +19,7 @@ class AppSettings {
     this.boardFraction = 0.4,
     this.themeMode = ThemeMode.system,
     this.boardPlacement = BoardPlacement.auto,
+    this.useDeviceOcr = false,
   });
 
   final PieceSet pieceSet;
@@ -40,6 +41,11 @@ class AppSettings {
   /// How the board pane is arranged relative to the book pane.
   final BoardPlacement boardPlacement;
 
+  /// Use the device's native OCR (Apple Vision / Google ML Kit) instead of the
+  /// bundled ONNX pipeline when reading scanned PDFs. Mobile-only and opt-in;
+  /// ignored on desktop, which always uses ONNX.
+  final bool useDeviceOcr;
+
   ChessboardColorScheme get boardColors =>
       boardThemes[boardThemeName] ?? ChessboardColorScheme.brown;
 
@@ -52,6 +58,7 @@ class AppSettings {
     double? boardFraction,
     ThemeMode? themeMode,
     BoardPlacement? boardPlacement,
+    bool? useDeviceOcr,
   }) {
     return AppSettings(
       pieceSet: pieceSet ?? this.pieceSet,
@@ -62,6 +69,7 @@ class AppSettings {
       boardFraction: boardFraction ?? this.boardFraction,
       themeMode: themeMode ?? this.themeMode,
       boardPlacement: boardPlacement ?? this.boardPlacement,
+      useDeviceOcr: useDeviceOcr ?? this.useDeviceOcr,
     );
   }
 }
@@ -91,6 +99,7 @@ class SettingsNotifier extends Notifier<AppSettings> {
   static const _kBoardFraction = 'boardFraction';
   static const _kThemeMode = 'themeMode';
   static const _kBoardPlacement = 'boardPlacement';
+  static const _kUseDeviceOcr = 'useDeviceOcr';
 
   SharedPreferences get _prefs => ref.read(sharedPrefsProvider);
 
@@ -115,6 +124,7 @@ class SettingsNotifier extends Notifier<AppSettings> {
         (b) => b.name == p.getString(_kBoardPlacement),
         orElse: () => BoardPlacement.auto,
       ),
+      useDeviceOcr: p.getBool(_kUseDeviceOcr) ?? false,
     );
   }
 
@@ -157,6 +167,11 @@ class SettingsNotifier extends Notifier<AppSettings> {
   void setBoardPlacement(BoardPlacement placement) {
     _prefs.setString(_kBoardPlacement, placement.name);
     state = state.copyWith(boardPlacement: placement);
+  }
+
+  void setUseDeviceOcr(bool value) {
+    _prefs.setBool(_kUseDeviceOcr, value);
+    state = state.copyWith(useDeviceOcr: value);
   }
 }
 
