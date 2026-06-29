@@ -1,0 +1,16 @@
+{
+  "_comment": "Ground-truth piece placement (FEN field 1, rank8->rank1) for the real Lasker 'Chess Strategy' diagram crops in tool/real_cells/. Hand-labeled from the board images; used to finetune the 2-channel square classifier on the engraving font. Stars/arrows are annotations -> the underlying square is empty.",
+  "pdf1_p1_b0": "2r5/pp3ppp/3pp3/8/4P3/2N5/PPP2PPP/8",
+  "pdf1_p1_b1": "rnbqkb1r/pp2pp1p/3p1np1/8/3NP3/2N5/PPP2PPP/R1BQKB1R",
+  "pdf2_p1_b0": "8/pp3ppp/4p3/2ppP3/3P4/2P5/PP3PPP/8",
+  "pdf2_p1_b1": "2B5/pp3ppp/4p3/2ppP3/3P4/2P5/PP3PPP/8",
+  "pdf3_p1_b0": "8/pp3ppp/2p5/3p4/3P4/4P3/PP3PPP/8",
+  "pdf4_p1_b0": "8/pp3ppp/4p3/8/3P4/8/PP3PPP/8",
+  "pdf5_p1_b0": "6k1/pp3p1p/4p1pB/8/3P4/1BNQ1N2/PP3PPP/3RR3",
+  "pdf5_p1_b1": "6k1/pp3p1p/4p1p1/4N3/3P4/P1NQ4/1PB2PPP/3RR3",
+  "pdf6_p1_b0": "8/pp3ppp/4p3/2N5/3P4/1Q6/PP3PPP/2R5",
+  "pdf6_p1_b1": "8/pp3ppp/4p3/8/3P4/8/PP3PPP/8",
+  "pdf7_p1_b0": "2r3k1/p2p1ppp/bp2pn2/n1p5/2PP4/2P1P3/P4PPP/6K1",
+  "pdf8_p1_b0": "3q4/pp2ppbp/2n3p1/2p5/3PP3/2P5/P4PPP/8",
+  "pdf9_p1_b0": "r1b2rk1/2q1bppp/p2p1n2/npp1p3/3PP3/2P2N1P/PPB2PP1/RNBQR1K1"
+}

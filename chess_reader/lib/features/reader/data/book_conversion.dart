@@ -174,7 +174,11 @@ class BookConversion {
   //     pieces, so those books' diagram FENs change.
   // v12: move-illustration diagrams (teaching books that tag squares with "x")
   //     are now rejected instead of emitted as a wall of phantom pieces.
-  static const _version = 12;
+  // v13: the 2-channel square classifier was finetuned on real engraving-font
+  //     diagrams (Lasker's "Chess Strategy"), fixing the residual bishop->king
+  //     confusion and the last arrow-induced phantom rooks/dropped pawns, so v12
+  //     caches of old-print books must be recomputed.
+  static const _version = 13;
 
   Map<String, dynamic> toJson() => {
         'v': _version,
