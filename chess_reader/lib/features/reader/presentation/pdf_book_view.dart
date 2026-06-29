@@ -4,6 +4,7 @@ import 'package:pdfrx/pdfrx.dart';
 
 import '../../../core/persistence/library_store.dart';
 import '../../../core/state/game_session.dart';
+import '../data/book_conversion.dart';
 import '../data/page_moves_service.dart';
 import '../state/book_providers.dart';
 import '../state/conversion_provider.dart';
@@ -52,6 +53,39 @@ class _PdfBookViewState extends ConsumerState<PdfBookView> {
           _PageMovesOverlay(page: page, pageSize: pageRect.size),
           _DiagramAnchorsOverlay(
               page: page, pageSize: pageRect.size, path: widget.path),
+        ],
+        // Persistent, draggable page scrollbar on the right edge: shows the
+        // current page and lets you scrub through the book (the original/PDF
+        // view otherwise has no position indicator, unlike the reflowed view).
+        viewerOverlayBuilder: (context, size, handleLinkTap) => [
+          PdfViewerScrollThumb(
+            controller: _controller,
+            orientation: ScrollbarOrientation.right,
+            thumbSize: const Size(44, 36),
+            thumbBuilder: (context, thumbSize, pageNumber, controller) {
+              final scheme = Theme.of(context).colorScheme;
+              return Material(
+                color: scheme.primary,
+                elevation: 2,
+                borderRadius: const BorderRadius.horizontal(
+                    left: Radius.circular(10)),
+                child: SizedBox(
+                  width: thumbSize.width,
+                  height: thumbSize.height,
+                  child: Center(
+                    child: Text(
+                      '${pageNumber ?? ''}',
+                      style: TextStyle(
+                        color: scheme.onPrimary,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
         ],
       ),
     );
@@ -149,11 +183,11 @@ class _DiagramAnchorsOverlay extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final conversion = ref.watch(conversionProvider(path));
-    final diagrams = conversion.maybeWhen(
-      data: (c) => c.diagramsFor(page.pageNumber),
-      orElse: () => const [],
-    );
+    // Read the incremental conversion so diagrams appear as their page finishes
+    // converting in the background (not only when the whole book is done).
+    final conversion = ref.watch(effectiveConversionProvider(path));
+    final diagrams =
+        conversion?.diagramsFor(page.pageNumber) ?? const <ConvertedDiagram>[];
     if (diagrams.isEmpty) return const SizedBox.shrink();
 
     // Raster pixels (200 dpi) → page-widget coordinates.

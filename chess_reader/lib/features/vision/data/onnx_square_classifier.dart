@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:flutter_onnxruntime/flutter_onnxruntime.dart';
 
+import '../../../core/onnx/onnx_asset_loader.dart';
 import '../../../core/onnx/onnx_session_options.dart';
 import '../domain/board_slicer.dart';
 import '../domain/square_classifier.dart';
@@ -78,9 +79,14 @@ class OnnxSquareClassifier {
     try {
       final rt = OnnxRuntime();
       final opts = acceleratedSessionOptions();
-      final seg = await rt.createSessionFromAsset(kArrowSegAsset, options: opts);
-      final cls =
-          await rt.createSessionFromAsset(kSquareModelAsset, options: opts);
+      // NOT rt.createSessionFromAsset: it reuses a stale temp copy of a model
+      // when an update ships new bytes under the same filename (see
+      // createOnnxSessionFromAssetVersioned), which kept loading the old
+      // classifier and misreading retrained diagrams.
+      final seg =
+          await createOnnxSessionFromAssetVersioned(rt, kArrowSegAsset, options: opts);
+      final cls = await createOnnxSessionFromAssetVersioned(rt, kSquareModelAsset,
+          options: opts);
       final segIn = seg.inputNames.isNotEmpty ? seg.inputNames.first : 'board';
       final clsIn = cls.inputNames.isNotEmpty ? cls.inputNames.first : 'cells';
       return OnnxSquareClassifier._(seg, segIn, cls, clsIn);

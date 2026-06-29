@@ -48,6 +48,8 @@ Float32List preprocessSegInput(img.Image inner) {
     img.grayscale(img.Image.from(inner)),
     width: kSegSize,
     height: kSegSize,
+    // Area averaging — see preprocessCell. (Big downscale here too.)
+    interpolation: img.Interpolation.average,
   );
   final out = Float32List(kSegSize * kSegSize);
   var i = 0;
@@ -62,10 +64,18 @@ Float32List preprocessSegInput(img.Image inner) {
 /// This must replicate the training preprocessing exactly
 /// (tool/vision_train/dataset.py): `(gray/255 - 0.5) / 0.5`.
 Float32List preprocessCell(img.Image cell) {
+  // Downsample each ~4×-larger cell with AREA averaging. The classifier is a
+  // tiny (~150k-param) CNN that is sensitive to the downsample method: cells
+  // built with copyResize's default (nearest) or a plain (non-antialiased)
+  // bilinear alias on this 4× reduction and misread engraving-font glyphs
+  // (white queen → black, pawn → bishop, rook colour flips). PIL's antialiased
+  // BILINEAR used to make the training cells behaves like an area filter, which
+  // `Interpolation.average` matches — and which reads these correctly.
   final small = img.copyResize(
     img.grayscale(img.Image.from(cell)),
     width: kCellSize,
     height: kCellSize,
+    interpolation: img.Interpolation.average,
   );
   final out = Float32List(kCellSize * kCellSize);
   var i = 0;

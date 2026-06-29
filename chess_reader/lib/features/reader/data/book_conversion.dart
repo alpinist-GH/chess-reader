@@ -178,7 +178,7 @@ class BookConversion {
   //     diagrams (Lasker's "Chess Strategy"), fixing the residual bishop->king
   //     confusion and the last arrow-induced phantom rooks/dropped pawns, so v12
   //     caches of old-print books must be recomputed.
-  static const _version = 13;
+  static const _version = 15;
 
   Map<String, dynamic> toJson() => {
         'v': _version,
@@ -217,6 +217,7 @@ Future<BookConversion> loadOrConvert(
   DiagramRecognizer recognizer, {
   TextPageRecognizer? ocr,
   void Function(double progress)? onProgress,
+  void Function(BookConversion partial)? onPartial,
 }) async {
   final cached = await _readCache(path);
   if (cached != null) {
@@ -225,7 +226,8 @@ Future<BookConversion> loadOrConvert(
   }
   final conversion = path.toLowerCase().endsWith('.epub')
       ? await convertEpub(path, recognizer, onProgress: onProgress)
-      : await convertPdf(path, recognizer, ocr: ocr, onProgress: onProgress);
+      : await convertPdf(path, recognizer,
+          ocr: ocr, onProgress: onProgress, onPartial: onPartial);
   await _writeCache(path, conversion);
   return conversion;
 }
@@ -255,6 +257,7 @@ Future<BookConversion> convertPdf(
   DiagramRecognizer recognizer, {
   TextPageRecognizer? ocr,
   void Function(double progress)? onProgress,
+  void Function(BookConversion partial)? onPartial,
 }) async {
   const scale = 200 / 72; // PDF points (72 dpi) → ~200 dpi raster.
   final doc = await PdfDocument.openFile(path);
@@ -323,6 +326,19 @@ Future<BookConversion> convertPdf(
             ConvertedPage(index: pageNumber, text: pageText, diagrams: diagrams);
         completed++;
         onProgress?.call(completed / total);
+        // Emit a growing partial so the reader can open early (pages convert
+        // out of order; diagramsFor() looks up by index, so a subset is fine).
+        // Throttle to keep widget rebuilds cheap on long books.
+        if (onPartial != null &&
+            (completed == total || completed % 4 == 0)) {
+          onPartial(BookConversion(
+            title: p.basenameWithoutExtension(path),
+            format: 'pdf',
+            sourcePath: path,
+            ocrAttempted: ocr != null,
+            pages: [for (final pg in results) ?pg],
+          ));
+        }
       }
 
       inFlight.add(recognize().whenComplete(sem.release));

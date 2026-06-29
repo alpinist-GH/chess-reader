@@ -176,6 +176,7 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
     _promptedPath = path; // they've chosen the Reading view; don't re-ask
     ref.read(ocrDecisionProvider(path).notifier).decide(true);
     ref.read(libraryStoreProvider.notifier).setViewMode(path, 'html');
+    ref.read(partialConversionProvider.notifier).clear(path);
     ref.invalidate(conversionCachedProvider(path));
     ref.invalidate(conversionProvider(path));
   }
@@ -590,23 +591,53 @@ class _BookPane extends ConsumerWidget {
   }
 
   Widget _book(BuildContext context, WidgetRef ref, String path) {
-    // Up-front diagram detection gates the reader (progress bar) for both
-    // formats; results are cached so reopening is instant.
-    final conversion = ref.watch(conversionProvider(path));
-    return conversion.when(
-      loading: () => _progress(ref, path),
-      error: (e, _) => Center(child: Text('Could not open book: $e')),
-      data: (c) {
-        if (_isEpub(path)) return EpubBookView(path: path);
-        final mode = ref.watch(libraryStoreProvider).viewMode[path] ?? 'pdf';
-        return mode == 'html'
-            ? PdfHtmlView(path: path, conversion: c)
-            : PdfBookView(path: path);
-      },
+    // Diagram detection runs up front, but the reader opens as soon as
+    // ~20% is converted (kReadableThreshold); the rest converts in the
+    // background and diagrams appear as their page completes. Watch the full
+    // conversion to start it and surface errors; gate display on the effective
+    // (partial-or-full) conversion.
+    final full = ref.watch(conversionProvider(path));
+    if (full.hasError) {
+      return Center(child: Text('Could not open book: ${full.error}'));
+    }
+    final c = ref.watch(effectiveConversionProvider(path));
+    // Open once the book is fully converted, OR the user tapped "Start reading"
+    // after ~20% is ready. Until then show the progress screen (with the button
+    // offered as soon as enough is converted).
+    final startedEarly = ref.watch(readEarlyProvider).contains(path);
+    final ready = full.value != null || (c != null && startedEarly);
+    if (!ready) {
+      return _progress(context, ref, path, canStart: c != null);
+    }
+
+    final Widget view;
+    if (_isEpub(path)) {
+      view = EpubBookView(path: path);
+    } else {
+      final mode = ref.watch(libraryStoreProvider).viewMode[path] ?? 'pdf';
+      view = mode == 'html'
+          ? PdfHtmlView(path: path, conversion: c!)
+          : PdfBookView(path: path);
+    }
+
+    final progress =
+        (ref.watch(conversionProgressProvider)[path] ?? 1).clamp(0.0, 1.0);
+    if (progress >= 1) return view;
+    return Stack(
+      children: [
+        view,
+        Positioned(
+          top: 0,
+          left: 0,
+          right: 0,
+          child: _BackgroundConversionBar(progress: progress),
+        ),
+      ],
     );
   }
 
-  Widget _progress(WidgetRef ref, String path) {
+  Widget _progress(BuildContext context, WidgetRef ref, String path,
+      {bool canStart = false}) {
     final fraction =
         (ref.watch(conversionProgressProvider)[path] ?? 0).clamp(0.0, 1.0);
     final pct = (fraction * 100).toStringAsFixed(0);
@@ -621,6 +652,62 @@ class _BookPane extends ConsumerWidget {
           ),
           const SizedBox(height: 12),
           Text('Detecting chess diagrams… $pct%'),
+          // Once enough of the book is converted, let the reader start now and
+          // finish the rest in the background.
+          if (canStart) ...[
+            const SizedBox(height: 16),
+            FilledButton.icon(
+              onPressed: () =>
+                  ref.read(readEarlyProvider.notifier).start(path),
+              icon: const Icon(Icons.menu_book),
+              label: const Text('Start reading'),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'The rest keeps converting in the background.',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+/// Slim, non-interactive banner shown at the top of the reader while the
+/// remaining pages convert in the background (the book opened at ~20%).
+class _BackgroundConversionBar extends StatelessWidget {
+  const _BackgroundConversionBar({required this.progress});
+
+  final double progress;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return IgnorePointer(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          LinearProgressIndicator(
+            minHeight: 3,
+            value: progress == 0 ? null : progress,
+          ),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Container(
+              margin: const EdgeInsets.all(6),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+              decoration: BoxDecoration(
+                color: scheme.secondaryContainer.withValues(alpha: 0.9),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Text(
+                'Converting diagrams… ${(progress * 100).toStringAsFixed(0)}%',
+                style: TextStyle(
+                    fontSize: 11, color: scheme.onSecondaryContainer),
+              ),
+            ),
+          ),
         ],
       ),
     );

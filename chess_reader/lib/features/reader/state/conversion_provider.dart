@@ -21,6 +21,62 @@ final conversionProgressProvider =
     NotifierProvider<ConversionProgress, Map<String, double>>(
         ConversionProgress.new);
 
+/// Fraction of a book that must be converted before the reader opens it for
+/// reading (the rest keeps converting in the background; diagrams light up as
+/// their page completes).
+const double kReadableThreshold = 0.2;
+
+/// Latest PARTIAL conversion per book path, published while [conversionProvider]
+/// is still running so the reader can open early. Holds a growing subset of the
+/// pages (diagrams appear as each page finishes); replaced by the full
+/// conversion when it completes.
+class PartialConversion extends Notifier<Map<String, BookConversion>> {
+  @override
+  Map<String, BookConversion> build() => const {};
+
+  void set(String path, BookConversion partial) {
+    state = {...state, path: partial};
+  }
+
+  void clear(String path) {
+    if (!state.containsKey(path)) return;
+    state = {...state}..remove(path);
+  }
+}
+
+final partialConversionProvider =
+    NotifierProvider<PartialConversion, Map<String, BookConversion>>(
+        PartialConversion.new);
+
+/// Books the user has chosen to start reading early (before conversion finishes)
+/// by tapping "Start reading" on the progress screen. Once a path is here the
+/// reader opens it and keeps converting the rest in the background.
+class ReadEarly extends Notifier<Set<String>> {
+  @override
+  Set<String> build() => const {};
+
+  void start(String path) {
+    if (state.contains(path)) return;
+    state = {...state, path};
+  }
+}
+
+final readEarlyProvider =
+    NotifierProvider<ReadEarly, Set<String>>(ReadEarly.new);
+
+/// The best conversion available for [path] right now: the full result once
+/// [conversionProvider] completes, otherwise the latest ≥[kReadableThreshold]
+/// partial. Null until enough pages are converted to start reading. The reader,
+/// diagram overlays and move resolution read this so they show data incrementally
+/// during a background conversion. (Export and the OCR-availability check still
+/// read [conversionProvider] directly, as they need the complete book.)
+final effectiveConversionProvider =
+    Provider.family<BookConversion?, String>((ref, path) {
+  final full = ref.watch(conversionProvider(path)).value;
+  if (full != null) return full;
+  return ref.watch(partialConversionProvider)[path];
+});
+
 /// Whether [path] is a scanned/image-only PDF (no usable embedded text), decided
 /// by a fast text-layer sample with no rendering. Drives the open-book prompt
 /// that offers the slow OCR conversion versus keeping the original pages.
@@ -81,6 +137,14 @@ final conversionProvider =
     ocr: runOcr ? ocr : null,
     onProgress: (pr) =>
         ref.read(conversionProgressProvider.notifier).set(path, pr),
+    // Publish partials once enough of the book is ready, so the reader opens at
+    // ~[kReadableThreshold] and keeps converting the rest in the background.
+    onPartial: (partial) {
+      final pr = ref.read(conversionProgressProvider)[path] ?? 0;
+      if (pr >= kReadableThreshold) {
+        ref.read(partialConversionProvider.notifier).set(path, partial);
+      }
+    },
   );
   return conversion;
 });
