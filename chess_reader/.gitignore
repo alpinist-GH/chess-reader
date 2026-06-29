@@ -44,3 +44,6 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 dist/
+
+# Per-cell diagram dumps (dump_board_cells.dart); only the board.png crops are tracked
+tool/real_cells/**/cell_*.png
