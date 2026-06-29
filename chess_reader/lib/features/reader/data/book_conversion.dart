@@ -167,7 +167,12 @@ class BookConversion {
   // v10: OCR recognizer upgraded from PP-OCRv3 to PP-OCRv4 mobile (same size and
   //     dictionary, measurably fewer errors on degraded scans), so v9 OCR
   //     caches must be recomputed.
-  static const _version = 10;
+  // v11: two reader upgrades, so older caches are stale. (1) The
+  //     tokenizer/resolver now also read English descriptive notation
+  //     (P-K4, Kt-QB3, PxQP, Castles). (2) A central-dark-mass emptiness gate
+  //     stops hatched "dark" squares (old print diagrams) being read as phantom
+  //     pieces, so those books' diagram FENs change.
+  static const _version = 11;
 
   Map<String, dynamic> toJson() => {
         'v': _version,
