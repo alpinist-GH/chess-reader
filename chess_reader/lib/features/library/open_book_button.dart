@@ -32,7 +32,7 @@ class OpenBookButton extends ConsumerWidget {
       return FilledButton.icon(
         onPressed: pick,
         icon: const Icon(Icons.folder_open),
-        label: const Text('Open a chess book (PDF)'),
+        label: const Text('Open a chess book (PDF or EPUB)'),
       );
     }
     return IconButton(

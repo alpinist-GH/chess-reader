@@ -93,5 +93,35 @@ void main() {
       // 'd4' was tokenized but is illegal for black after 2.Nf3 — skipped.
       expect(line.unresolved.map((t) => t.san), contains('d4'));
     });
+
+    test('detects English descriptive moves, flagged isDescriptive', () {
+      // Real typography from Lasker "Chess Strategy" p.22: spaced rank,
+      // doubled dash, spaced piece qualifier, and "Castles".
+      final tokens = SanTokenizer.tokenize(
+          '1. P-Q 4 P-Q4 7. B--KKt5 B-K2 8. K Kt-K2 Castles');
+      final descr = tokens.where((t) => t.isDescriptive).map((t) => t.san);
+      expect(descr,
+          containsAll(['P-Q 4', 'P-Q4', 'B--KKt5', 'B-K2', 'K Kt-K2', 'Castles']));
+      // Plain English with hyphens must NOT be read as moves.
+      final prose = SanTokenizer.tokenize(
+          'on the K-side, co-operating, a well-known Q-and-A');
+      expect(prose.where((t) => t.isDescriptive), isEmpty);
+    });
+
+    test('resolves a full descriptive line end to end (p.22)', () {
+      // The book prints this line in both notations; algebraic is the oracle.
+      final tokens = SanTokenizer.tokenize(
+          '1. P-Q 4 P-Q4 2. P-QB4 P-K3 3. Kt-QB3 P-QB4 4. PxQP KPxP '
+          '5. P-K4 QPxP 6. P-Q5 Kt-KB3 7. B--KKt5 B-K2 8. K Kt-K2 Castles');
+      final line = MoveResolver.resolve(tokens);
+      final sans = [
+        for (final m in line.moves) m.positionBefore.makeSan(m.move).$2
+      ];
+      expect(sans, [
+        'd4', 'd5', 'c4', 'e6', 'Nc3', 'c5', 'cxd5', 'exd5',
+        'e4', 'dxe4', 'd5', 'Nf6', 'Bg5', 'Be7', 'Nge2', 'O-O',
+      ]);
+      expect(line.unresolved, isEmpty);
+    });
   });
 }

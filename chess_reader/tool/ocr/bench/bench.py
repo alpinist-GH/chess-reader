@@ -4,7 +4,7 @@ Holds the detector fixed and swaps only the recognizer, so the numbers isolate
 the recognizer's cost/quality:
 
   * SPEED (rec-only) - time each recognizer over a fixed set of real text-line
-        crops taken from the bundled scanned book `assets/sample/My System.pdf`.
+        crops taken from a local scanned chess PDF (see PDF path below).
         This is the variable that changes between models (detection is shared).
   * ACCURACY (CER)   - per-line synthetic crops with known ground truth, clean
         and scan-degraded (blur + noise + JPEG + down/up-scale), small font.
@@ -30,7 +30,9 @@ from PIL import Image, ImageDraw, ImageFont
 from rapidocr_onnxruntime import RapidOCR
 
 REPO = Path(__file__).resolve().parents[3]
-PDF = REPO / "assets" / "sample" / "My System.pdf"
+# A local scanned PDF for OCR benchmarking. Not bundled in the app (the shipped
+# sample is a public-domain EPUB); supply any scanned chess PDF here.
+PDF = REPO.parent / "Chess-tactics-and-combinations-workbook-Todd-bardwick.pdf"
 MODELS = Path(__file__).resolve().parent / "models"
 FONT = r"C:\Windows\Fonts\times.ttf"
 DPI = 200

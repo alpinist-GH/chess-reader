@@ -1,6 +1,7 @@
 import 'package:dartchess/dartchess.dart';
 
 import '../../../core/models/move_token.dart';
+import 'descriptive_notation.dart';
 
 /// A token successfully resolved against the game context: playing [move]
 /// from [positionBefore] yields [positionAfter], which is what the board
@@ -52,6 +53,12 @@ class MoveResolver {
   /// How many resolved moves a remembered branch point stays valid for.
   static const _historyPlies = 60;
 
+  /// Parses a token against [pos], dispatching descriptive notation
+  /// (`P-K4`) to its board-aware resolver and everything else to algebraic SAN.
+  static Move? _parse(Position pos, MoveToken token) => token.isDescriptive
+      ? DescriptiveNotation.toMove(pos, token.san)
+      : pos.parseSan(token.san);
+
   static ResolvedLine resolve(List<MoveToken> tokens, {Position? start}) {
     var position = start ?? Chess.initial;
     final moves = <ResolvedMove>[];
@@ -70,10 +77,10 @@ class MoveResolver {
       Position? base;
 
       // Rung 1: explicit game start.
-      if (n == 1 && white == true && Chess.initial.parseSan(token.san) != null) {
+      if (n == 1 && white == true && _parse(Chess.initial, token) != null) {
         final hintMatches =
             position.fullmoves == 1 && position.turn == Side.white;
-        if (!hintMatches || position.parseSan(token.san) == null) {
+        if (!hintMatches || _parse(position, token) == null) {
           base = Chess.initial;
           seen.clear();
         }
@@ -88,7 +95,7 @@ class MoveResolver {
         if (!hintMatchesHere &&
             remembered != null &&
             moves.length - remembered.$2 <= _historyPlies) {
-          if (remembered.$1.parseSan(token.san) != null) {
+          if (_parse(remembered.$1, token) != null) {
             base = remembered.$1;
           }
         }
@@ -96,10 +103,10 @@ class MoveResolver {
 
       // Rung 3: plain continuation.
       base ??= position;
-      var move = base.parseSan(token.san);
+      var move = _parse(base, token);
       if (move == null && base != position) {
         base = position;
-        move = base.parseSan(token.san);
+        move = _parse(base, token);
       }
 
       if (move == null) {

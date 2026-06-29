@@ -6,10 +6,15 @@ class MoveToken {
     required this.end,
     this.moveNumber,
     this.isWhiteHint,
+    this.isDescriptive = false,
   });
 
   /// Normalized SAN (figurines already mapped to letters), suffixes like
   /// `!?` stripped, e.g. `Nf3`, `exd5`, `O-O`, `e8=Q+`.
+  ///
+  /// When [isDescriptive] is true this instead holds the raw English
+  /// descriptive move (`P-K4`, `Kt-QB3`, `PxQP`, `Castles`), which the resolver
+  /// converts against the live board rather than via [Position.parseSan].
   final String san;
 
   /// Offset range in the ORIGINAL (un-normalized) text, so the UI can place
@@ -25,7 +30,11 @@ class MoveToken {
   /// color cannot be inferred from the text.
   final bool? isWhiteHint;
 
+  /// True when [san] holds an English-descriptive move rather than algebraic SAN.
+  final bool isDescriptive;
+
   @override
   String toString() =>
-      'MoveToken($san @$start-$end, n=$moveNumber, white=$isWhiteHint)';
+      'MoveToken($san @$start-$end, n=$moveNumber, white=$isWhiteHint'
+      '${isDescriptive ? ', descriptive' : ''})';
 }

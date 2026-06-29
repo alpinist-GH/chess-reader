@@ -19,7 +19,9 @@ import numpy as np
 import onnxruntime as ort
 
 ROOT = Path(__file__).resolve().parents[2]
-PDF = ROOT / "assets" / "sample" / "My System.pdf"
+# A local scanned PDF for OCR diagnostics. Not bundled in the app (the shipped
+# sample is a public-domain EPUB); supply any scanned chess PDF here.
+PDF = ROOT.parent / "Chess-tactics-and-combinations-workbook-Todd-bardwick.pdf"
 DET = ROOT / "assets" / "models" / "ocr_det.onnx"
 REC = ROOT / "assets" / "models" / "ocr_rec.onnx"
 KEYS = ROOT / "assets" / "models" / "ocr_keys.txt"
