@@ -172,7 +172,9 @@ class BookConversion {
   //     (P-K4, Kt-QB3, PxQP, Castles). (2) A central-dark-mass emptiness gate
   //     stops hatched "dark" squares (old print diagrams) being read as phantom
   //     pieces, so those books' diagram FENs change.
-  static const _version = 11;
+  // v12: move-illustration diagrams (teaching books that tag squares with "x")
+  //     are now rejected instead of emitted as a wall of phantom pieces.
+  static const _version = 12;
 
   Map<String, dynamic> toJson() => {
         'v': _version,

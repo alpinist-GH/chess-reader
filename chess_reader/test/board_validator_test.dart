@@ -74,6 +74,27 @@ void main() {
     expect(isPlausibleDiagram(List.filled(64, 'N')..[0] = 'K'), isFalse);
   });
 
+  test('rejects a move-illustration diagram (wall of identical "x" marks)', () {
+    // Teaching books mark every square a piece can reach with an "x"; the CNN
+    // reads each as the same phantom piece. Mirrors a real read of the queen
+    // move-illustration in Bobby Fischer Teaches Chess (~18 "kings", one queen).
+    final labels = List.filled(64, '');
+    for (var i = 0; i < 18; i++) {
+      labels[i] = 'K';
+    }
+    labels[36] = 'Q';
+    expect(isPlausibleDiagram(labels), isFalse);
+  });
+
+  test('still accepts a full board of 8 pawns per side', () {
+    // The per-class cap must not reject legitimate pawn counts.
+    expect(
+      isPlausibleDiagram(
+          _labels('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR')),
+      isTrue,
+    );
+  });
+
   test('rejects a board read with low mean confidence', () {
     final labels = _labels('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR');
     expect(
