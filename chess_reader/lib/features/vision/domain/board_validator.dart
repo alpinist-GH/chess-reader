@@ -28,6 +28,15 @@ const int kMinPieces = 4;
 /// (e.g. the template classifier on an unfamiliar font, or a photo/figure).
 const int kMaxPieces = 40;
 
+/// A real position can't hold more than this many of any single piece class
+/// (8 pawns per colour is the natural max; the model's misreads add a little —
+/// real boards top out around 9). Far beyond it means a wall of identical
+/// marks: the move-illustration diagrams in teaching books (e.g. Bobby Fischer
+/// Teaches Chess) tag every reachable square with an "x", which the CNN reads as
+/// a row of identical phantom pieces (~18 "kings"). Those aren't game positions,
+/// so the whole board is dropped rather than emitted full of phantoms.
+const int kMaxSameClass = 12;
+
 /// Below this mean top-class probability the grid is almost certainly not a
 /// board (the model is guessing). Real diagrams score ~0.95. Only applied when
 /// confidences are supplied (the ONNX path); the template classifier reports
@@ -43,10 +52,16 @@ bool isPlausibleDiagram(List<String> labels, {List<double>? confidences}) {
 
   var pieces = 0;
   var kings = 0;
+  final counts = <String, int>{};
   for (final label in labels) {
     if (label.isEmpty) continue;
     pieces++;
     if (label == 'K' || label == 'k') kings++;
+    final n = (counts[label] ?? 0) + 1;
+    counts[label] = n;
+    // A single class repeated far past any legal count: a wall of identical
+    // marks (move-illustration "x"s), not a position.
+    if (n > kMaxSameClass) return false;
   }
 
   if (pieces < kMinPieces || pieces > kMaxPieces) return false;
