@@ -21,9 +21,21 @@ from PIL import Image
 
 from model import CELL, CLASSES
 
-# Mirror onnx_square_classifier.dart: a cell whose normalized-pixel std-dev is
-# below this is forced to empty regardless of the CNN.
+# Mirror onnx_square_classifier.dart: a cell is forced to empty regardless of
+# the CNN if its normalized-pixel std-dev is below _EMPTY_STD, OR its central
+# region has almost no dark ink (_EMPTY_CENTRAL_MASS) — the latter catches
+# hatched "dark" squares that pass the std gate but hold no piece.
 _EMPTY_STD = 0.08
+_EMPTY_CENTRAL_MASS = 0.05
+_DARK_NORM = -0.14  # normalized pixel <= this counts as dark ink (~gray 110)
+
+
+def _central_dark_mass(cell):
+    """Fraction of dark ink in the inner ~56% of a normalized [32,32] cell."""
+    lo = (CELL * 22) // 100
+    hi = CELL - lo
+    cen = cell[lo:hi, lo:hi]
+    return float((cen <= _DARK_NORM).mean())
 
 
 def _preprocess(path):
@@ -63,7 +75,9 @@ def main():
             soft = exp / exp.sum()
             probs.append([float(x) for x in soft])
             std = float(cells[i, 0].std())
-            labels.append("" if std < _EMPTY_STD else CLASSES[int(row.argmax())])
+            empty = std < _EMPTY_STD or \
+                _central_dark_mass(cells[i, 0]) < _EMPTY_CENTRAL_MASS
+            labels.append("" if empty else CLASSES[int(row.argmax())])
         boards.append({"id": name, "labels": labels, "probs": probs})
 
     with open(out_path, "w") as fh:
