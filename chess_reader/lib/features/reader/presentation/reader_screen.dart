@@ -48,11 +48,13 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
   @override
   void initState() {
     super.initState();
-    // First launch: surface the bundled sample as a library tile (once).
+    // First launch: surface the bundled samples as library tiles (once).
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref
-          .read(libraryStoreProvider.notifier)
-          .ensureSampleSeeded(extractSampleBook);
+      ref.read(libraryStoreProvider.notifier).ensureSampleSeeded(
+            () async => [
+              for (final sample in kSampleBooks) await extractSampleBook(sample)
+            ],
+          );
     });
   }
 

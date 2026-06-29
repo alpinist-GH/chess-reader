@@ -1,10 +1,17 @@
-My System — Aron Nimzowitsch.
+Bundled sample books — one of each supported format, both public domain.
 
-Bundled as the app's sample book. This is a PUBLIC DOMAIN edition: the work was
-first published in German ("Mein System", 1925); the classic English translation
-by Philip Hereford was published in 1929 and entered the U.S. public domain on
-1 January 2025 (95 years after publication). Sourced from the Internet Archive.
+- "Chess Strategy - Edward Lasker.pdf"
+  Edward Lasker, "Chess Strategy", 2nd edition (1915). Public domain (published
+  >100 years ago, no copyright notice). A games book in English DESCRIPTIVE
+  notation (P-K4, Kt-QB3, ...) with diagrams — it exercises both diagram
+  detection and the descriptive-notation reader (see descriptive_notation.dart).
+  This free PDF edition adds diagrams (José Garcia) over the original text and
+  was reformatted by Fergus Duniho.
 
-It is included as a free sample so first-time users have a book to open and test
-diagram detection with. If you replace it, keep the asset path referenced in
-pubspec.yaml (assets/sample/) and update this note.
+- "Chess History - Bird.epub"
+  H. E. Bird, "Chess History and Reminiscences" (1893). Public domain. Prose
+  history; Project Gutenberg branding stripped.
+
+If you replace either file, keep the asset paths referenced in pubspec.yaml
+(assets/sample/) and the kSampleBooks list in book_import.dart, and update this
+note.

@@ -107,29 +107,32 @@ class LibraryStore extends Notifier<LibraryState> {
     ref.read(sharedPrefsProvider).setStringList(_kRecent, recent);
   }
 
-  /// On the first launch, drops the bundled sample book into the library so it
-  /// shows as a tile without the user having to find the "Try the sample book"
-  /// action. [materialize] writes the asset to a stable on-disk path and returns
-  /// it (e.g. `extractSampleBook`); it's only invoked when seeding is needed, so
-  /// the asset copy isn't paid on every launch.
+  /// On the first launch, drops the bundled sample books into the library so
+  /// they show as tiles without the user having to find the "Try a sample"
+  /// actions. [materialize] writes each asset to a stable on-disk path and
+  /// returns the paths; it's only invoked when seeding is needed, so the asset
+  /// copies aren't paid on every launch.
   ///
   /// Runs exactly once: a persisted flag means that after this — or after the
-  /// user removes the sample — it never reappears. The path is appended (not
+  /// user removes the samples — they never reappear. Paths are appended (not
   /// prepended) so an upgrading user's existing books stay at the top.
-  Future<void> ensureSampleSeeded(Future<String> Function() materialize) async {
+  Future<void> ensureSampleSeeded(
+      Future<List<String>> Function() materialize) async {
     final prefs = ref.read(sharedPrefsProvider);
     if (prefs.getBool(_kSampleSeeded) ?? false) return;
-    String path;
+    List<String> paths;
     try {
-      path = await materialize();
+      paths = await materialize();
     } catch (_) {
       return; // leave the flag unset so a later launch can retry.
     }
-    if (!state.recentPaths.contains(path)) {
-      final recent = [...state.recentPaths, path].take(_maxRecent).toList();
-      state = state.copyWith(recentPaths: recent);
-      await prefs.setStringList(_kRecent, recent);
+    final recent = [...state.recentPaths];
+    for (final path in paths) {
+      if (!recent.contains(path)) recent.add(path);
     }
+    final trimmed = recent.take(_maxRecent).toList();
+    state = state.copyWith(recentPaths: trimmed);
+    await prefs.setStringList(_kRecent, trimmed);
     await prefs.setBool(_kSampleSeeded, true);
   }
 

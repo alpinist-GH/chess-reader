@@ -35,14 +35,15 @@ class LibraryHome extends ConsumerWidget {
               const OpenBookButton(filled: true),
               const SizedBox(height: 8),
               const ScanBookButton(),
-              TextButton.icon(
-                icon: const Icon(Icons.auto_stories),
-                label: const Text('Try the sample book'),
-                onPressed: () async {
-                  final path = await extractSampleBook();
-                  ref.read(openedBookProvider.notifier).open(path);
-                },
-              ),
+              for (final sample in kSampleBooks)
+                TextButton.icon(
+                  icon: const Icon(Icons.auto_stories),
+                  label: Text(sample.label),
+                  onPressed: () async {
+                    final path = await extractSampleBook(sample);
+                    ref.read(openedBookProvider.notifier).open(path);
+                  },
+                ),
             ],
           ),
         ),

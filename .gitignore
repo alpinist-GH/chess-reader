@@ -5,6 +5,7 @@
 *.tiff
 # Exception: the bundled sample book is public domain (see its SOURCE.txt).
 !chess_reader/assets/sample/*.pdf
+!chess_reader/assets/sample/*.epub
 
 # Large engine binaries — fetched by tool/fetch_stockfish.ps1
 chess_reader/assets/engines/*.exe

@@ -49,17 +49,32 @@ Future<Directory> _booksDir() async {
   return Directory(p.join(support.path, 'books'));
 }
 
-/// The bundled sample book shipped in the app's assets, so first-time users
-/// have something to open without picking a file.
-const _kSampleAsset = 'assets/sample/My System.pdf';
+/// A bundled sample book shipped in the app's assets, so first-time users have
+/// something to open without picking a file. Both public domain: a games book
+/// in descriptive notation as a PDF (with diagrams), and a prose history as an
+/// EPUB — one of each supported format.
+class SampleBook {
+  const SampleBook(this.label, this.asset);
 
-/// Materialises the bundled sample book onto disk (a stable, app-private path)
+  /// Button text, e.g. 'Try a sample PDF'.
+  final String label;
+
+  /// Bundled asset path.
+  final String asset;
+}
+
+const kSampleBooks = [
+  SampleBook('Try a sample PDF', 'assets/sample/Chess Strategy - Edward Lasker.pdf'),
+  SampleBook('Try a sample EPUB', 'assets/sample/Chess History - Bird.epub'),
+];
+
+/// Materialises a bundled sample book onto disk (a stable, app-private path)
 /// and returns it, so it flows through the normal open pipeline like any picked
 /// book. Idempotent: reuses the existing copy when sizes match.
-Future<String> extractSampleBook() async {
+Future<String> extractSampleBook(SampleBook sample) async {
   final dir = Directory(p.join((await _booksDir()).path, 'samples'));
-  final dest = File(p.join(dir.path, p.basename(_kSampleAsset)));
-  final data = await rootBundle.load(_kSampleAsset);
+  final dest = File(p.join(dir.path, p.basename(sample.asset)));
+  final data = await rootBundle.load(sample.asset);
   final bytes =
       data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
   if (await dest.exists() && await dest.length() == bytes.length) {
