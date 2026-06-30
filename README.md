@@ -108,6 +108,27 @@ tool/build_macos.sh
 The `.app`/`.dmg` is unsigned (no paid Apple Developer account needed); on first
 launch right‑click the app → **Open** to bypass Gatekeeper.
 
+## Support
+
+Need help, found a bug, or have a feature request?
+
+- **Report an issue:** [open a GitHub issue](https://github.com/alpinist-GH/chess-reader/issues)
+- **Email:** alpinist@gmail.com
+
+### FAQ
+
+- **What files can I open?** PDF and EPUB chess books — including scanned PDFs
+  and older books that use English descriptive notation (P‑K4, Kt‑QB3, PxP,
+  Castles).
+- **Do I need an internet connection?** No. The app runs fully offline; your
+  books stay on your device. (The optional "Open in Lichess / Chess.com" link is
+  the only feature that uses the web.)
+- **The board diagrams aren't recognised correctly.** Recognition runs on open
+  and is cached. If a book looks wrong, reopen it; if it persists, please open an
+  issue with the book and the page number.
+- **Is it free?** The app includes free sample books; see the in‑app store for
+  details on unlocking unlimited conversions.
+
 ## License
 
 This program is free software, licensed under the **GNU General Public License
