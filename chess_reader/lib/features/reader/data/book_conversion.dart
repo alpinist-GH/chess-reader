@@ -178,7 +178,11 @@ class BookConversion {
   //     diagrams (Lasker's "Chess Strategy"), fixing the residual bishop->king
   //     confusion and the last arrow-induced phantom rooks/dropped pawns, so v12
   //     caches of old-print books must be recomputed.
-  static const _version = 15;
+  // v16: line-wrap hyphens (soft hyphen / Unicode hyphen variants the reader
+  //     font can't render, shown as "tofu" boxes) are now stripped and the
+  //     split word rejoined in the HTML builder, along with other invisible
+  //     format characters, so cached page HTML must be rebuilt.
+  static const _version = 16;
 
   Map<String, dynamic> toJson() => {
         'v': _version,

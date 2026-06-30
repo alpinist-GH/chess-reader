@@ -86,12 +86,30 @@ String _diagramHtml(ConvertedDiagram d) =>
     '<chessdiagram fen="${_escapeAttr(d.fen)}">'
     '<img src="data:image/png;base64,${d.cropPngBase64}"></chessdiagram>';
 
+/// A word the OCR splits across a wrapped line ends in a hyphen — usually a
+/// soft hyphen (U+00AD) or a Unicode hyphen variant (U+2010/U+2011) the reader
+/// font has no glyph for, so it shows as a "tofu" box. Drop the hyphen *and*
+/// the single line break so the word rejoins ("char­\nacter" → "character").
+/// A blank line (paragraph break) is left alone.
+final _lineWrapHyphen = RegExp('[­‐‑]\n(?!\n)');
+
+/// Other invisible / format characters with no glyph in the reader font that
+/// would otherwise render as boxes: stray soft hyphens (mid-line, not at a
+/// wrap), zero-width spaces/joiners, directional marks, word joiner, BOM, and
+/// the Unicode replacement char left over from unmapped glyphs.
+final _invisibleChars =
+    RegExp('[­​-‏⁠﻿�]');
+
 /// Escapes a text run and turns blank lines into paragraph breaks (single
 /// newlines become spaces — PDF lines are wrapped, not semantic). Figurine
 /// glyphs in the prose between moves are normalized to letters for display
 /// (`normalizeFigurines` is prose-safe), so non-standard fonts don't leak
-/// glyph soup into the reading view.
-String _formatText(String s) => _escapeText(normalizeFigurines(s).text)
+/// glyph soup into the reading view. Line-wrap hyphens and stray invisible
+/// characters are cleaned up before paragraph handling.
+String _formatText(String s) => _escapeText(normalizeFigurines(s)
+        .text
+        .replaceAll(_lineWrapHyphen, '')
+        .replaceAll(_invisibleChars, ''))
     .replaceAll(RegExp(r'\n{2,}'), '</p><p>')
     .replaceAll('\n', ' ');
 

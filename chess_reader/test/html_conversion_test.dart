@@ -83,6 +83,30 @@ void main() {
       expect(html.contains('♘'), isFalse);
     });
 
+    test('rejoins words split by a line-wrap hyphen and strips tofu chars', () {
+      // OCR splits "character" across a line with a soft hyphen (U+00AD), and
+      // leaves a stray zero-width space (U+200B) and replacement char (U+FFFD)
+      // elsewhere in the prose — all render as boxes in the reader font.
+      final conversion = BookConversion(
+        title: 'T',
+        format: 'pdf',
+        pages: const [
+          ConvertedPage(
+            index: 1,
+            text: 'a char­\nacter and​ more� prose',
+          ),
+        ],
+      );
+      final html = buildPdfChapters(conversion).single.html;
+
+      // The split word is rejoined with no hyphen and no space.
+      expect(html.contains('character'), isTrue);
+      // No invisible/format characters survive into the HTML.
+      expect(html.contains('­'), isFalse);
+      expect(html.contains('​'), isFalse);
+      expect(html.contains('�'), isFalse);
+    });
+
     test('escapes HTML metacharacters in page text', () {
       final conversion = BookConversion(
         title: 'T',
