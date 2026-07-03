@@ -57,15 +57,36 @@ void main() {
     expect(isPlausibleDiagram(_labels('8/8/8/8/8/8/8/8')), isFalse);
   });
 
-  test('rejects a near-empty grid below the piece floor', () {
-    // A couple of stray misreads on a blank region (3 men) — not a diagram.
-    expect(isPlausibleDiagram(_labels('4k3/8/8/8/8/8/4P3/4K3')), isFalse);
-    expect(isPlausibleDiagram(_labels('4k3/8/8/8/8/8/8/8')), isFalse);
+  test('sparse boards need high confidence (basic-mate teaching diagrams)', () {
+    // K+P vs K — Chess Fundamentals Fig5. Real sparse diagrams read at ~0.95+
+    // mean confidence and must be kept; the same 3 marks on a noise region
+    // read much lower (or come from the template path with no confidences)
+    // and stay rejected.
+    final threeMen = _labels('4k3/8/8/8/8/8/4P3/4K3');
+    expect(isPlausibleDiagram(threeMen), isFalse);
+    expect(
+        isPlausibleDiagram(threeMen, confidences: List.filled(64, 0.7)),
+        isFalse);
+    expect(
+        isPlausibleDiagram(threeMen, confidences: List.filled(64, 0.95)),
+        isTrue);
+    // A lone king is below the absolute floor no matter how confident.
+    expect(
+        isPlausibleDiagram(_labels('4k3/8/8/8/8/8/8/8'),
+            confidences: List.filled(64, 0.99)),
+        isFalse);
   });
 
-  test('rejects a grid with no king', () {
-    expect(isPlausibleDiagram(_labels('rnbq1bnr/pppppppp/8/8/8/8/8/8')),
+  test('king-less boards need high confidence (pawn-structure diagrams)', () {
+    // Chess Fundamentals Fig90: a deliberate king-less pawn skeleton.
+    final pawnSkeleton = _labels('8/ppp2ppp/4p3/3pP3/3P4/8/PPP2PPP/8');
+    expect(isPlausibleDiagram(pawnSkeleton), isFalse);
+    expect(
+        isPlausibleDiagram(pawnSkeleton, confidences: List.filled(64, 0.7)),
         isFalse);
+    expect(
+        isPlausibleDiagram(pawnSkeleton, confidences: List.filled(64, 0.95)),
+        isTrue);
   });
 
   test('rejects a wall of pieces (every square read as a piece)', () {

@@ -15,12 +15,23 @@
 /// king, not a wall of pieces, and (on the ONNX path) decent mean confidence.
 library;
 
-/// Minimum non-empty squares for a grid to count as a populated diagram. After
-/// the per-cell emptiness gate an empty/near-empty board falls well below this;
-/// real printed diagrams have far more (typically 20-32). Kept low enough for
-/// sparse middlegame/endgame positions while still rejecting a handful of stray
-/// misreads on a blank region.
-const int kMinPieces = 4;
+/// Minimum non-empty squares for a grid to count as a populated diagram.
+/// Teaching books print genuinely tiny positions — Capablanca's Chess
+/// Fundamentals opens with three-man basic mates (K+R vs K) and even a
+/// two-man knight-vs-bishop comparison diagram — so the floor only rejects
+/// empty/one-mark grids; [kSparseMinMeanConfidence] guards the sparse range.
+const int kMinPieces = 2;
+
+/// Boards in the sparse/king-less range ([kMinPieces]..3 pieces, or no king)
+/// are accepted only when the classifier read them this confidently. Real
+/// sparse teaching diagrams measure 0.95+ mean top-class probability; noise
+/// regions the locator picked up read far lower. Without confidences (the
+/// template path) such boards stay rejected, as before.
+const double kSparseMinMeanConfidence = 0.85;
+
+/// Piece count below which a board counts as "sparse" and must pass
+/// [kSparseMinMeanConfidence] rather than being taken structurally.
+const int kSparsePieces = 4;
 
 /// A real position has at most 32 men. The square model misreads a few squares
 /// on real diagrams, so we allow generous slack above 32; the cap only rejects
@@ -65,15 +76,22 @@ bool isPlausibleDiagram(List<String> labels, {List<double>? confidences}) {
   }
 
   if (pieces < kMinPieces || pieces > kMaxPieces) return false;
-  // A real diagram shows at least one king; empty/noise regions usually don't.
-  // We deliberately do NOT cap kings per side: the model over-detects kings on
-  // real boards, and dropping those would lose genuine diagrams.
-  if (kings == 0) return false;
 
-  if (confidences != null && confidences.isNotEmpty) {
-    final mean = confidences.reduce((a, b) => a + b) / confidences.length;
-    if (mean < kMinMeanConfidence) return false;
+  final mean = (confidences != null && confidences.isNotEmpty)
+      ? confidences.reduce((a, b) => a + b) / confidences.length
+      : null;
+
+  // Sparse and king-less boards are common in teaching books (basic-mate and
+  // pawn-structure diagrams), so they aren't rejected structurally — but they
+  // are also what a few stray misreads on a noise region look like, so they
+  // must be read with high confidence. We deliberately do NOT cap kings per
+  // side: the model over-detects kings on real boards, and dropping those
+  // would lose genuine diagrams.
+  if (kings == 0 || pieces < kSparsePieces) {
+    if (mean == null || mean < kSparseMinMeanConfidence) return false;
   }
+
+  if (mean != null && mean < kMinMeanConfidence) return false;
 
   return true;
 }

@@ -192,7 +192,11 @@ class BookConversion {
   //     Fundamentals EPUB scans (engraving fonts, bleed-through, faint white
   //     glyphs) and the central-dark-mass emptiness gate removed, so cached
   //     diagram FENs from older versions are stale.
-  static const _version = 18;
+  // v19: plausibility gate accepts sparse/king-less teaching diagrams read at
+  //     high confidence (basic mates, pawn skeletons), and king repair flips
+  //     colour-misread kings / clears adjacent king-bleed cells instead of
+  //     minting phantom officers — dropped and misread diagrams differ.
+  static const _version = 19;
 
   Map<String, dynamic> toJson() => {
         'v': _version,

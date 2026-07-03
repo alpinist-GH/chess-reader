@@ -106,19 +106,50 @@ List<String> repairToLegal(List<String> labels, List<Float32List>? classProbs) {
   return out;
 }
 
-/// Keeps the single highest-confidence [king] cell, demoting the rest. Returns
-/// whether anything changed.
+/// Keeps the single highest-confidence [king] cell and resolves the rest.
+/// Returns whether anything changed.
+///
+/// Two surplus-king patterns dominate on old-print scans and get targeted
+/// fixes instead of a blind next-best demotion (which manufactures a phantom
+/// officer on a square that really holds a king or nothing):
+///  * the *other* side has no king at all — almost always a colour misread
+///    (faint ink turns a white king black or vice versa), so one surplus king
+///    is flipped to the missing colour rather than demoted;
+///  * a surplus king *adjacent* to the kept king — the kept king's ink bled
+///    into the neighbouring cell (castled kings on tight grids do this
+///    constantly), so the cell is really empty and is cleared outright.
 bool _capKings(List<String> out, List<Float32List> probs, String king) {
   final kingIdx = _labelIndex[king]!;
+  final other = king == 'K' ? 'k' : 'K';
+  final otherIdx = _labelIndex[other]!;
   final cells = _cellsLabelled(out, king);
   if (cells.length <= 1) return false;
   _sortByConfidenceAsc(cells, probs, kingIdx);
-  cells.removeLast(); // keep the most-confident king
+  final keep = cells.removeLast(); // the most-confident king stays
+
+  if (_cellsLabelled(out, other).isEmpty) {
+    // Flip the surplus cell that most resembles the missing-colour king.
+    var flip = cells.first;
+    for (final cell in cells) {
+      if (probs[cell][otherIdx] > probs[flip][otherIdx]) flip = cell;
+    }
+    out[flip] = other;
+    cells.remove(flip);
+  }
+
   for (final cell in cells) {
-    _demote(out, probs, cell, _demotable);
+    if (_adjacentCells(cell, keep)) {
+      out[cell] = '';
+    } else {
+      _demote(out, probs, cell, _demotable);
+    }
   }
   return true;
 }
+
+/// Whether two row-major cell indices touch (8-neighbourhood).
+bool _adjacentCells(int a, int b) =>
+    (a ~/ 8 - b ~/ 8).abs() <= 1 && (a % 8 - b % 8).abs() <= 1;
 
 /// Demotes every pawn sitting on the first or last rank (always illegal).
 bool _clearBackRankPawns(List<String> out, List<Float32List> probs) {

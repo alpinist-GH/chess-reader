@@ -178,6 +178,40 @@ void main() {
     expect(out, labels);
   });
 
+  test('two same-colour kings with the other colour missing: one flips', () {
+    // Old-print white kings are routinely misread as black (and vice versa):
+    // the reading has two black kings and no white one. Demoting the weaker
+    // to an officer would both invent a phantom piece and leave White
+    // king-less; flipping its colour repairs both at once.
+    final labels = _labels('k7/8/8/8/8/8/8/6k1');
+    final probs = _probs(labels, conf: {0: 0.9, 62: 0.6});
+    // The g1 "black king" carries some white-king mass — it IS the white king.
+    probs[62][_idx['K']!] = 0.3;
+
+    final out = repairToLegal(labels, probs);
+
+    expect(out[0], 'k', reason: 'the confident black king stays');
+    expect(out[62], 'K', reason: 'the weaker one flips to the missing colour');
+  });
+
+  test('a surplus king adjacent to the kept king is bleed, not a piece', () {
+    // A castled king's ink bleeds into the neighbouring cell on tight old-print
+    // grids, reading as a second adjacent king. That cell is really empty —
+    // demoting to next-best would print a phantom officer there instead.
+    final labels = _labels('4k3/8/8/8/8/8/8/R4KK1');
+    final probs = _probs(
+      labels,
+      conf: {56: 0.95, 61: 0.55, 62: 0.9},
+      nextBest: {61: 'R'}, // next-best would hallucinate a rook on f1
+    );
+
+    final out = repairToLegal(labels, probs);
+
+    expect(out[62], 'K', reason: 'the real castled king is kept');
+    expect(out[61], '', reason: 'the bleed cell is cleared, not demoted');
+    expect(_count(out, 'R'), 1, reason: 'no phantom rook appears');
+  });
+
   test('repaired reading becomes engine-analysable end to end', () {
     // A real sparse endgame with one square (a8) misread as a second white king.
     final labels = _labels('4k3/8/8/8/8/8/4P3/3RK3');
