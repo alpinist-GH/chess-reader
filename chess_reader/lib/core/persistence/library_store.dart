@@ -4,6 +4,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../settings/app_settings.dart';
 
+/// Reading-view modes stored in [LibraryState.viewMode]: the original PDF
+/// pages, or the reflowed HTML reading view.
+const kViewModePdf = 'pdf';
+const kViewModeHtml = 'html';
+
 /// A saved location in a book the user can jump back to.
 class Bookmark {
   const Bookmark({required this.page, required this.label});

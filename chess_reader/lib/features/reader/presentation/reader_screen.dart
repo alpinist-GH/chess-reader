@@ -41,9 +41,11 @@ class ReaderScreen extends ConsumerStatefulWidget {
 
 class _ReaderScreenState extends ConsumerState<ReaderScreen> {
   bool _boardVisibleNarrow = true;
-  String? _promptedPath;
-  String? _noTextWarnedPath;
-  String? _ocrPromptedPath;
+  // One-shot per-book guards (sets, so switching between two books doesn't
+  // re-fire a prompt already answered for either).
+  final _promptedPaths = <String>{};
+  final _noTextWarnedPaths = <String>{};
+  final _ocrPromptedPaths = <String>{};
 
   @override
   void initState() {
@@ -87,8 +89,7 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
   /// Original-pages view and suppresses the later no-text warning, while
   /// "Convert with OCR" pre-selects the Reading view.
   void _maybePromptOcr(String path) {
-    if (_ocrPromptedPath == path) return;
-    _ocrPromptedPath = path;
+    if (!_ocrPromptedPaths.add(path)) return;
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (!mounted) return;
       final runOcr = await showDialog<bool>(
@@ -122,12 +123,13 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
       final decision = runOcr ?? false; // dismissed → keep original
       final library = ref.read(libraryStoreProvider.notifier);
       if (decision) {
-        library.setViewMode(path, 'html'); // they asked for the reading view
-        _promptedPath = path; // don't also ask which view to use
+        // They asked for the reading view; don't also ask which view to use.
+        library.setViewMode(path, kViewModeHtml);
+        _promptedPaths.add(path);
       } else {
-        library.setViewMode(path, 'pdf');
-        _promptedPath = path;
-        _noTextWarnedPath = path; // no OCR → no text; don't nag about it
+        library.setViewMode(path, kViewModePdf);
+        _promptedPaths.add(path);
+        _noTextWarnedPaths.add(path); // no OCR → no text; don't nag about it
       }
       ref.read(ocrDecisionProvider(path).notifier).decide(decision);
     });
@@ -172,10 +174,10 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
     );
     if (confirmed != true || !mounted) return;
     await deleteCachedConversion(path);
-    _noTextWarnedPath = null; // let the warning re-fire if OCR still fails
-    _promptedPath = path; // they've chosen the Reading view; don't re-ask
+    _noTextWarnedPaths.remove(path); // let the warning re-fire if OCR fails
+    _promptedPaths.add(path); // they've chosen the Reading view; don't re-ask
     ref.read(ocrDecisionProvider(path).notifier).decide(true);
-    ref.read(libraryStoreProvider.notifier).setViewMode(path, 'html');
+    ref.read(libraryStoreProvider.notifier).setViewMode(path, kViewModeHtml);
     ref.read(partialConversionProvider.notifier).clear(path);
     ref.invalidate(conversionCachedProvider(path));
     ref.invalidate(conversionProvider(path));
@@ -185,12 +187,11 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
   /// clickable moves and the reading view can't work. Warn once, force Original
   /// pages, and suppress the reading-view prompt.
   void _maybeWarnNoText(String path) {
-    if (_noTextWarnedPath == path) return;
-    _noTextWarnedPath = path;
-    _promptedPath = path; // don't also ask which view to use
+    if (!_noTextWarnedPaths.add(path)) return;
+    _promptedPaths.add(path); // don't also ask which view to use
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (!mounted) return;
-      ref.read(libraryStoreProvider.notifier).setViewMode(path, 'pdf');
+      ref.read(libraryStoreProvider.notifier).setViewMode(path, kViewModePdf);
       await showDialog<void>(
         context: context,
         builder: (context) => AlertDialog(
@@ -218,9 +219,9 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
 
   /// On opening a PDF with no saved preference, ask how to read it.
   void _maybePromptView(String path) {
-    if (_isEpub(path) || _promptedPath == path) return;
+    if (_isEpub(path) || _promptedPaths.contains(path)) return;
     if (ref.read(libraryStoreProvider).viewMode[path] != null) return;
-    _promptedPath = path;
+    _promptedPaths.add(path);
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (!mounted) return;
       final mode = await showDialog<String>(
@@ -236,17 +237,19 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.of(context).pop('pdf'),
+              onPressed: () => Navigator.of(context).pop(kViewModePdf),
               child: const Text('Original pages'),
             ),
             FilledButton(
-              onPressed: () => Navigator.of(context).pop('html'),
+              onPressed: () => Navigator.of(context).pop(kViewModeHtml),
               child: const Text('Reading view'),
             ),
           ],
         ),
       );
-      ref.read(libraryStoreProvider.notifier).setViewMode(path, mode ?? 'pdf');
+      ref
+          .read(libraryStoreProvider.notifier)
+          .setViewMode(path, mode ?? kViewModePdf);
     });
   }
 
@@ -514,18 +517,18 @@ class _ViewToggle extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final mode = ref.watch(libraryStoreProvider).viewMode[path] ?? 'pdf';
+    final mode = ref.watch(libraryStoreProvider).viewMode[path] ?? kViewModePdf;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4),
       child: SegmentedButton<String>(
         showSelectedIcon: false,
         segments: const [
           ButtonSegment(
-              value: 'pdf',
+              value: kViewModePdf,
               icon: Icon(Icons.picture_as_pdf_outlined),
               tooltip: 'Original pages'),
           ButtonSegment(
-              value: 'html',
+              value: kViewModeHtml,
               icon: Icon(Icons.article_outlined),
               tooltip: 'Reading view'),
         ],
@@ -614,8 +617,9 @@ class _BookPane extends ConsumerWidget {
     if (_isEpub(path)) {
       view = EpubBookView(path: path);
     } else {
-      final mode = ref.watch(libraryStoreProvider).viewMode[path] ?? 'pdf';
-      view = mode == 'html'
+      final mode =
+          ref.watch(libraryStoreProvider).viewMode[path] ?? kViewModePdf;
+      view = mode == kViewModeHtml
           ? PdfHtmlView(path: path, conversion: c!)
           : PdfBookView(path: path);
     }
@@ -668,6 +672,13 @@ class _BookPane extends ConsumerWidget {
               style: Theme.of(context).textTheme.bodySmall,
             ),
           ],
+          const SizedBox(height: 16),
+          // Closing the book drops the conversion provider's last listener,
+          // which aborts the running conversion (nothing is cached).
+          TextButton(
+            onPressed: () => ref.read(openedBookProvider.notifier).close(),
+            child: const Text('Cancel'),
+          ),
         ],
       ),
     );

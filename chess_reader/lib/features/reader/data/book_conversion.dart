@@ -184,7 +184,11 @@ class BookConversion {
   //     font can't render, shown as "tofu" boxes) are now stripped and the
   //     split word rejoined in the HTML builder, along with other invisible
   //     format characters, so cached page HTML must be rebuilt.
-  static const _version = 16;
+  // v17: diagram crop PNGs move out of the cache JSON into a sidecar directory
+  //     ('pf' filename replaces the inline base64 'png'). The JSON stays slim
+  //     (page text + geometry), the PNGs avoid the 33% base64 overhead, and
+  //     listing/reading caches no longer decodes megabytes of image data.
+  static const _version = 17;
 
   Map<String, dynamic> toJson() => {
         'v': _version,
@@ -216,14 +220,25 @@ class CachedBook {
   final String format;
 }
 
+/// Thrown when a conversion is abandoned because the user closed the book (or
+/// otherwise cancelled) while it was still running. Nothing is cached.
+class ConversionCancelled implements Exception {
+  const ConversionCancelled();
+  @override
+  String toString() => 'Conversion cancelled';
+}
+
 /// Loads a cached conversion if one exists for [path]'s current contents,
 /// otherwise runs the conversion and caches it. Reports progress in [0,1].
+/// [isCancelled] is polled between pages; when it returns true the conversion
+/// stops (after in-flight pages drain) and throws [ConversionCancelled].
 Future<BookConversion> loadOrConvert(
   String path,
   DiagramRecognizer recognizer, {
   TextPageRecognizer? ocr,
   void Function(double progress)? onProgress,
   void Function(BookConversion partial)? onPartial,
+  bool Function()? isCancelled,
 }) async {
   final cached = await _readCache(path);
   if (cached != null) {
@@ -231,9 +246,13 @@ Future<BookConversion> loadOrConvert(
     return cached;
   }
   final conversion = path.toLowerCase().endsWith('.epub')
-      ? await convertEpub(path, recognizer, onProgress: onProgress)
+      ? await convertEpub(path, recognizer,
+          onProgress: onProgress, isCancelled: isCancelled)
       : await convertPdf(path, recognizer,
-          ocr: ocr, onProgress: onProgress, onPartial: onPartial);
+          ocr: ocr,
+          onProgress: onProgress,
+          onPartial: onPartial,
+          isCancelled: isCancelled);
   await _writeCache(path, conversion);
   return conversion;
 }
@@ -264,9 +283,11 @@ Future<BookConversion> convertPdf(
   TextPageRecognizer? ocr,
   void Function(double progress)? onProgress,
   void Function(BookConversion partial)? onPartial,
+  bool Function()? isCancelled,
 }) async {
   const scale = 200 / 72; // PDF points (72 dpi) → ~200 dpi raster.
   final doc = await PdfDocument.openFile(path);
+  var aborted = false;
   try {
     final total = doc.pages.length;
     final results = List<ConvertedPage?>.filled(total, null);
@@ -277,6 +298,13 @@ Future<BookConversion> convertPdf(
     for (var i = 0; i < total; i++) {
       // Throttle BEFORE rendering so at most N page images are in memory.
       await sem.acquire();
+      // Stop scheduling new pages once cancelled; in-flight pages drain below
+      // so the document isn't disposed under them.
+      if (isCancelled?.call() ?? false) {
+        sem.release();
+        aborted = true;
+        break;
+      }
       final page = doc.pages[i];
       final structured = await page.loadStructuredText();
       final text = structured.fullText;
@@ -350,6 +378,7 @@ Future<BookConversion> convertPdf(
       inFlight.add(recognize().whenComplete(sem.release));
     }
     await Future.wait(inFlight);
+    if (aborted) throw const ConversionCancelled();
     return BookConversion(
       title: p.basenameWithoutExtension(path),
       format: 'pdf',
@@ -370,6 +399,7 @@ Future<BookConversion> convertEpub(
   String path,
   DiagramRecognizer recognizer, {
   void Function(double progress)? onProgress,
+  bool Function()? isCancelled,
 }) async {
   final chapterImages = await epubChapterImages(path);
   final total = chapterImages.length;
@@ -377,9 +407,15 @@ Future<BookConversion> convertEpub(
   final sem = Semaphore(_conversionConcurrency);
   final inFlight = <Future<void>>[];
   var completed = 0;
+  var aborted = false;
 
   for (var c = 0; c < total; c++) {
     await sem.acquire();
+    if (isCancelled?.call() ?? false) {
+      sem.release();
+      aborted = true;
+      break;
+    }
     final index = c;
     final images = chapterImages[c];
 
@@ -408,6 +444,7 @@ Future<BookConversion> convertEpub(
     inFlight.add(recognize().whenComplete(sem.release));
   }
   await Future.wait(inFlight);
+  if (aborted) throw const ConversionCancelled();
   if (total == 0) onProgress?.call(1);
   return BookConversion(
     title: p.basenameWithoutExtension(path),
@@ -532,6 +569,8 @@ Future<void> deleteCachedConversion(String path) async {
   try {
     final file = await _cacheFile(path);
     if (file.existsSync()) file.deleteSync();
+    final pngDir = _pngDirFor(file);
+    if (pngDir.existsSync()) pngDir.deleteSync(recursive: true);
   } catch (_) {
     // Ignore.
   }
@@ -553,17 +592,34 @@ Future<File> _cacheFile(String path) async {
   return File(p.join(cacheDir.path, '$key.json'));
 }
 
-// The cache JSON embeds base64 diagram PNGs and can be many MB, so both the
-// decode on open and the encode on save run off the UI isolate.
+// On disk a conversion is a slim JSON (page text + diagram geometry) plus a
+// sidecar directory of diagram crop PNGs: each diagram's 'png' (base64) field
+// is swapped for a 'pf' filename on write and hydrated back on read. Keeps the
+// JSON small and the images binary. Reads/writes still run off the UI isolate.
+
+/// Sidecar PNG directory for a cache [file] (`<key>.json` → `<key>_png/`).
+Directory _pngDirFor(File file) =>
+    Directory('${file.path.substring(0, file.path.length - '.json'.length)}_png');
 
 Future<BookConversion?> _readCache(String path) async {
   try {
     final file = await _cacheFile(path);
     if (!file.existsSync()) return null;
+    final pngDirPath = _pngDirFor(file).path;
     return await Isolate.run(() {
       final json =
           jsonDecode(file.readAsStringSync()) as Map<String, dynamic>;
       if (json['v'] != BookConversion._version) return null;
+      for (final page in json['pages'] as List) {
+        for (final d in (page as Map<String, dynamic>)['d'] as List) {
+          final diagram = d as Map<String, dynamic>;
+          final pf = diagram.remove('pf') as String?;
+          if (pf == null) continue;
+          // A missing sidecar throws here → outer catch → reconvert.
+          diagram['png'] = base64Encode(
+              File(p.join(pngDirPath, pf)).readAsBytesSync());
+        }
+      }
       return BookConversion.fromJson(json);
     });
   } catch (_) {
@@ -574,8 +630,25 @@ Future<BookConversion?> _readCache(String path) async {
 Future<void> _writeCache(String path, BookConversion conversion) async {
   try {
     final file = await _cacheFile(path);
-    await Isolate.run(
-        () => file.writeAsStringSync(jsonEncode(conversion.toJson())));
+    final pngDirPath = _pngDirFor(file).path;
+    await Isolate.run(() {
+      final json = conversion.toJson();
+      final pngDir = Directory(pngDirPath);
+      if (pngDir.existsSync()) pngDir.deleteSync(recursive: true);
+      pngDir.createSync(recursive: true);
+      for (final page in json['pages'] as List) {
+        final pageMap = page as Map<String, dynamic>;
+        final diagrams = pageMap['d'] as List;
+        for (var j = 0; j < diagrams.length; j++) {
+          final diagram = diagrams[j] as Map<String, dynamic>;
+          final name = 'p${pageMap['i']}_$j.png';
+          File(p.join(pngDirPath, name)).writeAsBytesSync(
+              base64Decode(diagram.remove('png') as String));
+          diagram['pf'] = name;
+        }
+      }
+      file.writeAsStringSync(jsonEncode(json));
+    });
   } catch (_) {
     // Best-effort cache; conversion still returns to the caller.
   }

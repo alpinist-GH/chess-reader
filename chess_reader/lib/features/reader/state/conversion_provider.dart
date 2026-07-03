@@ -71,7 +71,7 @@ final readEarlyProvider =
 /// during a background conversion. (Export and the OCR-availability check still
 /// read [conversionProvider] directly, as they need the complete book.)
 final effectiveConversionProvider =
-    Provider.family<BookConversion?, String>((ref, path) {
+    Provider.autoDispose.family<BookConversion?, String>((ref, path) {
   final full = ref.watch(conversionProvider(path)).value;
   if (full != null) return full;
   return ref.watch(partialConversionProvider)[path];
@@ -104,8 +104,16 @@ final ocrDecisionProvider = NotifierProvider.family<OcrDecision, bool?, String>(
 
 /// Runs (or loads from disk) the whole-book diagram conversion for [path].
 /// The reader awaits this on open and shows a progress bar meanwhile.
-final conversionProvider =
-    FutureProvider.family<BookConversion, String>((ref, path) async {
+///
+/// autoDispose doubles as cancellation: the reader widgets watching this keep
+/// it alive while the book is open; closing the book drops the last listener,
+/// the provider disposes, and the running conversion aborts between pages
+/// (nothing is cached). A completed conversion calls `keepAlive` so reopening
+/// in-session stays instant.
+final conversionProvider = FutureProvider.autoDispose
+    .family<BookConversion, String>((ref, path) async {
+  var cancelled = false;
+  ref.onDispose(() => cancelled = true);
   final recognizer = DiagramRecognizer();
   // OCR uses the OS-native text recognizer on every platform (Apple Vision on
   // iOS/macOS, ML Kit on Android, Windows.Media.Ocr on Windows) — faster, more
@@ -145,6 +153,8 @@ final conversionProvider =
         ref.read(partialConversionProvider.notifier).set(path, partial);
       }
     },
+    isCancelled: () => cancelled,
   );
+  ref.keepAlive();
   return conversion;
 });

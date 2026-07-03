@@ -14,7 +14,7 @@ bool _isEpubPath(String path) => path.toLowerCase().endsWith('.epub');
 /// in reading view): jumps scroll the list instead of paging the PDF viewer.
 bool _htmlList(WidgetRef ref, String path) =>
     _isEpubPath(path) ||
-    ref.read(libraryStoreProvider).viewMode[path] == 'html';
+    ref.read(libraryStoreProvider).viewMode[path] == kViewModeHtml;
 
 /// PDF table of contents, loaded straight from the file so it works in both
 /// the raster and reading views (the raster viewer may not be attached).

@@ -9,9 +9,13 @@ import 'book_html_view.dart';
 /// diagrams are wrapped as `<chessdiagram>`; the reader already awaits the
 /// conversion, so this resolves promptly.
 final epubBookProvider =
-    FutureProvider.family<EpubBook, String>((ref, path) async {
+    FutureProvider.autoDispose.family<EpubBook, String>((ref, path) async {
   final conversion = await ref.watch(conversionProvider(path).future);
-  return loadEpubBook(path, diagrams: conversion);
+  final book = await loadEpubBook(path, diagrams: conversion);
+  // Cache the parsed book (and, via the watch above, the conversion) for the
+  // rest of the session once it has loaded successfully.
+  ref.keepAlive();
+  return book;
 });
 
 /// EPUB reader: chapters as a scrollable list of HTML with tappable
