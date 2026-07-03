@@ -69,27 +69,35 @@ class LibraryStore extends Notifier<LibraryState> {
   LibraryState build() {
     final p = ref.read(sharedPrefsProvider);
     final recent = p.getStringList(_kRecent) ?? const [];
+    // Each stored blob decodes independently and best-effort: one corrupt
+    // value must not throw during provider build and block startup.
     final lastPage = <String, int>{};
     final lastPageRaw = p.getString(_kLastPage);
     if (lastPageRaw != null) {
-      (jsonDecode(lastPageRaw) as Map<String, dynamic>)
-          .forEach((k, v) => lastPage[k] = v as int);
+      try {
+        (jsonDecode(lastPageRaw) as Map<String, dynamic>)
+            .forEach((k, v) => lastPage[k] = v as int);
+      } catch (_) {}
     }
     final bookmarks = <String, List<Bookmark>>{};
     final bmRaw = p.getString(_kBookmarks);
     if (bmRaw != null) {
-      (jsonDecode(bmRaw) as Map<String, dynamic>).forEach((k, v) {
-        bookmarks[k] = [
-          for (final e in v as List)
-            Bookmark.fromJson(e as Map<String, dynamic>)
-        ];
-      });
+      try {
+        (jsonDecode(bmRaw) as Map<String, dynamic>).forEach((k, v) {
+          bookmarks[k] = [
+            for (final e in v as List)
+              Bookmark.fromJson(e as Map<String, dynamic>)
+          ];
+        });
+      } catch (_) {}
     }
     final viewMode = <String, String>{};
     final vmRaw = p.getString(_kViewMode);
     if (vmRaw != null) {
-      (jsonDecode(vmRaw) as Map<String, dynamic>)
-          .forEach((k, v) => viewMode[k] = v as String);
+      try {
+        (jsonDecode(vmRaw) as Map<String, dynamic>)
+            .forEach((k, v) => viewMode[k] = v as String);
+      } catch (_) {}
     }
     return LibraryState(
       recentPaths: recent,
@@ -145,6 +153,9 @@ class LibraryStore extends Notifier<LibraryState> {
   }
 
   void recordPage(String path, int page) {
+    // Called from scroll listeners on every notification; skip the JSON
+    // encode + prefs write when the position hasn't actually changed.
+    if (state.lastPage[path] == page) return;
     final updated = {...state.lastPage, path: page};
     state = state.copyWith(lastPage: updated);
     ref.read(sharedPrefsProvider).setString(_kLastPage, jsonEncode(updated));

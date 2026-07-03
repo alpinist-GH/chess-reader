@@ -349,10 +349,16 @@ class _DiagramTile extends ConsumerWidget {
   }
 }
 
-/// Decodes a `data:` image URI to bytes, skipping SVG (unsupported).
+/// Decodes a `data:` image URI to bytes, skipping SVG (unsupported). Returns
+/// null on malformed base64 — this runs during build on untrusted EPUB
+/// content, so it must not throw.
 Uint8List? _decodeDataImage(String src) {
   if (!src.startsWith('data:') || src.contains('svg')) return null;
   final comma = src.indexOf(',');
   if (comma < 0) return null;
-  return base64Decode(src.substring(comma + 1));
+  try {
+    return base64Decode(src.substring(comma + 1));
+  } on FormatException {
+    return null;
+  }
 }

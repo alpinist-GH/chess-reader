@@ -50,6 +50,32 @@ void main() {
     expect(store.bookmarksFor('book.pdf').single.page, 30);
   });
 
+  test('recordPage with an unchanged page is a no-op', () async {
+    final c = await _container();
+    final store = c.read(libraryStoreProvider.notifier);
+    store.recordPage('book.pdf', 7);
+    final before = c.read(libraryStoreProvider);
+    store.recordPage('book.pdf', 7); // same page: no new state, no write
+    expect(identical(c.read(libraryStoreProvider), before), isTrue);
+  });
+
+  test('corrupt persisted JSON is ignored instead of breaking build', () async {
+    SharedPreferences.setMockInitialValues({
+      'lib.lastPage': 'not json {{{',
+      'lib.bookmarks': '[1,2,3]', // wrong shape
+      'lib.viewMode': '{"a.pdf": 5}', // wrong value type
+    });
+    final prefs = await SharedPreferences.getInstance();
+    final c = ProviderContainer(
+      overrides: [sharedPrefsProvider.overrideWithValue(prefs)],
+    );
+    addTearDown(c.dispose);
+    final state = c.read(libraryStoreProvider); // must not throw
+    expect(state.lastPage, isEmpty);
+    expect(state.bookmarks, isEmpty);
+    expect(state.viewMode, isEmpty);
+  });
+
   test('settings persist piece set, theme, engine and text scale', () async {
     final c = await _container();
     final s = c.read(settingsProvider.notifier);

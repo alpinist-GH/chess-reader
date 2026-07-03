@@ -59,8 +59,12 @@ _Spine _openSpine(String path, Uint8List bytes) {
   }
 
   final container = XmlDocument.parse(readEntry('META-INF/container.xml'));
+  final rootfiles = container.findAllElements('rootfile');
   final opfPath =
-      container.findAllElements('rootfile').first.getAttribute('full-path')!;
+      rootfiles.isEmpty ? null : rootfiles.first.getAttribute('full-path');
+  if (opfPath == null) {
+    throw const FormatException('EPUB container.xml has no rootfile');
+  }
   final opfDir = p.posix.dirname(opfPath);
   final opf = XmlDocument.parse(readEntry(opfPath));
 
@@ -85,9 +89,11 @@ _Spine _openSpine(String path, Uint8List bytes) {
   return _Spine(archive, title, hrefs);
 }
 
-String _entryText(Archive archive, String name) =>
-    utf8.decode(archive.findFile(name)!.content as List<int>,
-        allowMalformed: true);
+String _entryText(Archive archive, String name) {
+  final file = archive.findFile(name);
+  if (file == null) throw FormatException('EPUB entry not found: $name');
+  return utf8.decode(file.content as List<int>, allowMalformed: true);
+}
 
 /// Parses an EPUB into interactive chapters. Games span chapters, so the whole
 /// book is tokenized and resolved as one stream. When [diagrams] is provided

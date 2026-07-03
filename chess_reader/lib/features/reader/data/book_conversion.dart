@@ -1,11 +1,13 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:isolate';
 
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:pdfrx/pdfrx.dart';
 
 import '../../../core/async/semaphore.dart';
+import '../../../core/util/fnv_hash.dart';
 import '../../ocr/domain/text_page_recognizer.dart';
 import '../../vision/data/diagram_recognizer.dart';
 import 'epub_book.dart';
@@ -484,10 +486,20 @@ Future<Directory> _cacheDir() async {
 }
 
 /// Lists every converted book held in the on-disk cache (newest first).
+/// The cache JSONs embed base64 diagram PNGs and can be many MB each, so the
+/// reads and decodes run off the UI isolate.
 Future<List<CachedBook>> listCachedConversions() async {
   try {
-    final dir = await _cacheDir();
-    final files = dir
+    final dirPath = (await _cacheDir()).path;
+    return await Isolate.run(() => _listCachedConversionsSync(dirPath));
+  } catch (_) {
+    return const [];
+  }
+}
+
+List<CachedBook> _listCachedConversionsSync(String dirPath) {
+  try {
+    final files = Directory(dirPath)
         .listSync()
         .whereType<File>()
         .where((f) => f.path.endsWith('.json'))
@@ -533,18 +545,27 @@ Future<File> _cacheFile(String path) async {
   final base = p
       .basenameWithoutExtension(path)
       .replaceAll(RegExp(r'[^A-Za-z0-9_-]'), '_');
+  // Hash the full path so same-named books of equal size/mtime at different
+  // locations can't collide on one cache entry.
+  final pathTag = fnv1aHex(utf8.encode(path));
   final key =
-      '${base}_${stat.size}_${stat.modified.millisecondsSinceEpoch}_${path.length}';
+      '${base}_${stat.size}_${stat.modified.millisecondsSinceEpoch}_$pathTag';
   return File(p.join(cacheDir.path, '$key.json'));
 }
+
+// The cache JSON embeds base64 diagram PNGs and can be many MB, so both the
+// decode on open and the encode on save run off the UI isolate.
 
 Future<BookConversion?> _readCache(String path) async {
   try {
     final file = await _cacheFile(path);
     if (!file.existsSync()) return null;
-    final json = jsonDecode(await file.readAsString()) as Map<String, dynamic>;
-    if (json['v'] != BookConversion._version) return null;
-    return BookConversion.fromJson(json);
+    return await Isolate.run(() {
+      final json =
+          jsonDecode(file.readAsStringSync()) as Map<String, dynamic>;
+      if (json['v'] != BookConversion._version) return null;
+      return BookConversion.fromJson(json);
+    });
   } catch (_) {
     return null; // Corrupt or unreadable cache: just reconvert.
   }
@@ -553,7 +574,8 @@ Future<BookConversion?> _readCache(String path) async {
 Future<void> _writeCache(String path, BookConversion conversion) async {
   try {
     final file = await _cacheFile(path);
-    await file.writeAsString(jsonEncode(conversion.toJson()));
+    await Isolate.run(
+        () => file.writeAsStringSync(jsonEncode(conversion.toJson())));
   } catch (_) {
     // Best-effort cache; conversion still returns to the caller.
   }

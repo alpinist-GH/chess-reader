@@ -72,4 +72,52 @@ void main() {
     expect(ch2.moves.last.positionAfter.fen,
         startsWith('r1bqkb1r/1ppp1ppp/p1n2n2/4p3/B3P3/5N2/PPPP1PPP/RNBQ1RK1'));
   });
+
+  test('spine entry missing from the archive throws FormatException', () async {
+    final path = await _makeBrokenEpub(dropChapter: true);
+    addTearDown(() => File(path).delete());
+    expect(loadEpubBook(path), throwsFormatException);
+  });
+
+  test('container.xml without a rootfile throws FormatException', () async {
+    final path = await _makeBrokenEpub(emptyContainer: true);
+    addTearDown(() => File(path).delete());
+    expect(loadEpubBook(path), throwsFormatException);
+  });
+}
+
+/// A structurally broken EPUB: either the container has no rootfile, or the
+/// spine references a chapter file that isn't in the archive.
+Future<String> _makeBrokenEpub(
+    {bool dropChapter = false, bool emptyContainer = false}) async {
+  final container = emptyContainer
+      ? '<?xml version="1.0"?><container/>'
+      : '''
+<?xml version="1.0"?>
+<container version="1.0" xmlns="urn:oasis:names:tc:opendocument:xmlns:container">
+  <rootfiles>
+    <rootfile full-path="OEBPS/content.opf" media-type="application/oebps-package+xml"/>
+  </rootfiles>
+</container>''';
+  const opf = '''
+<?xml version="1.0"?>
+<package xmlns="http://www.idpf.org/2007/opf" version="2.0" unique-identifier="id">
+  <manifest>
+    <item id="ch1" href="missing.xhtml" media-type="application/xhtml+xml"/>
+  </manifest>
+  <spine><itemref idref="ch1"/></spine>
+</package>''';
+
+  final archive = Archive()
+    ..addFile(ArchiveFile('mimetype', 20, utf8.encode('application/epub+zip')))
+    ..addFile(ArchiveFile(
+        'META-INF/container.xml', container.length, utf8.encode(container)))
+    ..addFile(ArchiveFile('OEBPS/content.opf', opf.length, utf8.encode(opf)));
+  // dropChapter: the spine points at missing.xhtml, which is never added.
+
+  final bytes = ZipEncoder().encode(archive);
+  final file = File('${Directory.systemTemp.path}${Platform.pathSeparator}'
+      'chess_reader_broken_test.epub');
+  await file.writeAsBytes(bytes);
+  return file.path;
 }
