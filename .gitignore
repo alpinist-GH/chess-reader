@@ -32,3 +32,6 @@ chess_reader/tool/vision_train/_*.onnx
 # iOS code-signing private key (never commit)
 cm_cert_key.pem
 cm_cert_key
+
+# App-store listing screenshots (local only)
+store-screenshots/
