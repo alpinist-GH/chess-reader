@@ -53,3 +53,21 @@ $cg = "$env:LOCALAPPDATA\Pub\Cache\hosted\pub.dev\chessground-10.0.3\assets\piec
 #   dart run tool/dump_board_cells.dart <book.pdf> %TEMP%\book_cells 21 22
 .venv\Scripts\python eval_cells.py --model ..\..\assets\models\square_classifier.onnx --cells $env:TEMP\book_cells
 ```
+
+## Old-print EPUB finetune (Chess Strategy / Chess Fundamentals scans)
+
+The two EPUB scans in the repo root broke the shipped model (58% occupied-square
+accuracy: engraving fonts read pawns as R/B and kings as Q; bleed-through and
+mottled hatching add phantoms; very faint white glyphs fell under the old
+central-dark-mass emptiness gate, which is now removed from the app).
+
+- `_eval_epub.py <img_dir> <out_dir>` — app-faithful repro over a directory of
+  diagram images: locate, peel, segment, classify; writes board crops +
+  `results.tsv` (name, FEN). Extract EPUB images with `unzip -j book.epub
+  'OEBPS/*.jpg' -d dir` first.
+- `cls2_epub.py` — loads labeled boards from `tool/epub_boards/`. Lasker labels
+  reuse `lasker_labels.json` (same book as the bundled PDF, diagram numbers map
+  1:1); Capablanca labels are hand-read in `fund_labels.json`.
+- `cls2_epub_finetune.py --assets $cg --out ..\..\assets\models\square_classifier2.onnx`
+  — warm-start finetune on synthetic + previous real sources + EPUB cells, with
+  held-out EPUB boards. Result: holdout 83%→98% cell acc, old sources unchanged.

@@ -1,0 +1,20 @@
+{
+  "_comment": "Ground-truth piece placement (FEN field 1) for hand-labeled board crops from the 'Chess Fundamentals' (Capablanca) EPUB scan, in tool/epub_boards/fund/FigNN.png. Crops are the frame-peeled inner boards produced by the app-faithful repro pipeline. White=outline glyphs, Black=filled; the scan has mottled hatching and faint white glyphs on light squares.",
+  "Fig1": "7k/8/8/8/8/8/8/R6K",
+  "Fig2": "8/8/8/4k3/8/8/8/4K2R",
+  "Fig4": "8/8/8/4k3/8/8/8/4K2Q",
+  "Fig5": "8/8/8/8/4k3/8/3KP3/8",
+  "Fig6": "8/8/5k2/8/5K2/8/4P3/8",
+  "Fig8": "5n2/6p1/3k4/8/3K1RP1/8/8/8",
+  "Fig9": "8/6pp/3k4/8/3K1PPP/8/8/8",
+  "Fig10": "8/p6p/4k3/8/4K3/8/P5PP/8",
+  "Fig26": "8/p5kp/8/1P6/8/1K6/P7/8",
+  "Fig31": "8/8/8/4p1p1/8/5P2/6K1/3k4",
+  "Fig33": "k7/8/1K1N4/7p/7N/8/8/8",
+  "Fig34": "7k/8/8/6K1/8/3B4/7P/8",
+  "Fig36": "8/8/8/N2b4/8/8/8/8",
+  "Fig45": "1k6/1r6/2K5/Q7/8/8/8/8",
+  "Fig47": "8/5rk1/8/5Q1K/8/8/8/8",
+  "Fig81": "8/2R5/1k1r1P2/8/1p6/8/5PKP/8",
+  "Fig90": "8/ppp2ppp/4p3/3pP3/3P4/8/PPP2PPP/8"
+}

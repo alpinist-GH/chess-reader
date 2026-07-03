@@ -188,7 +188,11 @@ class BookConversion {
   //     ('pf' filename replaces the inline base64 'png'). The JSON stays slim
   //     (page text + geometry), the PNGs avoid the 33% base64 overhead, and
   //     listing/reading caches no longer decodes megabytes of image data.
-  static const _version = 17;
+  // v18: square classifier retrained on the Chess Strategy / Chess
+  //     Fundamentals EPUB scans (engraving fonts, bleed-through, faint white
+  //     glyphs) and the central-dark-mass emptiness gate removed, so cached
+  //     diagram FENs from older versions are stale.
+  static const _version = 18;
 
   Map<String, dynamic> toJson() => {
         'v': _version,

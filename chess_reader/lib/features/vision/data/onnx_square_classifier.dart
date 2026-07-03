@@ -25,24 +25,6 @@ const String kSquareModelAsset = 'assets/models/square_classifier2.onnx';
 /// normalized to [-1, 1] by `preprocessCell`).
 const double _emptyStdDev = 0.08;
 
-/// Second emptiness gate, for the std-dev gate's blind spot: "dark" squares
-/// printed as diagonal hatching (old books like Lasker's "Chess Strategy")
-/// rather than a solid fill. Their hatch texture has a high std-dev (≈0.3), so
-/// they sail past [_emptyStdDev] and the CNN reads the texture as a piece —
-/// usually a phantom queen/rook/knight. A real piece always fills the cell
-/// centre with solid ink; hatching does not. So a cell whose centre has almost
-/// no dark mass is forced empty regardless of its overall variance.
-///
-/// Measured on real boards: empty cells (solid or hatched) have ~0 central dark
-/// mass while pieces have ≥0.05 (most ≥0.11), so the threshold sits in a clear
-/// gap and removes phantom pieces without dropping real ones.
-const double _emptyCentralMass = 0.05;
-
-/// A normalized pixel at or below this counts as "dark" ink for the central-mass
-/// gate. ≈ grayscale 110 under `preprocessCell`'s (g/255 - 0.5) / 0.5 mapping —
-/// dark enough to catch solid piece strokes but not light hatch lines.
-const double _darkNorm = -0.14;
-
 /// A classified board: 64 FEN labels (row-major) plus, per cell, the model's
 /// top-class probability — used to reject non-board regions read with low
 /// confidence (see `isPlausibleDiagram`).
@@ -158,8 +140,12 @@ class OnnxSquareClassifier {
         classProbs.add(probs);
 
         final start = cell * cellLen;
-        final empty = _cellStdDev(cells64, start, cellLen) < _emptyStdDev ||
-            _centralDarkMass(cells64, start) < _emptyCentralMass;
+        // Only the low-contrast gate forces empty. The old central-dark-mass
+        // gate also swallowed faintly printed white pieces (their ink can be
+        // lighter than the gate's dark threshold entirely); since the model is
+        // trained on real hatched/bled-through empty cells it distinguishes
+        // hatching from pieces on its own.
+        final empty = _cellStdDev(cells64, start, cellLen) < _emptyStdDev;
         labels.add(empty ? '' : kModelClasses[best]);
         confidences.add(invSum); // softmax of the winning class
       }
@@ -188,23 +174,6 @@ class OnnxSquareClassifier {
     } finally {
       await input.dispose();
     }
-  }
-
-  /// Fraction of dark ink in the central region (≈ inner 56%) of one cell.
-  /// Pieces fill the centre with solid ink; hatched empty squares barely touch
-  /// it. Used as a second emptiness gate (see [_emptyCentralMass]).
-  static double _centralDarkMass(Float32List cells64, int start) {
-    const lo = (kCellSize * 22) ~/ 100; // 7 for 32px
-    const hi = kCellSize - lo; // exclusive upper bound
-    var dark = 0, total = 0;
-    for (var y = lo; y < hi; y++) {
-      final row = start + y * kCellSize;
-      for (var x = lo; x < hi; x++) {
-        if (cells64[row + x] <= _darkNorm) dark++;
-        total++;
-      }
-    }
-    return total == 0 ? 0 : dark / total;
   }
 
   /// Standard deviation of one cell's normalized pixels in [cells64].
