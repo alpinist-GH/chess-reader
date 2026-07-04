@@ -157,6 +157,8 @@ class RealCellsDataset(Dataset):
         counts = [0] * len(CLASSES)
         for bi, (_, _, _, labels) in enumerate(self.boards):
             for ci, lab in enumerate(labels):
+                if lab is None:
+                    continue  # excluded cell (ambiguous consensus pseudo-label)
                 k = CLASSES.index(lab)
                 self.pool.append((bi, ci, k))
                 counts[k] += 1

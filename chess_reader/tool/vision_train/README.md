@@ -71,3 +71,16 @@ central-dark-mass emptiness gate, which is now removed from the app).
 - `cls2_epub_finetune.py --assets $cg --out ..\..\assets\models\square_classifier2.onnx`
   — warm-start finetune on synthetic + previous real sources + EPUB cells, with
   held-out EPUB boards. Result: holdout 83%→98% cell acc, old sources unchanged.
+- `cls2_consensus.py --imgs <epub jpg dir>` — corpus-wide pseudo-labels for the
+  Chess Strategy book by cross-checking the EPUB scan against the sample-PDF
+  rendering (`tool/lasker_diagrams`): agreeing cells become labels, paired
+  adjacent disagreements (glyph-straddle shifts) are excluded, and unpaired
+  "PDF empty / EPUB piece" cells are labeled empty (reverse-page bleed-through
+  phantoms — the dominant user-visible error). Writes `lasker_consensus.json`
+  (committed). Pass the same dir to `cls2_epub_finetune.py --consensus-imgs`
+  to train with it. Result: corpus structural plausibility (after repair)
+  146→156/167 on the Lasker EPUB and 109→132/148 on Chess Fundamentals, with
+  hand-labeled holdout up 97.9→98.4% and old sources up slightly.
+  Do NOT hand-relabel individual cells from crop images: this book's print
+  places some glyphs visibly off their logical square, and the end-to-end
+  pipeline is self-consistently right where isolated cells look wrong.

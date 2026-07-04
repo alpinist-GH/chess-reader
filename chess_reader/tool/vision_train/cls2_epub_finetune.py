@@ -21,6 +21,7 @@ import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader, Dataset
 
+from cls2_consensus import load_consensus_boards
 from cls2_dataset import Square2Dataset
 from cls2_epub import split_epub_boards
 from cls2_lasker import load_lasker_boards
@@ -92,6 +93,10 @@ def main():
     ap.add_argument("--batch", type=int, default=256)
     ap.add_argument("--train-size", type=int, default=40000)
     ap.add_argument("--lr", type=float, default=3e-4)
+    ap.add_argument("--consensus-imgs", default=None,
+                    help="dir of Chess-Strategy EPUB diagram jpgs; enables the "
+                         "corpus-wide consensus pseudo-labels "
+                         "(lasker_consensus.json)")
     args = ap.parse_args()
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -105,8 +110,15 @@ def main():
     synth = Square2Dataset(args.assets, length=200000, seed=1)
     old_ds = RealCellsDataset(length=200000, seed=2, boards=old_real)
     epub_ds = RealCellsDataset(length=200000, seed=3, boards=epub_train)
-    train = MixedDataset([synth, old_ds, epub_ds], [0.5, 0.15, 0.35],
-                         args.train_size, seed=5)
+    sources, weights = [synth, old_ds, epub_ds], [0.5, 0.15, 0.35]
+    if args.consensus_imgs:
+        cons = load_consensus_boards(args.consensus_imgs)
+        print(f"consensus boards: {len(cons)}")
+        cons_ds = RealCellsDataset(length=200000, seed=4, boards=cons)
+        # Trimmed mostly from synth: the consensus cells are the same book the
+        # hand-labeled epub cells come from, so real-cell balance stays similar.
+        sources, weights = [synth, old_ds, epub_ds, cons_ds],             [0.42, 0.13, 0.28, 0.17]
+    train = MixedDataset(sources, weights, args.train_size, seed=5)
     workers = min(8, os.cpu_count() or 1)
     trdl = DataLoader(train, batch_size=args.batch, shuffle=True,
                       num_workers=workers, persistent_workers=workers > 0)

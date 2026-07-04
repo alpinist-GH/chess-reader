@@ -196,7 +196,11 @@ class BookConversion {
   //     high confidence (basic mates, pawn skeletons), and king repair flips
   //     colour-misread kings / clears adjacent king-bleed cells instead of
   //     minting phantom officers — dropped and misread diagrams differ.
-  static const _version = 19;
+  // v20: square classifier finetuned on corpus-wide consensus pseudo-labels
+  //     (EPUB scan cross-checked against the sample-PDF rendering of the same
+  //     book), mainly removing bleed-through phantom pieces, so cached diagram
+  //     FENs change again.
+  static const _version = 20;
 
   Map<String, dynamic> toJson() => {
         'v': _version,
