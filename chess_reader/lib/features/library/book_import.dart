@@ -50,13 +50,13 @@ Future<Directory> _booksDir() async {
 }
 
 /// A bundled sample book shipped in the app's assets, so first-time users have
-/// something to open without picking a file. Both public domain: a games book
-/// in descriptive notation as a PDF (with diagrams), and a prose history as an
-/// EPUB — one of each supported format.
+/// something to open without picking a file. Both public domain EPUBs: a games
+/// book in descriptive notation with diagram scans (exercising the vision
+/// pipeline), and a prose history.
 class SampleBook {
   const SampleBook(this.label, this.asset);
 
-  /// Button text, e.g. 'Try a sample PDF'.
+  /// Button text, e.g. 'Try a sample: Chess Strategy'.
   final String label;
 
   /// Bundled asset path.
@@ -64,8 +64,10 @@ class SampleBook {
 }
 
 const kSampleBooks = [
-  SampleBook('Try a sample PDF', 'assets/sample/Chess Strategy - Edward Lasker.pdf'),
-  SampleBook('Try a sample EPUB', 'assets/sample/Chess History - Bird.epub'),
+  SampleBook('Try a sample: Chess Strategy',
+      'assets/sample/Chess Strategy - Edward Lasker.epub'),
+  SampleBook('Try a sample: Chess History',
+      'assets/sample/Chess History - Bird.epub'),
 ];
 
 /// Materialises a bundled sample book onto disk (a stable, app-private path)

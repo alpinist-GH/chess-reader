@@ -1,12 +1,15 @@
-Bundled sample books — one of each supported format, both public domain.
+Bundled sample books — both public domain.
 
-- "Chess Strategy - Edward Lasker.pdf"
-  Edward Lasker, "Chess Strategy", 2nd edition (1915). Public domain (published
-  >100 years ago, no copyright notice). A games book in English DESCRIPTIVE
-  notation (P-K4, Kt-QB3, ...) with diagrams — it exercises both diagram
-  detection and the descriptive-notation reader (see descriptive_notation.dart).
-  This free PDF edition adds diagrams (José Garcia) over the original text and
-  was reformatted by Fergus Duniho.
+- "Chess Strategy - Edward Lasker.epub"
+  Edward Lasker, "Chess Strategy", 2nd edition (1915), translated by J. Du
+  Mont. Public domain (published >100 years ago). A games book in English
+  DESCRIPTIVE notation (P-K4, Kt-QB3, ...) with scanned old-print diagrams —
+  it exercises both diagram recognition and the descriptive-notation reader
+  (see descriptive_notation.dart). Project Gutenberg branding stripped
+  (header/footer boilerplate, license chapter, metadata identifiers);
+  diagram scans recompressed to JPEG q55 grayscale (recognition verified
+  unchanged: 158/167 boards byte-identical FENs, corpus plausibility 156/167
+  before and after).
 
 - "Chess History - Bird.epub"
   H. E. Bird, "Chess History and Reminiscences" (1893). Public domain. Prose
