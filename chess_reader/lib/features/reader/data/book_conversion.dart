@@ -239,10 +239,19 @@ class BookConversion {
 /// A converted book on disk: enough to list and reopen it.
 class CachedBook {
   const CachedBook(
-      {required this.path, required this.title, required this.format});
+      {required this.path,
+      required this.title,
+      required this.format,
+      required this.cacheFile});
   final String path;
   final String title;
   final String format;
+
+  /// The actual cache `.json` file on disk. Deletion must target this rather
+  /// than re-deriving the key from [path]: the source book may have been moved,
+  /// deleted, or modified since conversion, in which case the re-derived key
+  /// would not match (or would throw), silently leaving the entry orphaned.
+  final String cacheFile;
 }
 
 /// Thrown when a conversion is abandoned because the user closed the book (or
@@ -584,6 +593,7 @@ List<CachedBook> _listCachedConversionsSync(String dirPath) {
           path: source,
           title: j['title'] as String? ?? p.basenameWithoutExtension(source),
           format: j['format'] as String? ?? 'pdf',
+          cacheFile: f.path,
         ));
       } catch (_) {
         // Skip corrupt entries.
@@ -596,15 +606,34 @@ List<CachedBook> _listCachedConversionsSync(String dirPath) {
 }
 
 /// Deletes the cached conversion for [path] (the source book is untouched).
+/// Re-derives the cache key from the live source file, so it only works while
+/// that source still exists and is unchanged; prefer [deleteCachedConversionFile]
+/// when the cache `.json` path is already known (e.g. from
+/// [listCachedConversions]).
 Future<void> deleteCachedConversion(String path) async {
   try {
     final file = await _cacheFile(path);
-    if (file.existsSync()) file.deleteSync();
-    final pngDir = _pngDirFor(file);
-    if (pngDir.existsSync()) pngDir.deleteSync(recursive: true);
+    _deleteCacheFileSync(file);
   } catch (_) {
     // Ignore.
   }
+}
+
+/// Deletes a specific cache `.json` (and its PNG sidecar) by its own path,
+/// independent of whether the source book still exists. Used to remove orphaned
+/// entries whose source has been moved, deleted, or modified.
+Future<void> deleteCachedConversionFile(String cacheFilePath) async {
+  try {
+    _deleteCacheFileSync(File(cacheFilePath));
+  } catch (_) {
+    // Ignore.
+  }
+}
+
+void _deleteCacheFileSync(File file) {
+  if (file.existsSync()) file.deleteSync();
+  final pngDir = _pngDirFor(file);
+  if (pngDir.existsSync()) pngDir.deleteSync(recursive: true);
 }
 
 // ---- Disk cache ---------------------------------------------------------

@@ -72,7 +72,7 @@ class _ConvertedLibraryScreenState
                   icon: Icons.delete_outline,
                   tooltip: 'Delete saved conversion',
                   onPressed: () async {
-                    await deleteCachedConversion(book.path);
+                    await deleteCachedConversionFile(book.cacheFile);
                     _refresh();
                   },
                 ),

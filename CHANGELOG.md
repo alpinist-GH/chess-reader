@@ -4,6 +4,16 @@ All notable changes to ChessBook Reader are documented here. The project loosely
 follows [Keep a Changelog](https://keepachangelog.com/) and
 [Semantic Versioning](https://semver.org/).
 
+## [1.4.9] — 2026-07-04
+
+### Fixed
+- **Orphaned entries on the Converted-books screen can now be deleted.** A
+  converted book whose source file had been moved, deleted, or modified would
+  linger on the screen but refuse to open (its tile was disabled) or erase (the
+  delete re-derived the cache key from the now-missing source and silently
+  failed). Deletion now targets the actual cache file recorded when the list is
+  built, so the ghost entry clears on the first tap.
+
 ## [1.4.8] — 2026-07-04
 
 ### Added
