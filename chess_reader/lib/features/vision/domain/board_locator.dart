@@ -132,7 +132,47 @@ class ConnectedComponentBoardLocator implements BoardLocator {
           b.top + b.size <= r.top + r.size + r.size ~/ 16);
       if (!nested) result.add(b);
     }
+
+    // Broken-frame fallback: some printed frames (e.g. Chess Fundamentals'
+    // hatched-square diagrams) are drawn as four edges that don't quite join at
+    // the corners, so no single component spans the board and the scan above
+    // finds nothing. When that happens, stitch the board back from its frame
+    // edges — the long thin strips whose bounding boxes, unioned, recover the
+    // square. This runs only when nothing was found, so it can't change the
+    // result for any diagram already located.
+    if (result.isEmpty) {
+      final recovered =
+          _recoverBrokenFrame(minX, maxX, minY, maxY, minSide);
+      if (recovered != null) result.add(recovered);
+    }
     return result;
+  }
+
+  /// Recovers a board whose frame is broken into disconnected edge strips: take
+  /// every component long enough to be a frame edge (at least [minSide] in one
+  /// dimension) and union their bounding boxes. If the union is a large enough
+  /// square, that's the board. Returns null when the strips don't form one.
+  LocatedBoard? _recoverBrokenFrame(Map<int, int> minX, Map<int, int> maxX,
+      Map<int, int> minY, Map<int, int> maxY, double minSide) {
+    var x0 = 1 << 30, y0 = 1 << 30, x1 = -1, y1 = -1;
+    var found = false;
+    for (final label in minX.keys) {
+      final bw = maxX[label]! - minX[label]! + 1;
+      final bh = maxY[label]! - minY[label]! + 1;
+      if (bw < minSide && bh < minSide) continue; // not a frame edge
+      found = true;
+      if (minX[label]! < x0) x0 = minX[label]!;
+      if (minY[label]! < y0) y0 = minY[label]!;
+      if (maxX[label]! > x1) x1 = maxX[label]!;
+      if (maxY[label]! > y1) y1 = maxY[label]!;
+    }
+    if (!found) return null;
+    final bw = x1 - x0 + 1;
+    final bh = y1 - y0 + 1;
+    final size = (bw + bh) ~/ 2;
+    if (size < minSide) return null;
+    if ((bw - bh).abs() / size > maxAspectError) return null;
+    return LocatedBoard(left: x0, top: y0, size: size);
   }
 
   /// Otsu's threshold over the luminance histogram.

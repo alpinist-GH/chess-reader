@@ -115,7 +115,10 @@ class DiagramRecognizer {
       ];
       // Drop empty grids, photos/figures and other non-board regions the
       // locator picked up: only emit confidently-read, populated positions.
-      if (isPlausibleDiagram(wall.labels, confidences: result.confidences)) {
+      final plausible =
+          isPlausibleDiagram(wall.labels, confidences: result.confidences);
+      if (plausible && isReconstructiblePosition(wall.labels)) {
+        // A clean, legal-ish position: rebuild it as an interactive board.
         // Gate on the raw labels (repair must not smuggle noise past the gate),
         // then fix structural illegalities so the FEN is engine-analysable.
         // Repair also corrects castling inference, since a phantom king on
@@ -132,11 +135,13 @@ class DiagramRecognizer {
             for (final m in marks) BoardAnnotation.mark(m),
           ]),
         ));
-      } else if (_isTrainingBoard(wall, arrows)) {
-        // A training diagram we couldn't reconstruct reliably (e.g. the
-        // letter-label pages): keep the printed crop rather than dropping it.
-        // Restricted to boards with training evidence so gate rejections of
-        // photos/noise don't spam the book with junk crops.
+      } else if (plausible || _isTrainingBoard(wall, arrows)) {
+        // A populated board we can't reconstruct as a real position — a
+        // move-illustration teaching diagram (one piece + a fan of "x" marks
+        // the CNN reads as phantom pieces), or a training diagram with arrows /
+        // letter labels. Keep the printed crop as-is instead of rebuilding it
+        // into a nonsensical board (or dropping it). Restricted to plausible or
+        // training-evidenced grids so photos/noise don't spam junk crops.
         out.add(RecognizedDiagram(
           left: b.left,
           top: b.top,

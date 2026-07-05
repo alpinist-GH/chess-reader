@@ -96,6 +96,103 @@ bool isPlausibleDiagram(List<String> labels, {List<double>? confidences}) {
   return true;
 }
 
+/// Most kings of one colour a board may hold and still count as a real,
+/// two-sided position (see [isReconstructiblePosition]). A legal position has
+/// exactly one; the slack absorbs the odd officer-as-king misread. Beyond it a
+/// same-colour cluster is the move-illustration signature (a piece plus a fan of
+/// "x" marks the CNN reads as phantom kings), not a position.
+const int kMaxKingsPerSide = 3;
+
+/// Fewest men each colour must field, on a board *without* a clean king per
+/// side, for it to still be reconstructed rather than shown as a printed crop.
+/// A real position always has material on both sides — even a king-less
+/// pawn-structure diagram has pawns of both colours, and a position with one
+/// misread king still has a full army opposite it. A move-illustration teaching
+/// diagram is lopsided: one real piece plus same-colour phantom marks, so the
+/// opposite colour reads as ~nothing.
+const int kMinSideMen = 4;
+
+/// Largest either colour may be, on a king-misread board that is *small*, for it
+/// to still reconstruct as a sparse real endgame rather than a printed crop.
+/// Basic-mate / pawn endgame diagrams (Chess Fundamentals ch.1) are tiny —
+/// K + a piece or two per side — and the CNN sometimes misreads one king, so
+/// they fail the [kMinSideMen] material floor despite being genuine positions.
+/// They stay balanced and small; a move-illustration teaching diagram instead
+/// piles a fan of same-colour phantom marks onto one side (7+ men), so capping
+/// *both* sides here readmits the real endgames without readmitting the
+/// teaching aids.
+const int kMaxSparseSide = 6;
+
+/// Whether [labels] describe a real, two-sided position worth rebuilding as an
+/// interactive board — as opposed to a move-illustration teaching diagram that
+/// should fall back to its printed crop. Distinct from [isPlausibleDiagram]
+/// (which only asks "is this a populated board region worth showing at all").
+///
+/// Teaching books (e.g. *Bobby Fischer Teaches Chess*) print move-illustration
+/// diagrams: one piece plus an "x" on every square it can reach. The CNN reads
+/// those x's as a scatter of phantom pieces — but always of a *single* colour
+/// (the taught piece's), so the board is wildly one-sided. A real chess position
+/// is never one-sided: both kings are present, or (rarely — a misread king, or a
+/// deliberately king-less pawn skeleton) both colours still field a real army.
+/// So a grid reconstructs when it has a king of each colour (allowing a little
+/// slack for misreads) OR when both colours hold at least [kMinSideMen] men;
+/// otherwise it is shown as printed.
+bool isReconstructiblePosition(List<String> labels) {
+  assert(labels.length == 64);
+  var white = 0, black = 0, whiteKings = 0, blackKings = 0, pawns = 0;
+  for (final label in labels) {
+    if (label.isEmpty) continue;
+    if (label == 'K') {
+      whiteKings++;
+      white++;
+    } else if (label == 'k') {
+      blackKings++;
+      black++;
+    } else if (label == 'P' || label == 'p') {
+      pawns++;
+      if (label == 'P') {
+        white++;
+      } else {
+        black++;
+      }
+    } else if (label == label.toUpperCase()) {
+      white++;
+    } else {
+      black++;
+    }
+  }
+  // A real position always has men of both colours; a one-sided grid (a piece
+  // plus a same-colour x-fan) never does.
+  if (white == 0 || black == 0) return false;
+  // One king per side (no same-colour king wall) is the hallmark of a real
+  // position: keep it.
+  if (whiteKings >= 1 &&
+      whiteKings <= kMaxKingsPerSide &&
+      blackKings >= 1 &&
+      blackKings <= kMaxKingsPerSide) {
+    return true;
+  }
+  // No clean king pair — a king was misread or is absent. Keep it if it still
+  // looks like a real position rather than a one-sided teaching diagram:
+  //  - both colours field a real army (a dense misread board, or a king-less
+  //    pawn-structure skeleton — both colours have many pawns), or
+  //  - the whole board is small and balanced AND still has a king: a sparse
+  //    endgame with one king misread. The king requirement is what keeps a
+  //    small king-less move-illustration (a pawn plus an "x", which reads as two
+  //    lone pawns) from being rebuilt — a real endgame always keeps a king.
+  if (white >= kMinSideMen && black >= kMinSideMen) return true;
+  if (white <= kMaxSparseSide && black <= kMaxSparseSide) {
+    // A small board that keeps a king is a sparse endgame with one king
+    // misread; a small king-less board of officers only (no pawns) is a
+    // material-comparison diagram (e.g. knight vs bishop). Both are real. A
+    // king-less board *with* pawns is a pawn move-illustration (a pawn plus an
+    // "x" that reads as a second pawn) — that stays a printed crop.
+    if (whiteKings + blackKings >= 1) return true;
+    if (pawns == 0) return true;
+  }
+  return false;
+}
+
 /// Minimum squares a K/P confusion partner must hold before it is swept up
 /// with an x-mark wall (see [clearAnnotatedPhantoms]) — a single K or P next
 /// to a wall may be a real piece and is left alone.

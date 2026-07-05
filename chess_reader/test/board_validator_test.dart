@@ -116,6 +116,124 @@ void main() {
     );
   });
 
+  group('isReconstructiblePosition', () {
+    test('accepts a real position with one king per side', () {
+      expect(
+        isReconstructiblePosition(
+            _labels('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR')),
+        isTrue,
+      );
+      // A sparse real endgame (k, P, R, K) still reconstructs.
+      expect(
+          isReconstructiblePosition(_labels('4k3/8/8/8/8/8/4P3/3RK3')), isTrue);
+    });
+
+    test('absorbs a modest officer-as-king misread on a real board', () {
+      // One bishop misread as a king per side: still has a king each side.
+      expect(
+          isReconstructiblePosition(
+              _labels('rnkqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNKQKBNR')),
+          isTrue);
+    });
+
+    test('accepts a real dense position with one king misread away', () {
+      // Chess Fundamentals Example 15: a full middlegame where the CNN loses
+      // the white king (reads it as another officer). A real army on both sides
+      // means it still reconstructs, not falls back to the crop.
+      final labels = _labels('r2q1rk1/pp2ppbp/2np1np1/8/2BNP3/2N5/PPP2PPP/R2Q1RK1');
+      labels[62] = 'B'; // the white king (g1) misread as a bishop → no white K
+      expect(labels.where((l) => l == 'K'), isEmpty);
+      expect(isReconstructiblePosition(labels), isTrue);
+    });
+
+    test('accepts a king-less pawn-structure diagram (both colours present)',
+        () {
+      // Chess Fundamentals Fig90: a deliberate king-less pawn skeleton — real,
+      // must reconstruct.
+      expect(
+          isReconstructiblePosition(
+              _labels('8/ppp2ppp/4p3/3pP3/3P4/8/PPP2PPP/8')),
+          isTrue);
+    });
+
+    test('accepts a small balanced endgame with one king misread', () {
+      // Chess Fundamentals basic-mate / pawn-endgame diagrams are tiny and the
+      // CNN sometimes misreads a king (here White's king reads as a queen), so
+      // they miss the material floor — but they stay small and balanced and keep
+      // the other king, so they still reconstruct.
+      final labels = _labels('8/8/4k3/1p5p/1P2Q2P/8/8/8'); // Fig27 pattern
+      expect(labels.where((l) => l == 'K'), isEmpty); // white king misread
+      expect(labels.where((l) => l == 'k'), hasLength(1));
+      expect(isReconstructiblePosition(labels), isTrue);
+    });
+
+    test('rejects a small king-less two-mark diagram (pawn move illustration)',
+        () {
+      // Bobby Fischer's pawn page reads as two lone pawns with no king — the
+      // same shape as a sparse endgame but without the tell-tale king, so it is
+      // shown as its printed crop, not rebuilt.
+      final labels = List.filled(64, '');
+      labels[43] = 'P';
+      labels[27] = 'p';
+      expect(isReconstructiblePosition(labels), isFalse);
+    });
+
+    test('accepts a king-less officer-only comparison diagram (knight vs bishop)',
+        () {
+      // Chess Fundamentals Fig36: a two-man material-comparison diagram — a
+      // white knight and a black bishop, no kings, no pawns. It is a real
+      // diagram (not an x-mark move illustration), so it reconstructs.
+      final labels = List.filled(64, '');
+      labels[24] = 'N'; // a5
+      labels[27] = 'b'; // d5
+      expect(isReconstructiblePosition(labels), isTrue);
+    });
+
+    group('rejects move-illustration teaching diagrams (→ printed crop)', () {
+      test('King page: a piece + a same-colour x-fan, nothing opposite it', () {
+        // p13 read: a king surrounded by "x"s the CNN reads as white pawns/king.
+        // The board is entirely white — no real opponent — so it is not a game.
+        final labels = List.filled(64, '');
+        labels[27] = 'K';
+        for (final i in [18, 19, 20, 26, 28, 34, 35, 36]) {
+          labels[i] = 'P';
+        }
+        expect(isReconstructiblePosition(labels), isFalse);
+      });
+
+      test('Queen page: a wall of same-colour phantom kings, no opponent', () {
+        // p14 read: ~20 white "kings" from the x-marks, one queen.
+        final labels = List.filled(64, '');
+        for (var i = 0; i < 20; i++) {
+          labels[i] = 'K';
+        }
+        labels[36] = 'Q';
+        expect(isReconstructiblePosition(labels), isFalse);
+      });
+
+      test('Rook page: a one-sided wall of white men', () {
+        final labels = List.filled(64, '');
+        for (var i = 8; i < 21; i++) {
+          labels[i] = 'P'; // 13 white pawns
+        }
+        labels[27] = 'K'; // one white king, no black material
+        expect(isReconstructiblePosition(labels), isFalse);
+      });
+    });
+
+    test('rejects a board with a colour barely present (misread king wall)', () {
+      // A one-sided grid where a couple of x's happened to read black: still not
+      // a two-sided position.
+      final labels = List.filled(64, '');
+      for (var i = 0; i < 15; i++) {
+        labels[i] = 'K'; // white wall
+      }
+      labels[40] = 'p';
+      labels[41] = 'p'; // only two black men
+      expect(isReconstructiblePosition(labels), isFalse);
+    });
+  });
+
   group('clearAnnotatedPhantoms', () {
     test('clears an x-mark wall into cleared squares (Fischer p13 pattern)', () {
       // On the real scans an x-wall reads as a K/P mix (21 kings + 6 pawns on

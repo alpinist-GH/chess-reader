@@ -213,7 +213,27 @@ class BookConversion {
   //     and x-mark walls become ✕-marked squares (both stored in 'ann'); a
   //     training board that still can't be reconstructed is kept with an empty
   //     FEN so the reader shows its crop as printed.
-  static const _version = 21;
+  // v22: move-illustration teaching diagrams (a single piece + a fan of "x"
+  //     marks, e.g. the King/Queen/Rook "can move to any square marked x" pages)
+  //     are shown as their printed crop instead of rebuilt into a nonsensical
+  //     board — isReconstructiblePosition.
+  // v23: that gate is now a material-balance test, not "one king per side": a
+  //     real position has men of both colours, whereas a move-illustration
+  //     diagram is one-sided (one piece + same-colour phantom marks). Fixes real
+  //     positions whose king is misread and king-less pawn-structure diagrams
+  //     (Chess Fundamentals) being wrongly shown as crops.
+  // v24: board locator recovers diagrams whose printed frame is broken at the
+  //     corners (Chess Fundamentals' hatched-square boards, e.g. Example 15 /
+  //     Fig15) by stitching the square back from its disconnected edge strips —
+  //     previously no component spanned the board so it wasn't detected at all.
+  // v25: material gate also reconstructs small, balanced boards that keep a king
+  //     (sparse basic-mate / pawn-endgame diagrams whose one king the CNN
+  //     misreads) — kMaxSparseSide — while still cropping king-less two-mark
+  //     move-illustrations.
+  // v26: also reconstructs a small king-less board of officers only, no pawns
+  //     (a material-comparison diagram, e.g. Chess Fundamentals Fig36 knight vs
+  //     bishop); a king-less board *with* pawns stays a crop (pawn move aid).
+  static const _version = 26;
 
   Map<String, dynamic> toJson() => {
         'v': _version,
