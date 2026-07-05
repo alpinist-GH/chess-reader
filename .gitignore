@@ -1,4 +1,5 @@
 # Copyrighted test books and page images — never commit
+/book/
 *.pdf
 *.epub
 *.tif
