@@ -4,7 +4,7 @@ All notable changes to ChessBook Reader are documented here. The project loosely
 follows [Keep a Changelog](https://keepachangelog.com/) and
 [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
+## [1.4.8] — 2026-07-04
 
 ### Added
 - **Training diagrams are now rendered instead of dropped.** Teaching books
