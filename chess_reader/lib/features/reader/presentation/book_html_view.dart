@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:chessground/chessground.dart';
 import 'package:dartchess/dartchess.dart';
+import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
@@ -12,6 +13,7 @@ import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import '../../../core/persistence/library_store.dart';
 import '../../../core/settings/app_settings.dart';
 import '../../../core/state/game_session.dart';
+import '../../vision/domain/board_annotations.dart';
 import '../data/epub_book.dart';
 import '../state/book_providers.dart';
 import '../state/reader_nav.dart';
@@ -199,7 +201,12 @@ class _ChapterHtmlState extends ConsumerState<ChapterHtml> {
     final children = <Widget>[];
     for (final seg in _segments) {
       if (seg.fen != null) {
-        children.add(_DiagramTile(fen: seg.fen!));
+        if (seg.fen!.isNotEmpty) {
+          children.add(_DiagramTile(fen: seg.fen!, ann: seg.ann));
+        } else if (seg.imgBase64 != null) {
+          // Unreconstructable training diagram: show it as printed.
+          children.add(_FallbackDiagramTile(pngBase64: seg.imgBase64!));
+        }
       } else if (seg.html!.trim().isNotEmpty) {
         children.add(Html(
           data: seg.html,
@@ -225,20 +232,36 @@ class _ChapterHtmlState extends ConsumerState<ChapterHtml> {
   }
 }
 
-/// A prose run (`html`) or an extracted diagram (`fen`); exactly one is set.
+/// A prose run (`html`) or an extracted diagram (`fen`, possibly empty for an
+/// as-printed fallback); exactly one of the two is set.
 class _Segment {
-  const _Segment.html(this.html) : fen = null;
-  const _Segment.diagram(this.fen) : html = null;
+  const _Segment.html(this.html)
+      : fen = null,
+        ann = '',
+        imgBase64 = null;
+  const _Segment.diagram(this.fen, {this.ann = '', this.imgBase64})
+      : html = null;
 
   final String? html;
   final String? fen;
+
+  /// Encoded training annotations (see `decodeAnnotations`); '' when none.
+  final String ann;
+
+  /// The diagram's crop PNG (base64), used only when [fen] is empty — an
+  /// unreconstructable training diagram rendered as printed.
+  final String? imgBase64;
 }
 
 final _diagramRe = RegExp(
-  r'<chessdiagram\b[^>]*?\bfen="([^"]*)"[^>]*>.*?</chessdiagram>',
+  r'<chessdiagram\b([^>]*)>(.*?)</chessdiagram>',
   caseSensitive: false,
   dotAll: true,
 );
+
+final _fenAttrRe = RegExp(r'\bfen="([^"]*)"', caseSensitive: false);
+final _annAttrRe = RegExp(r'\bann="([^"]*)"', caseSensitive: false);
+final _dataPngRe = RegExp('data:image/[^;]+;base64,([^"\']+)');
 
 /// Splits chapter HTML into prose segments and the diagrams embedded in it, so
 /// each diagram can render as a native (reliably tappable) widget.
@@ -249,7 +272,15 @@ List<_Segment> _splitSegments(String html) {
     if (m.start > cursor) {
       segments.add(_Segment.html(html.substring(cursor, m.start)));
     }
-    segments.add(_Segment.diagram(_unescapeAttr(m.group(1) ?? '')));
+    final attrs = m.group(1) ?? '';
+    final body = m.group(2) ?? '';
+    final fen = _unescapeAttr(_fenAttrRe.firstMatch(attrs)?.group(1) ?? '');
+    segments.add(_Segment.diagram(
+      fen,
+      ann: _unescapeAttr(_annAttrRe.firstMatch(attrs)?.group(1) ?? ''),
+      imgBase64:
+          fen.isEmpty ? _dataPngRe.firstMatch(body)?.group(1) : null,
+    ));
     cursor = m.end;
   }
   if (cursor < html.length) {
@@ -265,17 +296,44 @@ String _unescapeAttr(String s) => s
     .replaceAll('&gt;', '>')
     .replaceAll('&amp;', '&');
 
-/// A detected diagram: a chessboard rendered from its FEN, the FEN caption, and
+/// Overlay color for recovered training arrows (lichess-style green).
+const _arrowColor = Color(0xB315781B);
+
+/// Stroke color for ✕-marked squares (the book's printed "x" crosses).
+const _markColor = Color(0xB3C62828);
+
+/// A detected diagram: a chessboard rendered from its FEN — with any recovered
+/// training annotations (arrows, ✕ marks) drawn on top — the FEN caption, and
 /// a tap target that loads the position onto the side board.
 class _DiagramTile extends ConsumerWidget {
-  const _DiagramTile({required this.fen});
+  const _DiagramTile({required this.fen, this.ann = ''});
 
   final String fen;
+
+  /// Encoded training annotations; '' when the diagram has none.
+  final String ann;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final settings = ref.watch(settingsProvider);
+    final annotations = decodeAnnotations(ann);
+    // Cell index (row-major from a8) → dartchess Square (LERF, a1 = 0).
+    Square squareOf(int cell) =>
+        Square((cell % 8) | ((7 - cell ~/ 8) << 3));
+    final arrows = <Shape>{
+      for (final a in annotations)
+        if (a.kind != BoardAnnotationKind.mark && a.from != a.to)
+          Arrow(
+            color: _arrowColor,
+            orig: squareOf(a.from),
+            dest: squareOf(a.to),
+          ),
+    };
+    final marks = [
+      for (final a in annotations)
+        if (a.kind == BoardAnnotationKind.mark) a.from,
+    ];
     final boardSettings = StaticChessboardSettings(
       pieceAssets: settings.pieceSet.assets,
       colorScheme: settings.boardColors,
@@ -308,11 +366,24 @@ class _DiagramTile extends ConsumerWidget {
                 // The static board must not absorb the tap meant for the tile.
                 IgnorePointer(
                   child: LayoutBuilder(
-                    builder: (ctx, c) => StaticChessboard(
-                      size: c.maxWidth,
-                      orientation: Side.white,
-                      fen: fen,
-                      settings: boardSettings,
+                    builder: (ctx, c) => Stack(
+                      children: [
+                        StaticChessboard(
+                          size: c.maxWidth,
+                          orientation: Side.white,
+                          fen: fen,
+                          settings: boardSettings,
+                          shapes: arrows,
+                        ),
+                        // ✕ marks aren't a chessground shape, so they get
+                        // their own paint layer over the board.
+                        if (marks.isNotEmpty)
+                          Positioned.fill(
+                            child: CustomPaint(
+                              painter: _XMarkPainter(marks),
+                            ),
+                          ),
+                      ],
                     ),
                   ),
                 ),
@@ -342,6 +413,74 @@ class _DiagramTile extends ConsumerWidget {
                 ),
               ],
             ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Paints a ✕ over each marked cell, mirroring the printed training crosses.
+/// [marks] hold cell indexes in the pipeline's row-major-from-a8 order, which
+/// with the tiles' fixed white orientation maps straight to screen cells.
+class _XMarkPainter extends CustomPainter {
+  const _XMarkPainter(this.marks);
+
+  final List<int> marks;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final cell = size.width / 8;
+    final paint = Paint()
+      ..color = _markColor
+      ..strokeWidth = (size.width / 90).clamp(2.0, 5.0)
+      ..strokeCap = StrokeCap.round;
+    final arm = cell * 0.55 / 2;
+    for (final m in marks) {
+      final cx = (m % 8 + 0.5) * cell;
+      final cy = (m ~/ 8 + 0.5) * cell;
+      canvas.drawLine(
+          Offset(cx - arm, cy - arm), Offset(cx + arm, cy + arm), paint);
+      canvas.drawLine(
+          Offset(cx - arm, cy + arm), Offset(cx + arm, cy - arm), paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(_XMarkPainter old) => !listEquals(old.marks, marks);
+}
+
+/// A training diagram that couldn't be reconstructed reliably (e.g. the
+/// letter-labelled flight-square pages): shown as printed, with no FEN or
+/// Load affordance.
+class _FallbackDiagramTile extends StatelessWidget {
+  const _FallbackDiagramTile({required this.pngBase64});
+
+  final String pngBase64;
+
+  @override
+  Widget build(BuildContext context) {
+    final bytes = _decodeDataImage('data:image/png;base64,$pngBase64');
+    if (bytes == null) return const SizedBox.shrink();
+    final theme = Theme.of(context);
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 360),
+        child: Card(
+          clipBehavior: Clip.antiAlias,
+          margin: const EdgeInsets.symmetric(vertical: 8),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Image.memory(bytes, fit: BoxFit.contain),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(8, 4, 8, 8),
+                child: Text(
+                  'Diagram (as printed)',
+                  style: theme.textTheme.bodySmall,
+                ),
+              ),
+            ],
           ),
         ),
       ),

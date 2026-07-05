@@ -51,6 +51,45 @@ void main() {
           lessThan(html.indexOf('<chessmove')));
     });
 
+    test('carries diagram annotations into the ann attribute', () {
+      const png =
+          'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==';
+      final conversion = BookConversion(
+        title: 'T',
+        format: 'pdf',
+        pages: [
+          ConvertedPage(
+            index: 1,
+            text: 'training diagram page',
+            diagrams: [
+              ConvertedDiagram(
+                fen: '4k3/8/8/8/4Q3/8/8/4K3 w - - 0 1',
+                annotations: 'Ae4e8;Xd5;Xf5',
+                cropPngBase64: png,
+                left: 0,
+                top: 0,
+                size: 100,
+                anchor: 0,
+              ),
+              // No annotations → no ann attribute at all.
+              ConvertedDiagram(
+                fen: '4k3/8/8/8/8/8/8/4K3 w - - 0 1',
+                cropPngBase64: png,
+                left: 0,
+                top: 200,
+                size: 100,
+                anchor: 5,
+              ),
+            ],
+          ),
+        ],
+      );
+
+      final html = buildPdfChapters(conversion).single.html;
+      expect(html.contains('ann="Ae4e8;Xd5;Xf5"'), isTrue);
+      expect('ann='.allMatches(html).length, 1);
+    });
+
     test('renders figurine moves as standard SAN, not glyph soup', () {
       // Gambit-font extraction: "lt:J" is a knight glyph sequence.
       final conversion = BookConversion(

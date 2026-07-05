@@ -4,6 +4,19 @@ All notable changes to ChessBook Reader are documented here. The project loosely
 follows [Keep a Changelog](https://keepachangelog.com/) and
 [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Added
+- **Training diagrams are now rendered instead of dropped.** Teaching books
+  like *Bobby Fischer Teaches Chess* draw arrows and mark squares with "x" on
+  their diagrams; the reader previously discarded those diagrams entirely. It
+  now rebuilds the position and draws the annotations on top — green arrows
+  (recovered from the arrow segmenter's mask) and red ✕ marks on the x‑ed
+  squares. A training diagram that still can't be read reliably (e.g. the
+  letter‑labelled flight‑square pages) is kept in the reading view as its
+  printed image instead of vanishing. Conversion cache bumped to v21, so books
+  reconvert on first open.
+
 ## [1.4.1] — 2026-06-28
 
 ### Changed

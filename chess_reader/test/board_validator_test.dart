@@ -116,6 +116,73 @@ void main() {
     );
   });
 
+  group('clearAnnotatedPhantoms', () {
+    test('clears an x-mark wall into cleared squares (Fischer p13 pattern)', () {
+      // On the real scans an x-wall reads as a K/P mix (21 kings + 6 pawns on
+      // p13): both classes are cleared, the real queen survives, and the
+      // cleaned board (with real confidences) passes the unchanged gate.
+      final labels = List.filled(64, '');
+      final xSquares = [for (var i = 0; i < 18; i++) i * 3];
+      // The x-squares split between K and P like the real read does.
+      for (final i in xSquares) {
+        labels[i] = i.isEven ? 'K' : 'P';
+      }
+      // More x-squares reading K, pushing K past the cap; P stays below it
+      // and is only swept up as the confusion partner.
+      for (var i = 55; i < 62; i++) {
+        labels[i] = 'K';
+      }
+      labels[35] = 'Q';
+      labels[7] = 'k'; // a real black king, not a wall class
+
+      final wall = clearAnnotatedPhantoms(labels);
+      expect(wall.labels[35], 'Q');
+      expect(wall.labels[7], 'k');
+      expect(wall.labels.where((l) => l == 'K' || l == 'P'), isEmpty,
+          reason: 'the x glyph reads as K or P — both must go');
+      expect(wall.labels.where((l) => l.isNotEmpty).length, 2);
+      expect(isPlausibleDiagram(labels), isFalse);
+      expect(
+          isPlausibleDiagram(wall.labels,
+              confidences: List.filled(64, 0.95)),
+          isTrue);
+    });
+
+    test('is the identity on ordinary boards (no >cap repeats)', () {
+      final labels =
+          _labels('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR');
+      final wall = clearAnnotatedPhantoms(labels);
+      expect(wall.cleared, isEmpty);
+      expect(identical(wall.labels, labels), isTrue);
+    });
+
+    test('a lone K next to a P wall is kept (may be a real king)', () {
+      final labels = List.filled(64, '');
+      for (var i = 0; i < 13; i++) {
+        labels[i * 2] = 'P';
+      }
+      labels[60] = 'K';
+      labels[35] = 'R';
+      final wall = clearAnnotatedPhantoms(labels);
+      expect(wall.labels[60], 'K');
+      expect(wall.labels[35], 'R');
+      expect(wall.cleared.length, 13);
+    });
+
+    test('clears every class past the cap (arrow-phantom rook walls)', () {
+      final labels = List.filled(64, '');
+      for (var i = 0; i < 14; i++) {
+        labels[i] = 'R';
+      }
+      for (var i = 20; i < 36; i++) {
+        labels[i] = 'B';
+      }
+      final wall = clearAnnotatedPhantoms(labels);
+      expect(wall.cleared.length, 30);
+      expect(wall.labels.where((l) => l.isNotEmpty), isEmpty);
+    });
+  });
+
   test('rejects a board read with low mean confidence', () {
     final labels = _labels('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR');
     expect(

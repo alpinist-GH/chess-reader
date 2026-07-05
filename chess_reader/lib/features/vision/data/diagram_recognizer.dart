@@ -1,5 +1,7 @@
 import 'dart:typed_data';
 
+import '../domain/annotation_extractor.dart';
+import '../domain/board_annotations.dart';
 import '../domain/board_repair.dart';
 import '../domain/board_validator.dart';
 import '../domain/fen_assembler.dart';
@@ -15,13 +17,21 @@ class RecognizedDiagram {
     required this.size,
     required this.fen,
     required this.cropPng,
+    this.annotations = '',
   });
 
   final int left;
   final int top;
   final int size;
+
+  /// Empty means "training diagram we could not reconstruct": the reader shows
+  /// [cropPng] as printed instead of a rebuilt board.
   final String fen;
   final Uint8List cropPng;
+
+  /// Training annotations (arrows, marked squares) recovered alongside the
+  /// position, encoded per `encodeAnnotations`; empty when there are none.
+  final String annotations;
 }
 
 /// Finds printed chess diagrams in page rasters (PDF) or encoded images
@@ -85,26 +95,70 @@ class DiagramRecognizer {
     for (final b in boards) {
       final result =
           await _locked(() => classifier.classifyBoard(b.cells, b.segInput));
+      // Training diagrams: a wall of printed "x" marks reads as a runaway class
+      // of phantom pieces — clear those squares into ✕ annotations instead of
+      // letting the same-class cap drop the board. Drawn arrows are recovered
+      // from the segmenter mask so the reader can show them.
+      final wall = clearAnnotatedPhantoms(result.labels);
+      final ex = result.segMask == null
+          ? null
+          : extractAnnotations(result.segMask!);
+      final arrows = ex == null
+          ? const <BoardAnnotation>[]
+          : orientArrows(ex.arrows, wall.labels);
+      // A cleared square only becomes a printed ✕ when the segmenter saw no
+      // ink there: phantom pieces minted under a drawn arrow (the mask lights
+      // up) are cleared silently, printed x's (which the mask ignores) marked.
+      final marks = [
+        for (final c in wall.cleared)
+          if ((ex?.cellCoverage[c] ?? 0) < kAnnotationInkCoverage) c,
+      ];
       // Drop empty grids, photos/figures and other non-board regions the
       // locator picked up: only emit confidently-read, populated positions.
-      if (!isPlausibleDiagram(result.labels,
-          confidences: result.confidences)) {
-        continue;
+      if (isPlausibleDiagram(wall.labels, confidences: result.confidences)) {
+        // Gate on the raw labels (repair must not smuggle noise past the gate),
+        // then fix structural illegalities so the FEN is engine-analysable.
+        // Repair also corrects castling inference, since a phantom king on
+        // e1/e8 no longer survives into assembleFen.
+        final repaired = repairToLegal(wall.labels, result.classProbs);
+        out.add(RecognizedDiagram(
+          left: b.left,
+          top: b.top,
+          size: b.size,
+          fen: assembleFen(repaired),
+          cropPng: b.cropPng,
+          annotations: encodeAnnotations([
+            ...arrows,
+            for (final m in marks) BoardAnnotation.mark(m),
+          ]),
+        ));
+      } else if (_isTrainingBoard(wall, arrows)) {
+        // A training diagram we couldn't reconstruct reliably (e.g. the
+        // letter-label pages): keep the printed crop rather than dropping it.
+        // Restricted to boards with training evidence so gate rejections of
+        // photos/noise don't spam the book with junk crops.
+        out.add(RecognizedDiagram(
+          left: b.left,
+          top: b.top,
+          size: b.size,
+          fen: '',
+          cropPng: b.cropPng,
+        ));
       }
-      // Gate on the raw labels (repair must not smuggle noise past the gate),
-      // then fix structural illegalities so the FEN is engine-analysable. Repair
-      // also corrects castling inference, since a phantom king on e1/e8 no
-      // longer survives into assembleFen.
-      final repaired = repairToLegal(result.labels, result.classProbs);
-      out.add(RecognizedDiagram(
-        left: b.left,
-        top: b.top,
-        size: b.size,
-        fen: assembleFen(repaired),
-        cropPng: b.cropPng,
-      ));
     }
     return out;
+  }
+
+  /// Whether a gate-rejected board still carries training-diagram evidence
+  /// worth showing as a printed crop: a cleared x-mark wall, or at least one
+  /// drawn arrow over a populated (not wall-of-noise) grid.
+  static bool _isTrainingBoard(
+      ({List<String> labels, List<int> cleared}) wall,
+      List<BoardAnnotation> arrows) {
+    if (wall.cleared.isNotEmpty) return true;
+    if (arrows.isEmpty) return false;
+    final pieces = wall.labels.where((l) => l.isNotEmpty).length;
+    return pieces >= kMinPieces && pieces <= kMaxPieces;
   }
 
   Future<void> dispose() async {

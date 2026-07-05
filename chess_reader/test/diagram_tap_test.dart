@@ -125,6 +125,95 @@ void main() {
     );
   });
 
+  testWidgets('training annotations render as arrow shapes and ✕ marks',
+      (tester) async {
+    tester.view.physicalSize = const Size(1200, 1600);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+
+    SharedPreferences.setMockInitialValues({});
+    final prefs = await SharedPreferences.getInstance();
+
+    const fen = '4k3/8/8/3PP3/3PP3/8/8/4K3 w - - 0 1';
+    final chapter = EpubChapter(
+      title: 'p1',
+      html: '<div>'
+          '<chessdiagram fen="$fen" ann="Ae1e4;Xd5;Xe5">board</chessdiagram>'
+          '</div>',
+      moves: const [],
+    );
+
+    await tester.pumpWidget(ProviderScope(
+      overrides: [sharedPrefsProvider.overrideWithValue(prefs)],
+      child: MaterialApp(
+        home: Scaffold(
+          body: HtmlChapterList(
+            path: '/tmp/book.pdf',
+            chapters: [chapter],
+            sourceKeyPrefix: 'pg',
+          ),
+        ),
+      ),
+    ));
+    await tester.pumpAndSettle();
+
+    final board =
+        tester.widget<StaticChessboard>(find.byType(StaticChessboard));
+    expect(
+      board.shapes,
+      {Arrow(color: const Color(0xB315781B), orig: Square.e1, dest: Square.e4)},
+      reason: 'the ann arrow should reach the board as a chessground shape',
+    );
+    // The two X marks paint through a dedicated layer over the board.
+    expect(
+      find.byWidgetPredicate((w) =>
+          w is CustomPaint &&
+          w.painter.runtimeType.toString() == '_XMarkPainter'),
+      findsOneWidget,
+      reason: 'marked squares should get the ✕ paint layer',
+    );
+  });
+
+  testWidgets('an unreconstructable diagram (empty fen) shows the print crop',
+      (tester) async {
+    tester.view.physicalSize = const Size(1200, 1600);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+
+    SharedPreferences.setMockInitialValues({});
+    final prefs = await SharedPreferences.getInstance();
+
+    // A 1×1 transparent PNG as the stand-in crop.
+    const png =
+        'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==';
+    final chapter = EpubChapter(
+      title: 'p1',
+      html: '<div><chessdiagram fen="">'
+          '<img src="data:image/png;base64,$png"></chessdiagram></div>',
+      moves: const [],
+    );
+
+    await tester.pumpWidget(ProviderScope(
+      overrides: [sharedPrefsProvider.overrideWithValue(prefs)],
+      child: MaterialApp(
+        home: Scaffold(
+          body: HtmlChapterList(
+            path: '/tmp/book.pdf',
+            chapters: [chapter],
+            sourceKeyPrefix: 'pg',
+          ),
+        ),
+      ),
+    ));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(StaticChessboard), findsNothing,
+        reason: 'no board can be rebuilt from an empty FEN');
+    expect(find.text('Diagram (as printed)'), findsOneWidget);
+    expect(find.widgetWithText(FilledButton, 'Load'), findsNothing,
+        reason: 'the as-printed tile has no position to load');
+  });
+
   testWidgets('tapping a move in the reading view updates the board',
       (tester) async {
     tester.view.physicalSize = const Size(1200, 1600);

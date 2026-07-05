@@ -21,10 +21,16 @@ class ConvertedDiagram {
     required this.top,
     required this.size,
     required this.anchor,
+    this.annotations = '',
   });
 
-  /// Detected position.
+  /// Detected position. Empty for a training diagram that couldn't be
+  /// reconstructed: the reader shows the crop image as printed instead.
   final String fen;
+
+  /// Training annotations (arrows, ✕-marked squares) drawn over the rebuilt
+  /// board, encoded per `encodeAnnotations`; empty when there are none.
+  final String annotations;
 
   /// Board crop as base64 PNG (embedded into the HTML reading view).
   final String cropPngBase64;
@@ -47,6 +53,7 @@ class ConvertedDiagram {
         't': top,
         's': size,
         'a': anchor,
+        if (annotations.isNotEmpty) 'ann': annotations,
       };
 
   factory ConvertedDiagram.fromJson(Map<String, dynamic> j) => ConvertedDiagram(
@@ -56,6 +63,7 @@ class ConvertedDiagram {
         top: j['t'] as int,
         size: j['s'] as int,
         anchor: j['a'] as int,
+        annotations: j['ann'] as String? ?? '',
       );
 }
 
@@ -200,7 +208,12 @@ class BookConversion {
   //     (EPUB scan cross-checked against the sample-PDF rendering of the same
   //     book), mainly removing bleed-through phantom pieces, so cached diagram
   //     FENs change again.
-  static const _version = 20;
+  // v21: training diagrams (Bobby Fischer Teaches Chess-style) are emitted
+  //     instead of dropped: drawn arrows are recovered from the segmenter mask
+  //     and x-mark walls become ✕-marked squares (both stored in 'ann'); a
+  //     training board that still can't be reconstructed is kept with an empty
+  //     FEN so the reader shows its crop as printed.
+  static const _version = 21;
 
   Map<String, dynamic> toJson() => {
         'v': _version,
@@ -354,6 +367,7 @@ Future<BookConversion> convertPdf(
           for (final r in recognized) {
             diagrams.add(ConvertedDiagram(
               fen: r.fen,
+              annotations: r.annotations,
               cropPngBase64: base64Encode(r.cropPng),
               left: r.left,
               top: r.top,
@@ -439,8 +453,13 @@ Future<BookConversion> convertEpub(
         final recognized = await recognizer.recognizeEncoded(bytes);
         if (recognized.isEmpty) continue;
         final r = recognized.first; // largest board in the image
+        // An unreconstructable training board (empty FEN) is skipped here: the
+        // EPUB reader already shows the chapter's raw <img> when it isn't
+        // wrapped in <chessdiagram>, which IS the as-printed fallback.
+        if (r.fen.isEmpty) continue;
         diagrams.add(ConvertedDiagram(
           fen: r.fen,
+          annotations: r.annotations,
           cropPngBase64: base64Encode(r.cropPng),
           left: r.left,
           top: r.top,

@@ -29,7 +29,8 @@ const double _emptyStdDev = 0.08;
 /// top-class probability — used to reject non-board regions read with low
 /// confidence (see `isPlausibleDiagram`).
 class BoardClassification {
-  const BoardClassification(this.labels, this.confidences, [this.classProbs]);
+  const BoardClassification(this.labels, this.confidences,
+      [this.classProbs, this.segMask]);
 
   final List<String> labels;
   final List<double> confidences;
@@ -39,6 +40,11 @@ class BoardClassification {
   /// legality repair (`repairToLegal`), which redistributes a misread square to
   /// its next-best class.
   final List<Float32List>? classProbs;
+
+  /// The arrow segmenter's [kSegSize]² sigmoid mask, kept so drawn arrows can
+  /// be recovered as visible annotations (`extractAnnotations`) instead of
+  /// only being masked out of classification. Null on the template path.
+  final Float32List? segMask;
 }
 
 /// Runs the arrow segmenter then the per-square CNN over a board's 64 cells.
@@ -149,7 +155,7 @@ class OnnxSquareClassifier {
         labels.add(empty ? '' : kModelClasses[best]);
         confidences.add(invSum); // softmax of the winning class
       }
-      return BoardClassification(labels, confidences, classProbs);
+      return BoardClassification(labels, confidences, classProbs, mask);
     } finally {
       await input.dispose();
     }

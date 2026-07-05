@@ -319,6 +319,9 @@ void _wrapDiagrams(dom.Document doc, List<ConvertedDiagram> diagrams) {
     if (parent == null) continue;
     final at = parent.nodes.indexOf(img);
     final wrapper = dom.Element.tag('chessdiagram')..attributes['fen'] = d.fen;
+    if (d.annotations.isNotEmpty) {
+      wrapper.attributes['ann'] = d.annotations;
+    }
     parent.nodes.removeAt(at);
     wrapper.append(img);
     parent.nodes.insert(at, wrapper);

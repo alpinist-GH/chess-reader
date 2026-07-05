@@ -83,7 +83,8 @@ String _buildPageHtml(
 }
 
 String _diagramHtml(ConvertedDiagram d) =>
-    '<chessdiagram fen="${_escapeAttr(d.fen)}">'
+    '<chessdiagram fen="${_escapeAttr(d.fen)}"'
+    '${d.annotations.isEmpty ? '' : ' ann="${_escapeAttr(d.annotations)}"'}>'
     '<img src="data:image/png;base64,${d.cropPngBase64}"></chessdiagram>';
 
 /// A word the OCR splits across a wrapped line ends in a hyphen — usually a

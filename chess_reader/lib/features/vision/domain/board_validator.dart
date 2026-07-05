@@ -95,3 +95,56 @@ bool isPlausibleDiagram(List<String> labels, {List<double>? confidences}) {
 
   return true;
 }
+
+/// Minimum squares a K/P confusion partner must hold before it is swept up
+/// with an x-mark wall (see [clearAnnotatedPhantoms]) — a single K or P next
+/// to a wall may be a real piece and is left alone.
+const int kMinWallPartner = 2;
+
+/// If any class repeats past [kMaxSameClass] — a wall of identical phantom
+/// pieces minted from printed training marks (the "x"s of move-illustration
+/// diagrams) — clears those squares to empty and reports them, so the diagram
+/// can be emitted with visible ✕ annotations instead of dropped by
+/// [isPlausibleDiagram]'s same-class cap.
+///
+/// Measured on the Fischer scans at the conversion's 200 dpi, an x-wall never
+/// reads as one clean class: the "x" glyph splits between white KING and PAWN
+/// (21×K + 6×P on one board, 13×P + 10×K on the next). So a wall in either of
+/// those two classes also clears the other when it holds at least
+/// [kMinWallPartner] squares — otherwise half the wall survives as phantoms.
+///
+/// Any other board comes back unchanged with nothing cleared: ordinary books
+/// never repeat a class past the cap (it was added *for* these teaching
+/// diagrams), so Lasker/Bird-class books can't enter the branch. Callers
+/// re-run the unchanged [isPlausibleDiagram] on the cleaned labels; whether a
+/// cleared square is rendered as a printed ✕ or was just arrow ink is decided
+/// by the caller from the segmenter mask (`kAnnotationInkCoverage`).
+({List<String> labels, List<int> cleared}) clearAnnotatedPhantoms(
+    List<String> labels) {
+  assert(labels.length == 64);
+  final counts = <String, int>{};
+  for (final label in labels) {
+    if (label.isEmpty) continue;
+    counts[label] = (counts[label] ?? 0) + 1;
+  }
+  final walls = <String>{
+    for (final e in counts.entries)
+      if (e.value > kMaxSameClass) e.key,
+  };
+  if (walls.isEmpty) return (labels: labels, cleared: const []);
+  if (walls.contains('K') || walls.contains('P')) {
+    for (final partner in const ['K', 'P']) {
+      if ((counts[partner] ?? 0) >= kMinWallPartner) walls.add(partner);
+    }
+  }
+
+  final cleaned = List.of(labels);
+  final cleared = <int>[];
+  for (var i = 0; i < 64; i++) {
+    if (walls.contains(cleaned[i])) {
+      cleaned[i] = '';
+      cleared.add(i);
+    }
+  }
+  return (labels: cleaned, cleared: cleared);
+}
