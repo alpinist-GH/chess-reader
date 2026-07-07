@@ -19,9 +19,12 @@ unsigned, so Windows SmartScreen may warn — choose **More info → Run anyway*
 The Stockfish engine and the diagram‑recognition model are bundled; everything
 runs offline.
 
-**macOS:** build from source on a Mac (Flutter + Xcode) and package a `.dmg`
-with the bundled helper script — see [Building](#building). Requires macOS 14+
-and a Mac with a Metal‑capable GPU.
+**macOS:** download the signed, notarized DMG from the latest release —
+[**chessbook-reader.dmg**](https://github.com/alpinist-GH/chess-reader/releases/download/chessbook-v1.4.9/chessbook-reader.dmg)
+([all releases](https://github.com/alpinist-GH/chess-reader/releases/latest)).
+
+Requires macOS 14+ and a Mac with a Metal‑capable GPU. The app is Developer
+ID-signed and notarized — no Gatekeeper warning on first launch.
 
 Other platforms: build from source (see [Building](#building)).
 
