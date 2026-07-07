@@ -46,6 +46,43 @@ pre_install do |installer|
       end
     end
   end
+
+  # Pre-populate CocoaPods download cache for onnxruntime pods before pod
+  # install's download phase. download.onnxruntime.ai is blocked on some
+  # Codemagic Mac M2 builder IPs (curl 35 / TCP RST after ~9 s, 0 bytes).
+  # We pre-extract the zips at the exact cache path CocoaPods would use, so
+  # it skips the download entirely and uses the pre-cached content.
+  require 'digest'
+  require 'fileutils'
+  require 'shellwords'
+  cache_root = File.expand_path('~/Library/Caches/CocoaPods/Pods/Release')
+  installer.pod_targets.each do |pod|
+    spec = pod.root_spec
+    url  = spec.source[:http] || spec.source['http']
+    next unless url&.include?('download.onnxruntime.ai')
+    # CocoaPods cache key: MD5 of {:http=>"<url>"}.inspect (symbol key)
+    chk  = Digest::MD5.hexdigest({ http: url }.inspect)
+    dir  = File.join(cache_root, spec.name, "#{spec.name}-#{spec.version}-#{chk}")
+    next if File.directory?(dir) && Dir.children(dir).any? rescue next
+    FileUtils.mkdir_p(dir)
+    zip  = "/tmp/pod-#{spec.name}-#{spec.version}.zip"
+    ver  = spec.version.to_s
+    # Try GitHub releases first; onnxruntime.ai as fallback (3×).
+    gh   = "https://github.com/microsoft/onnxruntime/releases/download/" \
+           "v#{ver}/pod-archive-#{spec.name}-#{ver}.zip"
+    ok   = false
+    [gh, url, url, url].each_with_index do |src, i|
+      sleep(i * 8) if i > 0
+      ok = system("curl -fsSL --max-time 180 -o #{zip.shellescape} #{src.shellescape}")
+      break if ok
+    end
+    if ok
+      system("unzip -q #{zip.shellescape} -d #{dir.shellescape}")
+      FileUtils.rm_f(zip)
+    else
+      FileUtils.rmdir(dir) rescue nil
+    end
+  end
 end
 
 target 'Runner' do
