@@ -129,8 +129,11 @@ Need help, found a bug, or have a feature request?
 - **The board diagrams aren't recognised correctly.** Recognition runs on open
   and is cached. If a book looks wrong, reopen it; if it persists, please open an
   issue with the book and the page number.
-- **Is it free?** The app includes free sample books; see the in‑app store for
-  details on unlocking unlimited conversions.
+- **Is it free?** The first few conversions are free; see the in‑app store for
+  details on unlocking unlimited conversions. The app doesn't bundle any book
+  content — grab a free public‑domain chess book from
+  [Project Gutenberg](https://www.gutenberg.org/ebooks/search/?query=chess) to
+  try it with.
 
 ## License
 

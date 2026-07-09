@@ -3,13 +3,21 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as p;
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/persistence/library_store.dart';
 import '../reader/state/book_providers.dart';
 import 'book_cover.dart';
-import 'book_import.dart';
 import 'open_book_button.dart';
 import 'scan_book_button.dart';
+
+/// Public-domain chess books on Project Gutenberg, offered as a starting
+/// point instead of bundling EPUBs in the app: some storefronts (e.g. the
+/// China mainland App Store) require a publishing permit for apps that ship
+/// book content, which bundled samples would trigger.
+const _kGutenbergLaskerUrl = 'https://www.gutenberg.org/ebooks/5614';
+const _kGutenbergChessSearchUrl =
+    'https://www.gutenberg.org/ebooks/search/?query=chess';
 
 /// Shown when no book is open: a prominent "open" action plus a bookshelf grid
 /// of recently-opened books (cover art extracted from each file) for one-tap
@@ -35,15 +43,24 @@ class LibraryHome extends ConsumerWidget {
               const OpenBookButton(filled: true),
               const SizedBox(height: 8),
               const ScanBookButton(),
-              for (final sample in kSampleBooks)
-                TextButton.icon(
-                  icon: const Icon(Icons.auto_stories),
-                  label: Text(sample.label),
-                  onPressed: () async {
-                    final path = await extractSampleBook(sample);
-                    ref.read(openedBookProvider.notifier).open(path);
-                  },
+              TextButton.icon(
+                icon: const Icon(Icons.auto_stories),
+                label: const Text('Get a free chess book: Lasker\'s '
+                    'Chess Strategy (Project Gutenberg)'),
+                onPressed: () => launchUrl(
+                  Uri.parse(_kGutenbergLaskerUrl),
+                  mode: LaunchMode.externalApplication,
                 ),
+              ),
+              TextButton.icon(
+                icon: const Icon(Icons.search),
+                label: const Text('Browse more chess books on Project '
+                    'Gutenberg'),
+                onPressed: () => launchUrl(
+                  Uri.parse(_kGutenbergChessSearchUrl),
+                  mode: LaunchMode.externalApplication,
+                ),
+              ),
             ],
           ),
         ),

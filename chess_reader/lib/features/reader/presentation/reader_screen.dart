@@ -11,7 +11,6 @@ import '../../../core/persistence/library_store.dart';
 import '../../../core/settings/app_settings.dart';
 import '../../board/board_panel.dart';
 import '../../library/about.dart';
-import '../../library/book_import.dart';
 import '../../library/converted_library_screen.dart';
 import '../../library/library_home.dart';
 import '../../library/open_book_button.dart';
@@ -46,19 +45,6 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
   final _promptedPaths = <String>{};
   final _noTextWarnedPaths = <String>{};
   final _ocrPromptedPaths = <String>{};
-
-  @override
-  void initState() {
-    super.initState();
-    // First launch: surface the bundled samples as library tiles (once).
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(libraryStoreProvider.notifier).ensureSampleSeeded(
-            () async => [
-              for (final sample in kSampleBooks) await extractSampleBook(sample)
-            ],
-          );
-    });
-  }
 
   /// Once the conversion is ready, either offer the reading-view choice (the
   /// PDF has usable text, whether from its own layer or recovered by OCR) or —

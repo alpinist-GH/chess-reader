@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:flutter/services.dart' show rootBundle;
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
@@ -47,42 +46,4 @@ Future<String> importBook(String sourcePath) async {
 Future<Directory> _booksDir() async {
   final support = await getApplicationSupportDirectory();
   return Directory(p.join(support.path, 'books'));
-}
-
-/// A bundled sample book shipped in the app's assets, so first-time users have
-/// something to open without picking a file. Both public domain EPUBs: a games
-/// book in descriptive notation with diagram scans (exercising the vision
-/// pipeline), and a prose history.
-class SampleBook {
-  const SampleBook(this.label, this.asset);
-
-  /// Button text, e.g. 'Try a sample: Chess Strategy'.
-  final String label;
-
-  /// Bundled asset path.
-  final String asset;
-}
-
-const kSampleBooks = [
-  SampleBook('Try a sample: Chess Strategy',
-      'assets/sample/Chess Strategy - Edward Lasker.epub'),
-  SampleBook('Try a sample: Chess History',
-      'assets/sample/Chess History - Bird.epub'),
-];
-
-/// Materialises a bundled sample book onto disk (a stable, app-private path)
-/// and returns it, so it flows through the normal open pipeline like any picked
-/// book. Idempotent: reuses the existing copy when sizes match.
-Future<String> extractSampleBook(SampleBook sample) async {
-  final dir = Directory(p.join((await _booksDir()).path, 'samples'));
-  final dest = File(p.join(dir.path, p.basename(sample.asset)));
-  final data = await rootBundle.load(sample.asset);
-  final bytes =
-      data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
-  if (await dest.exists() && await dest.length() == bytes.length) {
-    return dest.path;
-  }
-  await dir.create(recursive: true);
-  await dest.writeAsBytes(bytes, flush: true);
-  return dest.path;
 }

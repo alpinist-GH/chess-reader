@@ -67,7 +67,6 @@ class LibraryStore extends Notifier<LibraryState> {
   static const _kLastPage = 'lib.lastPage';
   static const _kBookmarks = 'lib.bookmarks';
   static const _kViewMode = 'lib.viewMode';
-  static const _kSampleSeeded = 'lib.sampleSeeded';
   static const _maxRecent = 12;
 
   @override
@@ -118,35 +117,6 @@ class LibraryStore extends Notifier<LibraryState> {
         .toList();
     state = state.copyWith(recentPaths: recent);
     ref.read(sharedPrefsProvider).setStringList(_kRecent, recent);
-  }
-
-  /// On the first launch, drops the bundled sample books into the library so
-  /// they show as tiles without the user having to find the "Try a sample"
-  /// actions. [materialize] writes each asset to a stable on-disk path and
-  /// returns the paths; it's only invoked when seeding is needed, so the asset
-  /// copies aren't paid on every launch.
-  ///
-  /// Runs exactly once: a persisted flag means that after this — or after the
-  /// user removes the samples — they never reappear. Paths are appended (not
-  /// prepended) so an upgrading user's existing books stay at the top.
-  Future<void> ensureSampleSeeded(
-      Future<List<String>> Function() materialize) async {
-    final prefs = ref.read(sharedPrefsProvider);
-    if (prefs.getBool(_kSampleSeeded) ?? false) return;
-    List<String> paths;
-    try {
-      paths = await materialize();
-    } catch (_) {
-      return; // leave the flag unset so a later launch can retry.
-    }
-    final recent = [...state.recentPaths];
-    for (final path in paths) {
-      if (!recent.contains(path)) recent.add(path);
-    }
-    final trimmed = recent.take(_maxRecent).toList();
-    state = state.copyWith(recentPaths: trimmed);
-    await prefs.setStringList(_kRecent, trimmed);
-    await prefs.setBool(_kSampleSeeded, true);
   }
 
   /// Drops a book from the recent list (its bookmarks / resume page are kept
