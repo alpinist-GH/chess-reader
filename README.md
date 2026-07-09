@@ -11,7 +11,7 @@ The Flutter app lives in [`chess_reader/`](chess_reader/).
 ## Download
 
 **Windows:** download the installer from the latest release —
-[**chessbook-reader-setup-1.4.9.exe**](https://github.com/alpinist-GH/chess-reader/releases/download/chessbook-v1.4.9/chessbook-reader-setup-1.4.9.exe)
+[**chessbook-reader-setup-1.4.10.exe**](https://github.com/alpinist-GH/chess-reader/releases/download/chessbook-v1.4.10/chessbook-reader-setup-1.4.10.exe)
 ([all releases](https://github.com/alpinist-GH/chess-reader/releases/latest)).
 
 It's a per‑user install (no administrator rights needed). The installer is
@@ -20,7 +20,7 @@ The Stockfish engine and the diagram‑recognition model are bundled; everything
 runs offline.
 
 **macOS:** download the signed, notarized DMG from the latest release —
-[**chessbook-reader-1.4.9.dmg**](https://github.com/alpinist-GH/chess-reader/releases/download/chessbook-v1.4.9/chessbook-reader-1.4.9.dmg)
+[**chessbook-reader-1.4.10.dmg**](https://github.com/alpinist-GH/chess-reader/releases/download/chessbook-v1.4.10/chessbook-reader-1.4.10.dmg)
 ([all releases](https://github.com/alpinist-GH/chess-reader/releases/latest)).
 
 Requires macOS 14+ and a Mac with a Metal‑capable GPU. The app is Developer
