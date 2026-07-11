@@ -87,6 +87,7 @@ List<ExtractedBoard> _extract(ExtractRequest request) {
     width: request.width,
     height: request.height,
     bytes: request.bgra.buffer,
+    bytesOffset: request.bgra.offsetInBytes,
     order: img.ChannelOrder.bgra,
   );
   return _extractFromImage(page);

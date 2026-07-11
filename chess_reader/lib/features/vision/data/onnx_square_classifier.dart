@@ -66,21 +66,40 @@ class OnnxSquareClassifier {
   static Future<OnnxSquareClassifier?> tryLoad() async {
     try {
       final rt = OnnxRuntime();
-      final opts = acceleratedSessionOptions();
       // NOT rt.createSessionFromAsset: it reuses a stale temp copy of a model
       // when an update ships new bytes under the same filename (see
       // createOnnxSessionFromAssetVersioned), which kept loading the old
       // classifier and misreading retrained diagrams.
-      final seg =
-          await createOnnxSessionFromAssetVersioned(rt, kArrowSegAsset, options: opts);
-      final cls = await createOnnxSessionFromAssetVersioned(rt, kSquareModelAsset,
-          options: opts);
+      final seg = await _createSession(rt, kArrowSegAsset);
+      final cls = await _createSession(rt, kSquareModelAsset);
       final segIn = seg.inputNames.isNotEmpty ? seg.inputNames.first : 'board';
       final clsIn = cls.inputNames.isNotEmpty ? cls.inputNames.first : 'cells';
       return OnnxSquareClassifier._(seg, segIn, cls, clsIn);
     } catch (_) {
       // Model assets absent or runtime unavailable: caller falls back.
       return null;
+    }
+  }
+
+  /// Creates a session for [assetKey], preferring the accelerated (CoreML)
+  /// provider but retrying CPU-only if that fails.
+  ///
+  /// [acceleratedSessionOptions]'s doc claims CPU is listed "as a fallback",
+  /// but flutter_onnxruntime's native `createSession` does not actually
+  /// implement that: on macOS/iOS, `appendCoreMLExecutionProvider()` throwing
+  /// (e.g. CoreML can't compile this model under the current sandbox/signing
+  /// constraints) aborts session creation immediately with a
+  /// `SESSION_OPTIONS_ERROR` — it never falls through to a CPU-only session.
+  /// Without this retry, a CoreML failure on one signed build silently drops
+  /// every diagram in the book: `tryLoad` returns null, `_classify` always
+  /// returns `[]`, and no exception is ever visible to the user.
+  static Future<OrtSession> _createSession(
+      OnnxRuntime rt, String assetKey) async {
+    try {
+      return await createOnnxSessionFromAssetVersioned(rt, assetKey,
+          options: acceleratedSessionOptions());
+    } catch (_) {
+      return createOnnxSessionFromAssetVersioned(rt, assetKey);
     }
   }
 

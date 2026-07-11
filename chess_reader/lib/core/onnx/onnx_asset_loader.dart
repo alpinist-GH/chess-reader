@@ -33,6 +33,13 @@ Future<OrtSession> createOnnxSessionFromAssetVersioned(
   final file = File(p.join(dir.path, '$base.$tag.onnx'));
   // Rewrite if missing or a previous partial write left a wrong-sized file.
   if (!await file.exists() || await file.length() != bytes.length) {
+    // On macOS/iOS, getTemporaryDirectory() maps to NSCachesDirectory, which
+    // path_provider_foundation's getTemporaryPath() returns WITHOUT creating
+    // (unlike its getApplicationCachePath() sibling, which does). On a fresh
+    // sandboxed container that directory doesn't exist yet, so the write
+    // below fails outright — silently dropping every diagram in the book,
+    // since the caller treats "can't load the model" as "no accelerator".
+    await dir.create(recursive: true);
     await file.writeAsBytes(bytes, flush: true);
   }
   return rt.createSession(file.path, options: options);
