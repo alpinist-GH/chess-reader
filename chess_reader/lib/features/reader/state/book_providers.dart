@@ -18,9 +18,9 @@ class OpenedBook extends Notifier<String?> {
   String? build() => null;
 
   Future<void> open(String path) async {
-    // On mobile this copies a freshly-picked book into stable app storage and
-    // returns the local path (a recent-book reopen is already local); on
-    // desktop it returns [path] unchanged.
+    // On iOS/Android/macOS this copies a freshly-picked book into stable app
+    // storage and returns the local path (a recent-book reopen is already
+    // local); on Windows/Linux it returns [path] unchanged.
     final localPath = await importBook(path);
     ref.read(libraryStoreProvider.notifier).recordOpened(localPath);
     _resetReadingState();
