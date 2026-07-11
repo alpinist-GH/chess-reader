@@ -20,7 +20,7 @@ The Stockfish engine and the diagram‑recognition model are bundled; everything
 runs offline.
 
 **macOS:** download the signed, notarized DMG from the latest release —
-[**chessbook-reader-1.4.10.dmg**](https://github.com/alpinist-GH/chess-reader/releases/download/chessbook-v1.4.10/chessbook-reader-1.4.10.dmg)
+[**chessbook-reader-1.4.11.dmg**](https://github.com/alpinist-GH/chess-reader/releases/download/chessbook-v1.4.11/chessbook-reader-1.4.11.dmg)
 ([all releases](https://github.com/alpinist-GH/chess-reader/releases/latest)).
 
 Requires macOS 14+ and a Mac with a Metal‑capable GPU. The app is Developer
