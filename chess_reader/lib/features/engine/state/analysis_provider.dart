@@ -97,12 +97,20 @@ class AnalysisNotifier extends Notifier<AnalysisState> {
       if (!next.legal) return;
       if (previous?.fen != next.fen) _onPositionChanged(next.fen);
     });
-    ref.onDispose(() async {
-      _debounce?.cancel();
-      await _subscription?.cancel();
-      await _engine?.dispose();
-    });
+    ref.onDispose(stopEngine);
     return const AnalysisState();
+  }
+
+  /// Stops and disposes the engine, if running. Safe to call when no engine
+  /// has been started. Used both on provider disposal and when the app is
+  /// quitting, so the native Stockfish process isn't left blocked on a
+  /// `read()` that would otherwise hang Dart VM shutdown.
+  Future<void> stopEngine() async {
+    _debounce?.cancel();
+    await _subscription?.cancel();
+    final engine = _engine;
+    _engine = null;
+    await engine?.dispose();
   }
 
   Future<void> toggle() async {
