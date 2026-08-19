@@ -76,8 +76,12 @@ EDIT_ID=$(curl -sf -X POST "$API/edits" \
 echo "Edit ID: $EDIT_ID"
 
 echo "Uploading $AAB (version ${VERSION}, build ${BUILD_NUMBER})..."
+# Binary media uploads need the separate /upload/ API path prefix -- posting
+# to the plain (metadata-only) path makes the server try to parse the AAB's
+# raw bytes as a JSON request body and reject it.
+UPLOAD_API="https://androidpublisher.googleapis.com/upload/androidpublisher/v3/applications/$PACKAGE_NAME"
 VERSION_CODE=$(curl -sf -X POST \
-  "$API/edits/$EDIT_ID/bundles?uploadType=media" \
+  "$UPLOAD_API/edits/$EDIT_ID/bundles?uploadType=media" \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/octet-stream" \
   --data-binary "@$AAB" | python3 -c 'import sys,json; print(json.load(sys.stdin)["versionCode"])')
