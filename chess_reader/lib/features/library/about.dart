@@ -1,14 +1,16 @@
-import 'package:flutter/foundation.dart' show LicenseEntryWithLineBreaks, LicenseRegistry;
+import 'package:flutter/foundation.dart'
+    show LicenseEntryWithLineBreaks, LicenseRegistry;
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// App version shown in the About box. Keep in sync with pubspec `version`.
-const String kAppVersion = '1.4.13';
+const String kAppVersion = '1.4.15';
 
 /// Where users can obtain the corresponding source code. Bundling Stockfish
 /// (GPL v3) obliges us to offer its source; we link both upstream Stockfish
 /// and this app (also GPL v3, so the same applies to it).
-const String _kStockfishSourceUrl = 'https://github.com/official-stockfish/Stockfish';
+const String _kStockfishSourceUrl =
+    'https://github.com/official-stockfish/Stockfish';
 const String _kAppSourceUrl = 'https://github.com/alpinist-GH/chess-reader';
 
 /// Registers Stockfish's copyright + GPL v3 notice so it always shows under the
@@ -63,6 +65,13 @@ void showAppAboutDialog(BuildContext context) {
       ),
       const SizedBox(height: 12),
       const Text(
+        'Android requirements\n\n'
+        'Android 7.0 or newer is required. A device with 4 GB of RAM or more '
+        'is recommended for diagram recognition, especially with long or '
+        'high-resolution PDFs.',
+      ),
+      const SizedBox(height: 12),
+      const Text(
         'This program is free software, distributed under the GNU General '
         'Public License v3.0.\n\n'
         'It bundles the Stockfish chess engine (Copyright © The Stockfish '
@@ -72,14 +81,8 @@ void showAppAboutDialog(BuildContext context) {
         'below; the corresponding source code is linked here:',
       ),
       const SizedBox(height: 8),
-      _SourceLink(
-        label: 'Stockfish source code',
-        url: _kStockfishSourceUrl,
-      ),
-      _SourceLink(
-        label: 'ChessBook Reader source code',
-        url: _kAppSourceUrl,
-      ),
+      _SourceLink(label: 'Stockfish source code', url: _kStockfishSourceUrl),
+      _SourceLink(label: 'ChessBook Reader source code', url: _kAppSourceUrl),
     ],
   );
 }
@@ -103,10 +106,8 @@ class _SourceLink extends StatelessWidget {
         ),
         icon: const Icon(Icons.open_in_new, size: 18),
         label: Text(label),
-        onPressed: () => launchUrl(
-          Uri.parse(url),
-          mode: LaunchMode.externalApplication,
-        ),
+        onPressed: () =>
+            launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication),
       ),
     );
   }

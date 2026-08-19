@@ -28,6 +28,10 @@ ID-signed and notarized — no Gatekeeper warning on first launch.
 
 Other platforms: build from source (see [Building](#building)).
 
+**Android:** requires Android 7.0 (API 24) or newer. A device with at least
+4 GB of RAM is recommended for diagram recognition, especially for long or
+high-resolution PDFs. Diagram recognition runs fully on-device.
+
 ## Features
 
 - **Clickable moves** — tap a move in the book and the side board jumps to that

@@ -1,0 +1,97 @@
+PODS:
+  - cunning_document_scanner (1.0.0):
+    - Flutter
+  - file_selector_ios (0.0.1):
+    - Flutter
+  - Flutter (1.0.0)
+  - flutter_onnxruntime (0.0.1):
+    - Flutter
+    - onnxruntime-objc (= 1.24.2)
+  - multistockfish_chess (0.3.0):
+    - Flutter
+  - multistockfish_sf16 (0.1.1):
+    - Flutter
+  - multistockfish_variant (0.1.1):
+    - Flutter
+  - onnxruntime-c (1.24.2)
+  - onnxruntime-objc (1.24.2):
+    - onnxruntime-objc/Core (= 1.24.2)
+  - onnxruntime-objc/Core (1.24.2):
+    - onnxruntime-c (= 1.24.2)
+  - pdfium_flutter (0.1.5):
+    - Flutter
+    - FlutterMacOS
+  - permission_handler_apple (9.4.8):
+    - Flutter
+  - share_plus (0.0.1):
+    - Flutter
+  - shared_preferences_foundation (0.0.1):
+    - Flutter
+    - FlutterMacOS
+  - url_launcher_ios (0.0.1):
+    - Flutter
+
+DEPENDENCIES:
+  - cunning_document_scanner (from `.symlinks/plugins/cunning_document_scanner/ios`)
+  - file_selector_ios (from `.symlinks/plugins/file_selector_ios/ios`)
+  - Flutter (from `Flutter`)
+  - flutter_onnxruntime (from `.symlinks/plugins/flutter_onnxruntime/ios`)
+  - multistockfish_chess (from `.symlinks/plugins/multistockfish_chess/ios`)
+  - multistockfish_sf16 (from `.symlinks/plugins/multistockfish_sf16/ios`)
+  - multistockfish_variant (from `.symlinks/plugins/multistockfish_variant/ios`)
+  - pdfium_flutter (from `.symlinks/plugins/pdfium_flutter/darwin`)
+  - permission_handler_apple (from `.symlinks/plugins/permission_handler_apple/ios`)
+  - share_plus (from `.symlinks/plugins/share_plus/ios`)
+  - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/darwin`)
+  - url_launcher_ios (from `.symlinks/plugins/url_launcher_ios/ios`)
+
+SPEC REPOS:
+  trunk:
+    - onnxruntime-c
+    - onnxruntime-objc
+
+EXTERNAL SOURCES:
+  cunning_document_scanner:
+    :path: ".symlinks/plugins/cunning_document_scanner/ios"
+  file_selector_ios:
+    :path: ".symlinks/plugins/file_selector_ios/ios"
+  Flutter:
+    :path: Flutter
+  flutter_onnxruntime:
+    :path: ".symlinks/plugins/flutter_onnxruntime/ios"
+  multistockfish_chess:
+    :path: ".symlinks/plugins/multistockfish_chess/ios"
+  multistockfish_sf16:
+    :path: ".symlinks/plugins/multistockfish_sf16/ios"
+  multistockfish_variant:
+    :path: ".symlinks/plugins/multistockfish_variant/ios"
+  pdfium_flutter:
+    :path: ".symlinks/plugins/pdfium_flutter/darwin"
+  permission_handler_apple:
+    :path: ".symlinks/plugins/permission_handler_apple/ios"
+  share_plus:
+    :path: ".symlinks/plugins/share_plus/ios"
+  shared_preferences_foundation:
+    :path: ".symlinks/plugins/shared_preferences_foundation/darwin"
+  url_launcher_ios:
+    :path: ".symlinks/plugins/url_launcher_ios/ios"
+
+SPEC CHECKSUMS:
+  cunning_document_scanner: 43a2bda11ef6a33fd68766b287ed056b4caf6a06
+  file_selector_ios: ec57ec07954363dd730b642e765e58f199bb621a
+  Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
+  flutter_onnxruntime: 577a012771672fd168079e29be7909a9d0f9c302
+  multistockfish_chess: 826a3fb3746cbf66496bb1388eb664084fac393c
+  multistockfish_sf16: dfd62eb23f5caaad596fa61e88624ead35f0a5e8
+  multistockfish_variant: fba6f8034da46db2a1745a0fab420000c3db5cd9
+  onnxruntime-c: b58bafbc58707d165404665e46a7467a16e8e0e4
+  onnxruntime-objc: 99e0fe4b6d606970c6c1350c194c7629ef6e6fc9
+  pdfium_flutter: e5a6e881af0b182d5b0465ebad23a8a20caa28d4
+  permission_handler_apple: 92d754bbaa7361d436db2d6c3c1c2a0fdcec462e
+  share_plus: 50da8cb520a8f0f65671c6c6a99b3617ed10a58a
+  shared_preferences_foundation: 7036424c3d8ec98dfe75ff1667cb0cd531ec82bb
+  url_launcher_ios: 7a95fa5b60cc718a708b8f2966718e93db0cef1b
+
+PODFILE CHECKSUM: f639e450b1e4e3c61ccd6c8d2cdcce2dac6ae38e
+
+COCOAPODS: 1.17.0

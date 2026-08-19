@@ -4,6 +4,16 @@ All notable changes to ChessBook Reader are documented here. The project loosely
 follows [Keep a Changelog](https://keepachangelog.com/) and
 [Semantic Versioning](https://semver.org/).
 
+## [1.4.15] — 2026-08-19
+
+### Changed
+- New app icon and promotional artwork.
+
+### Fixed
+- Android release builds no longer abort during ONNX diagram recognition.
+  ONNX Runtime's Java classes are now preserved from R8 obfuscation so its
+  native JNI lookups resolve correctly.
+
 ## [1.4.9] — 2026-07-04
 
 ### Fixed
