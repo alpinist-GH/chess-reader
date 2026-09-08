@@ -41,6 +41,7 @@ class ChessnutController extends Notifier<ChessnutState>
   Timer? _scanTimer;
   Timer? _stabilityTimer;
   Timer? _graceTimer;
+  Timer? _completionTimer;
   Timer? _batteryPollTimer;
   Timer? _reconnectTimer;
   int _reconnectAttempts = 0;
@@ -81,6 +82,7 @@ class ChessnutController extends Notifier<ChessnutState>
     _scanTimer?.cancel();
     _stabilityTimer?.cancel();
     _graceTimer?.cancel();
+    _completionTimer?.cancel();
     _batteryPollTimer?.cancel();
     _reconnectTimer?.cancel();
   }
@@ -621,6 +623,7 @@ class ChessnutController extends Notifier<ChessnutState>
     _motionTimer?.cancel();
     _stabilityTimer?.cancel();
     _graceTimer?.cancel();
+    _completionTimer?.cancel();
     _pendingTargetPlacement = null;
     _inFlightTargetPlacement = null;
     _latestReportedPlacement = null;
@@ -833,6 +836,7 @@ class ChessnutController extends Notifier<ChessnutState>
     if (_latestReportedPlacement != placement) {
       _stabilityTimer?.cancel();
       _graceTimer?.cancel();
+      _completionTimer?.cancel();
       state = state.copyWith(
         clearPendingTurnRecovery: true,
         clearIntermediateHint: true,
@@ -845,28 +849,29 @@ class ChessnutController extends Notifier<ChessnutState>
     final session = ref.read(gameSessionProvider);
     final appPlacement = ChessnutCodec.extractPlacement(session.fen);
 
-    // If board reached the in-flight target, transition to synchronized
+    // If the board reports the in-flight target, don't trust a single
+    // packet: the hardware has no distinct motion-completion notification
+    // (confirmed on real hardware — the write ack is a generic "command
+    // received" reply, not a completion signal, and FEN reports stream
+    // continuously through a move). Require the reported placement to stay
+    // stable for the same interval used to confirm physical moves before
+    // treating the move as complete.
     if (_inFlightTargetPlacement != null &&
         placement == _inFlightTargetPlacement) {
-      _motionTimer?.cancel();
-      _inFlightTargetPlacement = null;
-      _currentSynchronizedPlacement = placement;
-
-      // If a newer pending target arrived while in-flight, send it now
-      if (_pendingTargetPlacement != null) {
-        final nextTarget = _pendingTargetPlacement!;
-        _pendingTargetPlacement = null;
-        _sendTargetCommand(nextTarget);
-        return;
-      }
-
-      state = state.copyWith(
-        syncState: ChessnutSyncState.synchronized,
-        statusMessage: 'Synchronized with board.',
-        mismatchedSquares: const {},
-        clearMismatchedPlacement: true,
-      );
-      _clearBoardLeds();
+      final target = placement;
+      final motion = _motionEpoch;
+      final epoch = _connectionEpoch;
+      _completionTimer?.cancel();
+      _completionTimer = Timer(ChessnutConstants.stabilityDuration, () {
+        if (_disposed ||
+            epoch != _connectionEpoch ||
+            motion != _motionEpoch ||
+            _inFlightTargetPlacement != target ||
+            _latestReportedPlacement != target) {
+          return; // Stale, superseded, or the placement moved on again.
+        }
+        _completeMotion(target);
+      });
       return;
     }
 
@@ -907,6 +912,28 @@ class ChessnutController extends Notifier<ChessnutState>
         _processStablePhysicalPlacement(placement);
       }
     });
+  }
+
+  void _completeMotion(String placement) {
+    _motionTimer?.cancel();
+    _inFlightTargetPlacement = null;
+    _currentSynchronizedPlacement = placement;
+
+    // If a newer pending target arrived while in-flight, send it now
+    if (_pendingTargetPlacement != null) {
+      final nextTarget = _pendingTargetPlacement!;
+      _pendingTargetPlacement = null;
+      _sendTargetCommand(nextTarget);
+      return;
+    }
+
+    state = state.copyWith(
+      syncState: ChessnutSyncState.synchronized,
+      statusMessage: 'Synchronized with board.',
+      mismatchedSquares: const {},
+      clearMismatchedPlacement: true,
+    );
+    _clearBoardLeds();
   }
 
   void _processStablePhysicalPlacement(String reportedPlacement) {

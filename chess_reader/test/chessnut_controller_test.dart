@@ -32,6 +32,12 @@ void main() {
     container.dispose();
   });
 
+  /// Advances real time past the FEN-stability window that now gates both
+  /// outgoing move completion and incoming physical-move recognition, since
+  /// real hardware has no distinct motion-completion notification.
+  Future<void> settle() =>
+      Future<void>.delayed(const Duration(milliseconds: 400));
+
   group('ChessnutController connection lifecycle', () {
     test('starts disconnected, scans and connects to fake board in paused state', () async {
       final controller = container.read(chessnutControllerProvider.notifier);
@@ -72,8 +78,15 @@ void main() {
       fakeBoard.receivedCommands.clear();
       await controller.startOrResume();
 
+      // Completion is confirmed only after the reported placement stays
+      // stable for the completion window, not on the first matching packet
+      // (real hardware has no distinct motion-completion notification).
+      expect(container.read(chessnutControllerProvider).syncState,
+          ChessnutSyncState.moving);
+
+      await settle();
+
       final state = container.read(chessnutControllerProvider);
-      // Fake board automatically processes and emits matching FEN, so it transitions to synchronized
       expect(state.syncState, ChessnutSyncState.synchronized);
       expect(fakeBoard.receivedCommands.isNotEmpty, isTrue);
 
@@ -89,6 +102,7 @@ void main() {
       final controller = container.read(chessnutControllerProvider.notifier);
       await controller.connectToDevice(FakeChessnutBoard.fakeDeviceId);
       await controller.startOrResume();
+      await settle();
 
       final countBefore = fakeBoard.receivedCommands.length;
 
@@ -122,6 +136,7 @@ void main() {
       final controller = container.read(chessnutControllerProvider.notifier);
       await controller.connectToDevice(FakeChessnutBoard.fakeDeviceId);
       await controller.startOrResume();
+      await settle();
 
       final countBefore = fakeBoard.receivedCommands.length;
       final session = container.read(gameSessionProvider.notifier);
@@ -155,6 +170,7 @@ void main() {
       final controller = container.read(chessnutControllerProvider.notifier);
       await controller.connectToDevice(FakeChessnutBoard.fakeDeviceId);
       await controller.startOrResume();
+      await settle();
 
       expect(container.read(gameSessionProvider).position.turn, Side.white);
 
@@ -165,7 +181,7 @@ void main() {
       fakeBoard.simulatePhysicalMove(e4Placement);
 
       // Fast forward past stability duration (350ms)
-      await Future<void>.delayed(const Duration(milliseconds: 400));
+      await settle();
 
       final sessionState = container.read(gameSessionProvider);
       expect(sessionState.origin, PositionOrigin.physical);
@@ -177,16 +193,21 @@ void main() {
       final controller = container.read(chessnutControllerProvider.notifier);
       await controller.connectToDevice(FakeChessnutBoard.fakeDeviceId);
       await controller.startOrResume();
+      await settle();
 
       // Play 1. e4 via screen/app
       final session = container.read(gameSessionProvider.notifier);
       session.playMove(NormalMove.fromUci('e2e4'));
 
+      // Let the app's own e4 target reach and settle on the board before
+      // the user physically moves anything, matching real hardware timing.
+      await settle();
+
       // User physically returns pawn from e4 back to e2
       fakeBoard.simulatePhysicalMove(ChessnutCodec.extractPlacement(Chess.initial.fen));
 
       // Fast forward past stability duration
-      await Future<void>.delayed(const Duration(milliseconds: 400));
+      await settle();
 
       final sessionState = container.read(gameSessionProvider);
       expect(sessionState.origin, PositionOrigin.physical);
@@ -198,6 +219,7 @@ void main() {
       final controller = container.read(chessnutControllerProvider.notifier);
       await controller.connectToDevice(FakeChessnutBoard.fakeDeviceId);
       await controller.startOrResume();
+      await settle();
 
       // Position where white can castle kingside (e.g. 1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5)
       Position pos = Chess.initial;
@@ -209,12 +231,14 @@ void main() {
       pos = pos.playUnchecked(NormalMove.fromUci('f8c5'));
 
       container.read(gameSessionProvider.notifier).setPosition(pos);
+      await settle();
       await controller.startOrResume();
+      await settle();
 
       // Simulate King moved to g1 (rook still on h1)
       fakeBoard.simulateCastlingIntermediate(side: Side.white, kingside: true);
 
-      await Future<void>.delayed(const Duration(milliseconds: 400));
+      await settle();
 
       final state = container.read(chessnutControllerProvider);
       expect(state.intermediateHint, contains('Complete castling'));
@@ -225,6 +249,7 @@ void main() {
       final controller = container.read(chessnutControllerProvider.notifier);
       await controller.connectToDevice(FakeChessnutBoard.fakeDeviceId);
       await controller.startOrResume();
+      await settle();
 
       // Quiet diagram loaded with turnRecoverable: true (White to move)
       // Placement: 8/8/8/8/8/4k3/8/4K3 w - - 0 1
@@ -232,6 +257,10 @@ void main() {
         '8/8/8/8/8/4k3/8/4K3 w - - 0 1',
         turnRecoverable: true,
       );
+
+      // Let the diagram's own target reach and settle on the board before
+      // the physical move is simulated.
+      await settle();
 
       // Black physically plays 1... Kd4 (or Ke4)
       final oppositeSetup = Setup.parseFen('8/8/8/8/8/4k3/8/4K3 b - - 0 1');
@@ -241,7 +270,7 @@ void main() {
 
       fakeBoard.simulatePhysicalMove(ChessnutCodec.extractPlacement(playedPos.fen));
 
-      await Future<void>.delayed(const Duration(milliseconds: 400));
+      await settle();
 
       final state = container.read(chessnutControllerProvider);
       expect(state.pendingTurnRecovery, isNotNull);
@@ -264,6 +293,7 @@ void main() {
       final controller = container.read(chessnutControllerProvider.notifier);
       await controller.connectToDevice(FakeChessnutBoard.fakeDeviceId);
       await controller.startOrResume();
+      await settle();
 
       fakeBoard.receivedCommands.clear();
 
@@ -271,7 +301,7 @@ void main() {
       fakeBoard.simulatePhysicalMove('8/8/8/8/8/8/8/8');
 
       // Stability period finishes
-      await Future<void>.delayed(const Duration(milliseconds: 400));
+      await settle();
       expect(container.read(chessnutControllerProvider).syncState,
           isNot(ChessnutSyncState.mismatch));
 

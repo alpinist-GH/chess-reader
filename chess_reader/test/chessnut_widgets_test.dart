@@ -83,6 +83,9 @@ void main() {
       final controller = container.read(chessnutControllerProvider.notifier);
       await controller.connectToDevice(FakeChessnutBoard.fakeDeviceId);
       await controller.startOrResume();
+      // Let the initial align target reach and settle on the board before
+      // simulating a subsequent physical move.
+      await tester.pump(const Duration(milliseconds: 400));
 
       // Put mismatched placement
       fakeBoard.simulatePhysicalMove('8/8/8/8/8/8/8/8');

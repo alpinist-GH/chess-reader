@@ -24,9 +24,20 @@ void main() {
   final nf3 = Chess.initial.playUnchecked(NormalMove.fromUci('g1f3'));
   int targets() =>
       board.receivedCommands.where((c) => c[0] == 0x42 && c.last == 1).length;
-  Future<void> ready() async {
+  // Completion now requires the reported placement to stay stable for the
+  // completion window (no single-packet completion signal on real
+  // hardware), so wait it out before treating the board as settled. Inside
+  // testWidgets/checkWidgets that means pumping the fake clock rather than
+  // a bare delayed future, which the test binding's fake clock won't
+  // auto-advance.
+  Future<void> ready([WidgetTester? tester]) async {
     await controller.connectToDevice(FakeChessnutBoard.fakeDeviceId);
     await controller.startOrResume();
+    if (tester != null) {
+      await tester.pump(const Duration(milliseconds: 400));
+    } else {
+      await Future<void>.delayed(const Duration(milliseconds: 400));
+    }
     board.receivedCommands.clear();
   }
 
@@ -68,7 +79,7 @@ void main() {
   checkWidgets('physical moves and takebacks never echo motor commands', (
     tester,
   ) async {
-    await ready();
+    await ready(tester);
     board.simulatePhysicalMove(placement(e4));
     await tester.pump(const Duration(milliseconds: 400));
     expect(container.read(gameSessionProvider).position.fen, e4.fen);
@@ -82,7 +93,7 @@ void main() {
   checkWidgets('repeated identical reports do not starve recognition', (
     tester,
   ) async {
-    await ready();
+    await ready(tester);
     for (var i = 0; i < 5; i++) {
       board.simulatePhysicalMove(placement(e4));
       await tester.pump(const Duration(milliseconds: 100));
@@ -93,7 +104,7 @@ void main() {
   checkWidgets('pause discards in-flight completion and pending positions', (
     tester,
   ) async {
-    await ready();
+    await ready(tester);
     board.autoCompleteMotion = false;
     session.setPosition(e4);
     session.setPosition(d4);
@@ -110,13 +121,14 @@ void main() {
   checkWidgets(
     'rapid navigation sends only latest pending target after completion',
     (tester) async {
-      await ready();
+      await ready(tester);
       board.autoCompleteMotion = false;
       session.setPosition(e4);
       session.setPosition(d4);
       session.setPosition(nf3);
       expect(targets(), 1);
       board.simulatePhysicalMove(placement(e4));
+      await tester.pump(const Duration(milliseconds: 400));
       expect(targets(), 2);
       final last = board.receivedCommands.lastWhere((c) => c[0] == 0x42);
       expect(ChessnutCodec.boardBytesToPlacement(last, 2), placement(nf3));
@@ -126,12 +138,13 @@ void main() {
   checkWidgets(
     'navigation back to in-flight target clears stale pending target',
     (tester) async {
-      await ready();
+      await ready(tester);
       board.autoCompleteMotion = false;
       session.setPosition(e4);
       session.setPosition(d4);
       session.setPosition(e4);
       board.simulatePhysicalMove(placement(e4));
+      await tester.pump(const Duration(milliseconds: 400));
       expect(targets(), 1);
       expect(
         container.read(chessnutControllerProvider).syncState,
@@ -143,7 +156,7 @@ void main() {
   checkWidgets('movement timeout pauses and clears queued target', (
     tester,
   ) async {
-    await ready();
+    await ready(tester);
     board.autoCompleteMotion = false;
     session.setPosition(e4);
     session.setPosition(d4);
@@ -163,8 +176,11 @@ void main() {
   checkWidgets(
     'changed placement cancels an obsolete turn proposal immediately',
     (tester) async {
-      await ready();
+      await ready(tester);
       session.loadFen('8/8/8/8/8/4k3/8/4K3 w - - 0 1', turnRecoverable: true);
+      // Let the diagram's own target reach and settle on the board before
+      // simulating a subsequent physical move.
+      await tester.pump(const Duration(milliseconds: 400));
       final opposite = Chess.fromSetup(
         Setup.parseFen('8/8/8/8/8/4k3/8/4K3 b - - 0 1'),
       );
@@ -190,7 +206,7 @@ void main() {
   checkWidgets('grace timer refers only to the latest stable placement', (
     tester,
   ) async {
-    await ready();
+    await ready(tester);
     board.simulatePhysicalMove('8/8/8/8/8/8/8/8');
     await tester.pump(const Duration(milliseconds: 400));
     await tester.pump(const Duration(milliseconds: 1400));
@@ -210,8 +226,11 @@ void main() {
   checkWidgets(
     'en passant intermediate stays out of mismatch until capture is removed',
     (tester) async {
-      await ready();
+      await ready(tester);
       session.loadFen('4k3/8/8/3pP3/8/8/8/4K3 w - d6 0 1');
+      // Let the diagram's own target reach and settle on the board before
+      // simulating a subsequent physical move.
+      await tester.pump(const Duration(milliseconds: 400));
       board.simulatePhysicalMove('4k3/8/3P4/3p4/8/8/8/4K3');
       await tester.pump(const Duration(milliseconds: 400));
       await tester.pump(const Duration(seconds: 3));
@@ -294,7 +313,7 @@ void main() {
   checkWidgets('background cancels reconnect and requires resume', (
     tester,
   ) async {
-    await ready();
+    await ready(tester);
     controller.didChangeAppLifecycleState(AppLifecycleState.paused);
     await board.disconnect(FakeChessnutBoard.fakeDeviceId);
     await tester.pump(const Duration(seconds: 40));
