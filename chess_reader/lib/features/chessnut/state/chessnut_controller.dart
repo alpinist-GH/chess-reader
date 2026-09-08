@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:typed_data';
 import 'package:dartchess/dartchess.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:universal_ble/universal_ble.dart';
@@ -23,9 +22,23 @@ final chessnutTransportProvider = Provider<ChessnutTransport>((ref) {
 
 /// Riverpod controller managing Chessnut Move connection, synchronization,
 /// physical move recognition, inventory checks, battery monitoring, and LED alerts.
-class ChessnutController extends Notifier<ChessnutState> with WidgetsBindingObserver {
+class ChessnutController extends Notifier<ChessnutState>
+    with WidgetsBindingObserver {
   ChessnutTransport get _transport => ref.read(chessnutTransportProvider);
 
+  bool _disposed = false;
+  bool _foreground = true;
+  AvailabilityState? _availability;
+  bool get isSupported => _availability != AvailabilityState.unsupported;
+  bool get _bluetoothAvailable =>
+      _availability == null || _availability == AvailabilityState.poweredOn;
+  int _connectionEpoch = 0;
+  int _scanEpoch = 0;
+  bool _connectionBusy = false;
+  int _motionEpoch = 0;
+  String? _latestReportedPlacement;
+  Timer? _motionTimer;
+  Timer? _scanTimer;
   Timer? _stabilityTimer;
   Timer? _graceTimer;
   Timer? _batteryPollTimer;
@@ -36,7 +49,6 @@ class ChessnutController extends Notifier<ChessnutState> with WidgetsBindingObse
   String? _inFlightTargetPlacement;
   String? _pendingTargetPlacement;
   String? _currentSynchronizedPlacement;
-  int _lastRecognizedRevision = -1;
 
   StreamSubscription<BleDevice>? _scanSubscription;
   StreamSubscription<bool>? _connectionSubscription;
@@ -48,6 +60,8 @@ class ChessnutController extends Notifier<ChessnutState> with WidgetsBindingObse
   ChessnutState build() {
     WidgetsBinding.instance.addObserver(this);
     ref.onDispose(() {
+      _disposed = true;
+      _connectionEpoch++;
       WidgetsBinding.instance.removeObserver(this);
       _cleanupTimers();
       _scanSubscription?.cancel();
@@ -63,6 +77,8 @@ class ChessnutController extends Notifier<ChessnutState> with WidgetsBindingObse
   }
 
   void _cleanupTimers() {
+    _motionTimer?.cancel();
+    _scanTimer?.cancel();
     _stabilityTimer?.cancel();
     _graceTimer?.cancel();
     _batteryPollTimer?.cancel();
@@ -70,22 +86,52 @@ class ChessnutController extends Notifier<ChessnutState> with WidgetsBindingObse
   }
 
   void _listenToAvailability() {
-    _availabilitySubscription = _transport.availabilityStream.listen((avail) {
-      if (avail == AvailabilityState.poweredOff) {
-        state = state.copyWith(
-          statusMessage: 'Bluetooth is powered off. Please enable Bluetooth.',
-        );
-      } else if (avail == AvailabilityState.unauthorized) {
-        state = state.copyWith(
-          statusMessage: 'Bluetooth permissions denied. Please grant permissions.',
-        );
-      }
+    _availabilitySubscription = _transport.availabilityStream.listen(
+      _onAvailability,
+    );
+    Future.microtask(() async {
+      if (_disposed) return;
+      try {
+        final availability = await _transport.getAvailabilityState();
+        if (!_disposed) _onAvailability(availability);
+      } catch (
+        _
+      ) {} // A transient query failure does not mean BLE is unsupported.
     });
+  }
+
+  void _onAvailability(AvailabilityState availability) {
+    if (_disposed) return;
+    final previous = _availability;
+    _availability = availability;
+    if (!_bluetoothAvailable) {
+      _reconnectTimer?.cancel();
+      if (state.isConnected ||
+          state.connectionState == ChessnutConnectionState.connecting) {
+        _onDisconnected();
+      }
+      state = state.copyWith(
+        statusMessage: switch (availability) {
+          AvailabilityState.poweredOff =>
+            'Bluetooth is powered off. Please enable Bluetooth.',
+          AvailabilityState.unauthorized =>
+            'Bluetooth permissions denied. Please grant permissions.',
+          AvailabilityState.unsupported =>
+            'Bluetooth is not supported on this device.',
+          _ => 'Bluetooth is unavailable. Try again when it is ready.',
+        },
+      );
+    } else if (_foreground &&
+        previous != null &&
+        previous != AvailabilityState.poweredOn) {
+      _onAppForegrounded();
+    }
   }
 
   void _checkInitialAutoReconnect() {
     // Read persisted settings
     Future.microtask(() {
+      if (_disposed || !_foreground) return;
       final settings = ref.read(settingsProvider);
       if (settings.chessnutAutoReconnect && settings.chessnutDeviceId != null) {
         connectToDevice(settings.chessnutDeviceId!, nameHint: 'Chessnut Move');
@@ -105,6 +151,8 @@ class ChessnutController extends Notifier<ChessnutState> with WidgetsBindingObse
   }
 
   void _onAppBackgrounded() {
+    _foreground = false;
+    _reconnectTimer?.cancel();
     if (state.isConnected) {
       // Pause synchronization and clear pending motion
       pause();
@@ -113,6 +161,7 @@ class ChessnutController extends Notifier<ChessnutState> with WidgetsBindingObse
   }
 
   void _onAppForegrounded() {
+    _foreground = true;
     if (!state.isConnected && !_explicitlyDisconnected) {
       final settings = ref.read(settingsProvider);
       if (settings.chessnutAutoReconnect && settings.chessnutDeviceId != null) {
@@ -128,16 +177,27 @@ class ChessnutController extends Notifier<ChessnutState> with WidgetsBindingObse
     });
   }
 
-  void _onSessionPositionChanged(GameSessionState? prev, GameSessionState next) {
-    // Collision rule: App-origin change invalidates in-flight physical settling buffer
-    if (next.origin == PositionOrigin.app) {
-      _stabilityTimer?.cancel();
-      _graceTimer?.cancel();
-      _lastRecognizedRevision = next.revision;
-      if (state.pendingTurnRecovery != null) {
-        state = state.copyWith(clearPendingTurnRecovery: true);
-      }
+  void _onSessionPositionChanged(
+    GameSessionState? prev,
+    GameSessionState next,
+  ) {
+    if (prev?.revision == next.revision) return;
+    if (next.origin == PositionOrigin.physical) {
+      _currentSynchronizedPlacement = ChessnutCodec.extractPlacement(next.fen);
+      return; // Physical moves and takebacks must never echo motor commands.
     }
+    _latestReportedPlacement = null;
+    state = state.copyWith(
+      canSendDiagramAnyway: false,
+      clearUnvalidatedPlacement: true,
+    );
+    // Every app or lifecycle revision invalidates physical recognition.
+    _stabilityTimer?.cancel();
+    _graceTimer?.cancel();
+    state = state.copyWith(
+      clearPendingTurnRecovery: true,
+      clearIntermediateHint: true,
+    );
 
     // Book lifecycle change (opening/closing book) pauses synchronization
     if (next.origin == PositionOrigin.bookReset) {
@@ -149,15 +209,31 @@ class ChessnutController extends Notifier<ChessnutState> with WidgetsBindingObse
     if (state.isConnected &&
         (state.syncState == ChessnutSyncState.synchronized ||
             state.syncState == ChessnutSyncState.aligning ||
-            state.syncState == ChessnutSyncState.moving)) {
+            state.syncState == ChessnutSyncState.moving ||
+            state.syncState == ChessnutSyncState.mismatch)) {
       final appPlacement = ChessnutCodec.extractPlacement(next.fen);
-      _queueTargetPosition(appPlacement, isAppOrigin: next.origin == PositionOrigin.app);
+      if (!next.legal) {
+        pause();
+        state = state.copyWith(
+          canSendDiagramAnyway: true,
+          unvalidatedPlacement: appPlacement,
+          statusMessage: 'Diagram is unvalidated. Confirm before sending.',
+        );
+        return;
+      }
+      _queueTargetPosition(appPlacement);
     }
   }
 
   // --- Scan and Connection Management ---
 
   Future<void> startScan() async {
+    if (state.isConnected ||
+        state.connectionState == ChessnutConnectionState.connecting) {
+      return;
+    }
+    final scan = ++_scanEpoch;
+    bool current() => !_disposed && scan == _scanEpoch;
     discoveredDevices.clear();
     state = state.copyWith(
       connectionState: ChessnutConnectionState.scanning,
@@ -166,6 +242,7 @@ class ChessnutController extends Notifier<ChessnutState> with WidgetsBindingObse
     );
 
     final permsOk = await _transport.checkAndRequestPermissions();
+    if (!current()) return;
     if (!permsOk) {
       state = state.copyWith(
         connectionState: ChessnutConnectionState.error,
@@ -176,8 +253,10 @@ class ChessnutController extends Notifier<ChessnutState> with WidgetsBindingObse
 
     _scanSubscription?.cancel();
     _scanSubscription = _transport.scanResults.listen((device) {
-      final existingIndex =
-          discoveredDevices.indexWhere((d) => d.deviceId == device.deviceId);
+      if (!current()) return;
+      final existingIndex = discoveredDevices.indexWhere(
+        (d) => d.deviceId == device.deviceId,
+      );
       if (existingIndex >= 0) {
         discoveredDevices[existingIndex] = device;
       } else {
@@ -191,7 +270,11 @@ class ChessnutController extends Notifier<ChessnutState> with WidgetsBindingObse
 
     try {
       await _transport.startScan(timeout: const Duration(seconds: 15));
+      if (!current()) return;
+      _scanTimer?.cancel();
+      _scanTimer = Timer(const Duration(seconds: 15), stopScan);
     } catch (e) {
+      if (!current()) return;
       state = state.copyWith(
         connectionState: ChessnutConnectionState.error,
         lastError: 'Failed to start scan: $e',
@@ -200,7 +283,10 @@ class ChessnutController extends Notifier<ChessnutState> with WidgetsBindingObse
   }
 
   Future<void> stopScan() async {
+    _scanEpoch++;
+    _scanTimer?.cancel();
     await _transport.stopScan();
+    if (_disposed) return;
     _scanSubscription?.cancel();
     if (state.connectionState == ChessnutConnectionState.scanning) {
       state = state.copyWith(
@@ -211,92 +297,146 @@ class ChessnutController extends Notifier<ChessnutState> with WidgetsBindingObse
   }
 
   Future<void> connectToDevice(String deviceId, {String? nameHint}) async {
-    _explicitlyDisconnected = false;
-    _reconnectTimer?.cancel();
-    await stopScan();
-
-    state = state.copyWith(
-      connectionState: ChessnutConnectionState.connecting,
-      connectedDeviceId: deviceId,
-      connectedDeviceName: nameHint ?? 'Chessnut Board',
-      statusMessage: 'Connecting to board...',
-      clearLastError: true,
-    );
-
+    if (_disposed ||
+        _connectionBusy ||
+        !_foreground ||
+        state.isConnected ||
+        state.connectionState == ChessnutConnectionState.connecting) {
+      return;
+    }
+    _connectionBusy = true;
     try {
-      await _transport.connect(deviceId, timeout: const Duration(seconds: 12));
+      _explicitlyDisconnected = false;
+      _reconnectTimer?.cancel();
+      final epoch = ++_connectionEpoch;
+      bool current() => !_disposed && epoch == _connectionEpoch;
+      state = state.copyWith(
+        connectionState: ChessnutConnectionState.connecting,
+      );
+      await stopScan();
+      if (!current()) return;
 
-      // Validate MTU on Android / verify transport capacity
-      final mtu = await _transport.requestMtu(
-        deviceId,
-        ChessnutConstants.desiredAndroidMtu,
+      state = state.copyWith(
+        connectionState: ChessnutConnectionState.connecting,
+        connectedDeviceId: deviceId,
+        connectedDeviceName: nameHint ?? 'Chessnut Board',
+        statusMessage: 'Connecting to board...',
+        clearLastError: true,
       );
 
-      // Validate required GATT services
-      final servicesValid =
-          await _transport.validateRequiredServices(deviceId);
-      if (!servicesValid) {
-        await _transport.disconnect(deviceId);
+      try {
+        if (!await _transport.checkAndRequestPermissions()) {
+          throw StateError('Bluetooth permissions were not granted.');
+        }
+        if (!current()) return;
+        await _connectionSubscription?.cancel();
+        if (!current()) return;
+        _connectionSubscription = _transport
+            .connectionStateStream(deviceId)
+            .listen((connected) {
+              if (current() && !connected) _onDisconnected();
+            });
+        final transport = _transport;
+        await transport.connect(deviceId, timeout: const Duration(seconds: 12));
+        if (!current()) {
+          try {
+            await transport.disconnect(deviceId);
+          } catch (_) {}
+          return;
+        }
+
+        // Validate MTU on Android / verify transport capacity
+        final mtu = await _transport.requestMtu(
+          deviceId,
+          ChessnutConstants.desiredAndroidMtu,
+        );
+
+        if (!current()) return;
+        // Validate required GATT services
+        final servicesValid = await _transport.validateRequiredServices(
+          deviceId,
+        );
+        if (!current()) return;
+        if (!servicesValid) {
+          throw StateError(
+            'Device is missing required Chessnut Move GATT services.',
+          );
+        }
+
+        // Subscribe to FEN and command responses
+        await _transport.subscribeToNotifications(
+          deviceId: deviceId,
+          onFenReport: (packet) {
+            if (current()) _handleIncomingFenReport(packet);
+          },
+          onCommandResponse: (packet) {
+            if (current()) _handleIncomingCommandResponse(packet);
+          },
+        );
+
+        if (!current()) return;
+
+        // Enable real-time FEN notifications
+        await _transport.writeCommand(
+          deviceId,
+          ChessnutCodec.encodeEnableFenReportingCommand(),
+        );
+
+        if (!current()) return;
+        // Remember device in settings
+        ref.read(settingsProvider.notifier).setChessnutDevice(deviceId);
+
+        _reconnectAttempts = 0;
+        state = state.copyWith(
+          connectionState: ChessnutConnectionState.connected,
+          syncState: ChessnutSyncState.paused, // Initially paused per spec
+          negotiatedMtu: mtu,
+          statusMessage:
+              'Connected (Paused). Press Start/Resume to synchronize.',
+        );
+
+        // Initial battery query after connection state is connected
+        await queryBattery();
+        if (current()) _startBatteryPollingTimer();
+      } catch (e) {
+        if (!current()) return;
+        await _connectionSubscription?.cancel();
+        try {
+          await _transport.disconnect(deviceId);
+        } catch (_) {}
+        if (!current()) return;
         state = state.copyWith(
           connectionState: ChessnutConnectionState.error,
-          lastError:
-              'Device is missing required Chessnut Move GATT services.',
+          lastError: 'Connection failed: $e',
         );
-        return;
+        _scheduleReconnect(deviceId);
       }
-
-      // Subscribe to FEN and command responses
-      await _transport.subscribeToNotifications(
-        deviceId: deviceId,
-        onFenReport: _handleIncomingFenReport,
-        onCommandResponse: _handleIncomingCommandResponse,
-      );
-
-      // Listen to disconnect events
-      _connectionSubscription?.cancel();
-      _connectionSubscription =
-          _transport.connectionStateStream(deviceId).listen((isConnected) {
-        if (!isConnected) {
-          _onDisconnected();
-        }
-      });
-
-      // Enable real-time FEN notifications
-      await _transport.writeCommand(
-        deviceId,
-        ChessnutCodec.encodeEnableFenReportingCommand(),
-      );
-
-      // Remember device in settings
-      ref.read(settingsProvider.notifier).setChessnutDevice(deviceId);
-
-      _reconnectAttempts = 0;
-      state = state.copyWith(
-        connectionState: ChessnutConnectionState.connected,
-        syncState: ChessnutSyncState.paused, // Initially paused per spec
-        negotiatedMtu: mtu,
-        statusMessage:
-            'Connected (Paused). Press Start/Resume to synchronize.',
-      );
-
-      // Initial battery query after connection state is connected
-      await queryBattery();
-      _startBatteryPollingTimer();
-    } catch (e) {
-      state = state.copyWith(
-        connectionState: ChessnutConnectionState.error,
-        lastError: 'Connection failed: $e',
-      );
-      _scheduleReconnect(deviceId);
+    } finally {
+      _connectionBusy = false;
     }
   }
 
   void _onDisconnected() {
+    if (_disposed) return;
+    _connectionEpoch++;
+    _motionEpoch++;
+    _inFlightTargetPlacement = null;
+    _pendingTargetPlacement = null;
+    _currentSynchronizedPlacement = null;
+    _latestReportedPlacement = null;
     _cleanupTimers();
     state = state.copyWith(
       connectionState: ChessnutConnectionState.disconnected,
       syncState: ChessnutSyncState.paused,
       clearBoardBattery: true,
+      clearPieceStatuses: true,
+      clearNegotiatedMtu: true,
+      clearPendingTurnRecovery: true,
+      clearUnvalidatedPlacement: true,
+      canSendDiagramAnyway: false,
+      clearIntermediateHint: true,
+      mismatchedSquares: const {},
+      clearMismatchedPlacement: true,
       statusMessage: 'Disconnected from board.',
     );
 
@@ -309,10 +449,24 @@ class ChessnutController extends Notifier<ChessnutState> with WidgetsBindingObse
   }
 
   void _scheduleReconnect(String deviceId) {
-    if (_explicitlyDisconnected) return;
+    final settings = ref.read(settingsProvider);
+    if (_disposed ||
+        !_bluetoothAvailable ||
+        !_foreground ||
+        _explicitlyDisconnected ||
+        !settings.chessnutAutoReconnect ||
+        settings.chessnutDeviceId != deviceId) {
+      return;
+    }
     _reconnectTimer?.cancel();
 
     // Bounded exponential backoff: 2s, 4s, 8s, max 16s
+    if (_reconnectAttempts >= 5) {
+      state = state.copyWith(
+        statusMessage: 'Reconnect failed. Scan again to find the board.',
+      );
+      return;
+    }
     final delaySeconds = (2 << _reconnectAttempts).clamp(2, 16);
     _reconnectAttempts++;
 
@@ -326,12 +480,22 @@ class ChessnutController extends Notifier<ChessnutState> with WidgetsBindingObse
   }
 
   Future<void> _attemptReconnect(String deviceId) async {
-    if (state.isConnected || _explicitlyDisconnected) return;
+    final settings = ref.read(settingsProvider);
+    if (_disposed ||
+        !_foreground ||
+        state.isConnected ||
+        _explicitlyDisconnected ||
+        !settings.chessnutAutoReconnect ||
+        settings.chessnutDeviceId != deviceId) {
+      return;
+    }
     await connectToDevice(deviceId);
   }
 
   Future<void> disconnect() async {
     _explicitlyDisconnected = true;
+    _connectionEpoch++;
+    await pause();
     _reconnectTimer?.cancel();
     final deviceId = state.connectedDeviceId;
     if (deviceId != null) {
@@ -356,16 +520,26 @@ class ChessnutController extends Notifier<ChessnutState> with WidgetsBindingObse
 
   Future<void> queryBattery() async {
     final deviceId = state.connectedDeviceId;
-    if (deviceId == null || !state.isConnected) return;
+    if (deviceId == null ||
+        !state.isConnected ||
+        _inFlightTargetPlacement != null) {
+      return;
+    }
+    final epoch = _connectionEpoch;
     try {
       await _transport.writeCommand(
         deviceId,
         ChessnutCodec.encodeBatteryQueryCommand(),
       );
-      await _transport.writeCommand(
-        deviceId,
-        ChessnutCodec.encodePieceStatusQueryCommand(),
-      );
+      if (!_disposed &&
+          epoch == _connectionEpoch &&
+          (state.negotiatedMtu ?? 0) >=
+              ChessnutConstants.pieceStatusReportMinMtu) {
+        await _transport.writeCommand(
+          deviceId,
+          ChessnutCodec.encodePieceStatusQueryCommand(),
+        );
+      }
     } catch (_) {}
   }
 
@@ -385,6 +559,18 @@ class ChessnutController extends Notifier<ChessnutState> with WidgetsBindingObse
 
     final session = ref.read(gameSessionProvider);
     final placement = ChessnutCodec.extractPlacement(session.fen);
+
+    if (!session.legal) {
+      final inventory = ChessnutCodec.validateInventory(placement);
+      state = state.copyWith(
+        syncState: ChessnutSyncState.paused,
+        canSendDiagramAnyway: inventory.isValid,
+        unvalidatedPlacement: placement,
+        lastError: inventory.errorMessage,
+        statusMessage: 'Diagram is unvalidated. Confirm before sending.',
+      );
+      return;
+    }
 
     // Validate inventory limits
     final invCheck = ChessnutCodec.validateInventory(placement);
@@ -413,40 +599,45 @@ class ChessnutController extends Notifier<ChessnutState> with WidgetsBindingObse
 
   /// User action: Pause synchronization.
   Future<void> pause() async {
+    final wasMoving = _inFlightTargetPlacement != null;
+    final deviceId = state.connectedDeviceId;
+    _motionEpoch++;
+    _motionTimer?.cancel();
     _stabilityTimer?.cancel();
     _graceTimer?.cancel();
-    _pendingTargetPlacement = null;
-
-    state = state.copyWith(
-      syncState: ChessnutSyncState.paused,
-      statusMessage: 'Synchronization paused.',
-    );
-  }
-
-  /// User action: Stop physical motion immediately.
-  Future<void> stop() async {
-    final deviceId = state.connectedDeviceId;
     _pendingTargetPlacement = null;
     _inFlightTargetPlacement = null;
-    _stabilityTimer?.cancel();
-    _graceTimer?.cancel();
-
-    if (deviceId != null && state.isConnected) {
+    _latestReportedPlacement = null;
+    state = state.copyWith(
+      syncState: ChessnutSyncState.paused,
+      clearPendingTurnRecovery: true,
+      clearIntermediateHint: true,
+      statusMessage: wasMoving
+          ? 'Synchronization paused. Physical stop is not confirmed.'
+          : 'Synchronization paused.',
+    );
+    if (wasMoving &&
+        deviceId != null &&
+        state.isConnected &&
+        _transport.motionProtocolVerified) {
       try {
         await _transport.writeCommand(
           deviceId,
           ChessnutCodec.encodeStopCommand(),
         );
-        await _transport.writeCommand(
-          deviceId,
-          ChessnutCodec.encodeClearLedsCommand(),
-        );
-      } catch (_) {}
+      } catch (_) {} // A successful write alone is not stop confirmation.
     }
+  }
 
+  /// User action: request a verified stop command, without claiming completion.
+  Future<void> stop() async {
+    final wasMoving = _inFlightTargetPlacement != null;
+    await pause();
+    if (!wasMoving && state.isConnected && _transport.motionProtocolVerified) {
+      await _writeLedOrStop(ChessnutCodec.encodeStopCommand());
+    }
+    _clearBoardLeds();
     state = state.copyWith(
-      syncState: ChessnutSyncState.paused,
-      statusMessage: 'Movement stopped.',
       mismatchedSquares: const {},
       clearMismatchedPlacement: true,
     );
@@ -455,7 +646,12 @@ class ChessnutController extends Notifier<ChessnutState> with WidgetsBindingObse
   /// User action: Override for unvalidated / imperfect diagram.
   Future<void> sendDiagramAnyway() async {
     final placement = state.unvalidatedPlacement;
-    if (placement == null || !state.isConnected) return;
+    if (placement == null ||
+        !state.isConnected ||
+        placement !=
+            ChessnutCodec.extractPlacement(ref.read(gameSessionProvider).fen)) {
+      return;
+    }
 
     final invCheck = ChessnutCodec.validateInventory(placement);
     if (!invCheck.isValid) {
@@ -475,9 +671,11 @@ class ChessnutController extends Notifier<ChessnutState> with WidgetsBindingObse
     await _sendTargetCommand(placement);
   }
 
-  void _queueTargetPosition(String placement, {bool isAppOrigin = false}) {
+  void _queueTargetPosition(String placement) {
     // Placement deduplication: same piece placement requires zero motion
-    if ((_inFlightTargetPlacement ?? _currentSynchronizedPlacement) == placement) {
+    if ((_inFlightTargetPlacement ?? _currentSynchronizedPlacement) ==
+        placement) {
+      _pendingTargetPlacement = null;
       return;
     }
 
@@ -486,7 +684,8 @@ class ChessnutController extends Notifier<ChessnutState> with WidgetsBindingObse
     if (!invCheck.isValid) {
       pause();
       state = state.copyWith(
-        statusMessage: 'Position exceeds board inventory: ${invCheck.errorMessage}',
+        statusMessage:
+            'Position exceeds board inventory: ${invCheck.errorMessage}',
         lastError: invCheck.errorMessage,
         canSendDiagramAnyway: true,
         unvalidatedPlacement: placement,
@@ -497,13 +696,8 @@ class ChessnutController extends Notifier<ChessnutState> with WidgetsBindingObse
     // Retain only the latest pending target
     _pendingTargetPlacement = placement;
 
-    // If rapid navigation occurred with an in-flight motion, abort/retarget immediately
-    if (isAppOrigin && _inFlightTargetPlacement != null) {
-      _sendTargetCommand(placement);
-      return;
-    }
-
-    if (state.syncState == ChessnutSyncState.synchronized) {
+    if (state.syncState == ChessnutSyncState.synchronized ||
+        state.syncState == ChessnutSyncState.mismatch) {
       _sendTargetCommand(placement);
     }
   }
@@ -512,12 +706,72 @@ class ChessnutController extends Notifier<ChessnutState> with WidgetsBindingObse
     final deviceId = state.connectedDeviceId;
     if (deviceId == null || !state.isConnected) return;
 
+    if (!_foreground) return;
+    final inventory = ChessnutCodec.validateInventory(placement);
+    final available = _transport.availablePieces;
+    String? error;
+    if (!inventory.isValid) {
+      error = inventory.errorMessage;
+    } else if ((state.negotiatedMtu ?? 0) <
+        ChessnutConstants.pieceStatusReportMinMtu) {
+      error = 'Bluetooth capacity is insufficient for complete board reports.';
+    } else if (!_transport.motionProtocolVerified) {
+      error =
+          'Automatic movement awaits hardware validation of completion and stopping.';
+    } else if (available == null) {
+      error =
+          'Piece availability is unknown. Verify the physical inventory first.';
+    } else {
+      final required = <String, int>{};
+      for (final piece in placement.split('')) {
+        if (ChessnutCodec.nominalPieceOrder.contains(piece)) {
+          required[piece] = (required[piece] ?? 0) + 1;
+        }
+      }
+      for (final entry in required.entries) {
+        if (entry.value > (available[entry.key] ?? 0)) {
+          error =
+              'Required piece unavailable: ${entry.key} (need ${entry.value}).';
+          break;
+        }
+      }
+    }
+    if (error != null) {
+      await pause();
+      state = state.copyWith(lastError: error, statusMessage: error);
+      return;
+    }
+    if (_inFlightTargetPlacement != null) {
+      _pendingTargetPlacement = placement == _inFlightTargetPlacement
+          ? null
+          : placement;
+      return;
+    }
+    _stabilityTimer?.cancel();
+    _graceTimer?.cancel();
+    _latestReportedPlacement = null;
+    final epoch = _connectionEpoch;
+    final motion = ++_motionEpoch;
     _inFlightTargetPlacement = placement;
     _pendingTargetPlacement = null;
+    _motionTimer?.cancel();
+    _motionTimer = Timer(const Duration(seconds: 30), () {
+      if (!_disposed &&
+          epoch == _connectionEpoch &&
+          motion == _motionEpoch &&
+          _inFlightTargetPlacement != null) {
+        pause();
+        state = state.copyWith(
+          lastError: 'Movement completion timed out. Resume to resynchronize.',
+        );
+      }
+    });
 
     state = state.copyWith(
       syncState: ChessnutSyncState.moving,
       statusMessage: 'Pieces moving...',
+      clearLastError: true,
+      clearPendingTurnRecovery: true,
     );
 
     final cmd = ChessnutCodec.encodeTargetPositionCommand(
@@ -528,9 +782,12 @@ class ChessnutController extends Notifier<ChessnutState> with WidgetsBindingObse
     try {
       await _transport.writeCommand(deviceId, cmd);
     } catch (e) {
-      _inFlightTargetPlacement = null;
+      if (_disposed || epoch != _connectionEpoch || motion != _motionEpoch) {
+        return;
+      }
+      await pause();
       state = state.copyWith(
-        syncState: ChessnutSyncState.error,
+        syncState: ChessnutSyncState.paused,
         lastError: 'Failed to send move command: $e',
       );
     }
@@ -556,13 +813,26 @@ class ChessnutController extends Notifier<ChessnutState> with WidgetsBindingObse
 
   void _handleIncomingFenReport(Uint8List packet) {
     final placement = ChessnutCodec.decodeFenReport(packet);
-    if (placement == null) return;
+    if (placement == null || !state.isConnected) return;
+    if (_latestReportedPlacement != placement) {
+      _stabilityTimer?.cancel();
+      _graceTimer?.cancel();
+      state = state.copyWith(
+        clearPendingTurnRecovery: true,
+        clearIntermediateHint: true,
+      );
+    } else {
+      return; // Repeated reports must not starve the stability timer.
+    }
+    _latestReportedPlacement = placement;
 
     final session = ref.read(gameSessionProvider);
     final appPlacement = ChessnutCodec.extractPlacement(session.fen);
 
     // If board reached the in-flight target, transition to synchronized
-    if (_inFlightTargetPlacement != null && placement == _inFlightTargetPlacement) {
+    if (_inFlightTargetPlacement != null &&
+        placement == _inFlightTargetPlacement) {
+      _motionTimer?.cancel();
       _inFlightTargetPlacement = null;
       _currentSynchronizedPlacement = placement;
 
@@ -611,16 +881,24 @@ class ChessnutController extends Notifier<ChessnutState> with WidgetsBindingObse
 
     // Timer 1: 350ms Stability Timer
     _stabilityTimer?.cancel();
+    final revision = session.revision;
+    final epoch = _connectionEpoch;
     _stabilityTimer = Timer(ChessnutConstants.stabilityDuration, () {
-      _processStablePhysicalPlacement(placement);
+      if (!_disposed &&
+          epoch == _connectionEpoch &&
+          revision == ref.read(gameSessionProvider).revision &&
+          placement == _latestReportedPlacement) {
+        _processStablePhysicalPlacement(placement);
+      }
     });
   }
 
   void _processStablePhysicalPlacement(String reportedPlacement) {
     final session = ref.read(gameSessionProvider);
 
-    // Collision check: Ignore results if session revision has changed
-    if (_lastRecognizedRevision > session.revision) {
+    if (!state.isConnected ||
+        (state.syncState != ChessnutSyncState.synchronized &&
+            state.syncState != ChessnutSyncState.mismatch)) {
       return;
     }
 
@@ -635,10 +913,9 @@ class ChessnutController extends Notifier<ChessnutState> with WidgetsBindingObse
           _graceTimer?.cancel();
           _clearBoardLeds();
 
-          ref.read(gameSessionProvider.notifier).playMove(
-                move,
-                origin: PositionOrigin.physical,
-              );
+          ref
+              .read(gameSessionProvider.notifier)
+              .playMove(move, origin: PositionOrigin.physical);
 
           state = state.copyWith(
             syncState: ChessnutSyncState.synchronized,
@@ -662,9 +939,9 @@ class ChessnutController extends Notifier<ChessnutState> with WidgetsBindingObse
         _graceTimer?.cancel();
         _clearBoardLeds();
 
-        ref.read(gameSessionProvider.notifier).undo(
-              origin: PositionOrigin.physical,
-            );
+        ref
+            .read(gameSessionProvider.notifier)
+            .undo(origin: PositionOrigin.physical);
 
         state = state.copyWith(
           syncState: ChessnutSyncState.synchronized,
@@ -678,7 +955,7 @@ class ChessnutController extends Notifier<ChessnutState> with WidgetsBindingObse
     }
 
     // 3. Restricted side-to-move recovery for newly imported diagrams
-    if (session.turnRecoverable) {
+    if (session.legal && session.turnRecoverable) {
       final candidateSetup = Setup(
         board: session.position.board,
         turn: session.position.turn.opposite,
@@ -691,13 +968,14 @@ class ChessnutController extends Notifier<ChessnutState> with WidgetsBindingObse
       try {
         final oppositePos = Chess.fromSetup(
           candidateSetup,
-          ignoreImpossibleCheck: true,
+          ignoreImpossibleCheck: false,
         );
 
         final matchingMoves = <NormalMove>[];
         for (final move in _generateAllLegalMoves(oppositePos)) {
           final nextPos = oppositePos.playUnchecked(move);
-          if (ChessnutCodec.extractPlacement(nextPos.fen) == reportedPlacement) {
+          if (ChessnutCodec.extractPlacement(nextPos.fen) ==
+              reportedPlacement) {
             matchingMoves.add(move);
           }
         }
@@ -724,7 +1002,10 @@ class ChessnutController extends Notifier<ChessnutState> with WidgetsBindingObse
     }
 
     // 4. Intermediate castling and en passant detection
-    final intermediateHint = _detectIntermediateHint(session, reportedPlacement);
+    final intermediateHint = _detectIntermediateHint(
+      session,
+      reportedPlacement,
+    );
     if (intermediateHint != null) {
       // Hold mismatch grace timer and show subtle hint
       _graceTimer?.cancel();
@@ -737,8 +1018,15 @@ class ChessnutController extends Notifier<ChessnutState> with WidgetsBindingObse
 
     // 5. Timer 2: Grace period (~1.75s) before mismatch UI and red LEDs
     if (_graceTimer == null || !_graceTimer!.isActive) {
+      final revision = session.revision;
+      final epoch = _connectionEpoch;
       _graceTimer = Timer(ChessnutConstants.mismatchGraceDuration, () {
-        _triggerMismatch(reportedPlacement);
+        if (!_disposed &&
+            epoch == _connectionEpoch &&
+            revision == ref.read(gameSessionProvider).revision &&
+            reportedPlacement == _latestReportedPlacement) {
+          _triggerMismatch(reportedPlacement);
+        }
       });
     }
   }
@@ -750,62 +1038,32 @@ class ChessnutController extends Notifier<ChessnutState> with WidgetsBindingObse
     if (!session.legal) return null;
     final pos = session.position;
 
-    // Check White O-O intermediate (King on g1, Rook still on h1)
-    if (pos.turn == Side.white &&
-        pos.castles.rookOf(Side.white, CastlingSide.king) != null) {
-      final whiteK = pos.board.kingOf(Side.white);
-      if (whiteK == Square.e1) {
-        final testBoard = pos.board
-            .removePieceAt(Square.e1)
-            .setPieceAt(Square.g1, const Piece(color: Side.white, role: Role.king));
-        final expectedFen = ChessnutCodec.extractPlacement(testBoard.fen);
-        if (reportedPlacement == expectedFen) {
-          return 'Complete castling: move rook from h1 to f1';
+    for (final move in _generateAllLegalMoves(pos)) {
+      final piece = pos.board.pieceAt(move.from);
+      if (piece == null) continue;
+      if (piece.role == Role.king &&
+          pos.board.pieceAt(move.to) ==
+              Piece(color: pos.turn, role: Role.rook)) {
+        final kingside = move.to.file > move.from.file;
+        final kingTo = Square(move.from.rank * 8 + (kingside ? 6 : 2));
+        final rookTo = Square(move.from.rank * 8 + (kingside ? 5 : 3));
+        final intermediate = pos.board
+            .removePieceAt(move.from)
+            .setPieceAt(kingTo, piece);
+        if (reportedPlacement == intermediate.fen) {
+          return 'Complete castling: move rook from ${move.to.name} to ${rookTo.name}';
         }
       }
-    }
-
-    // Check White O-O-O intermediate (King on c1, Rook still on a1)
-    if (pos.turn == Side.white &&
-        pos.castles.rookOf(Side.white, CastlingSide.queen) != null) {
-      final whiteK = pos.board.kingOf(Side.white);
-      if (whiteK == Square.e1) {
-        final testBoard = pos.board
-            .removePieceAt(Square.e1)
-            .setPieceAt(Square.c1, const Piece(color: Side.white, role: Role.king));
-        final expectedFen = ChessnutCodec.extractPlacement(testBoard.fen);
-        if (reportedPlacement == expectedFen) {
-          return 'Complete castling: move rook from a1 to d1';
-        }
-      }
-    }
-
-    // Check Black O-O intermediate (King on g8, Rook still on h8)
-    if (pos.turn == Side.black &&
-        pos.castles.rookOf(Side.black, CastlingSide.king) != null) {
-      final blackK = pos.board.kingOf(Side.black);
-      if (blackK == Square.e8) {
-        final testBoard = pos.board
-            .removePieceAt(Square.e8)
-            .setPieceAt(Square.g8, const Piece(color: Side.black, role: Role.king));
-        final expectedFen = ChessnutCodec.extractPlacement(testBoard.fen);
-        if (reportedPlacement == expectedFen) {
-          return 'Complete castling: move rook from h8 to f8';
-        }
-      }
-    }
-
-    // Check Black O-O-O intermediate (King on c8, Rook still on a8)
-    if (pos.turn == Side.black &&
-        pos.castles.rookOf(Side.black, CastlingSide.queen) != null) {
-      final blackK = pos.board.kingOf(Side.black);
-      if (blackK == Square.e8) {
-        final testBoard = pos.board
-            .removePieceAt(Square.e8)
-            .setPieceAt(Square.c8, const Piece(color: Side.black, role: Role.king));
-        final expectedFen = ChessnutCodec.extractPlacement(testBoard.fen);
-        if (reportedPlacement == expectedFen) {
-          return 'Complete castling: move rook from a8 to d8';
+      if (piece.role == Role.pawn &&
+          move.to == pos.epSquare &&
+          move.from.file != move.to.file &&
+          pos.board.pieceAt(move.to) == null) {
+        final intermediate = pos.board
+            .removePieceAt(move.from)
+            .setPieceAt(move.to, piece);
+        if (reportedPlacement == intermediate.fen) {
+          final captured = Square(move.from.rank * 8 + move.to.file);
+          return 'Complete en passant: remove pawn from ${captured.name}';
         }
       }
     }
@@ -826,28 +1084,25 @@ class ChessnutController extends Notifier<ChessnutState> with WidgetsBindingObse
       statusMessage: 'Physical pieces do not match app position.',
     );
 
-    // Illuminate mismatched squares in red on the board
-    final deviceId = state.connectedDeviceId;
-    if (deviceId != null && state.isConnected && diff.isNotEmpty) {
-      try {
-        _transport.writeCommand(
-          deviceId,
-          ChessnutCodec.encodeMismatchLedsCommand(diff),
-        );
-      } catch (_) {}
+    if (diff.isNotEmpty) {
+      _writeLedOrStop(ChessnutCodec.encodeMismatchLedsCommand(diff));
     }
   }
 
-  void _clearBoardLeds() {
+  Future<void> _writeLedOrStop(Uint8List command) async {
     final deviceId = state.connectedDeviceId;
-    if (deviceId != null && state.isConnected) {
-      try {
-        _transport.writeCommand(
-          deviceId,
-          ChessnutCodec.encodeClearLedsCommand(),
-        );
-      } catch (_) {}
+    if (deviceId == null ||
+        !state.isConnected ||
+        (state.negotiatedMtu ?? 0) < command.length + 3) {
+      return;
     }
+    try {
+      await _transport.writeCommand(deviceId, command);
+    } catch (_) {}
+  }
+
+  void _clearBoardLeds() {
+    _writeLedOrStop(ChessnutCodec.encodeClearLedsCommand());
   }
 
   /// User action: Confirm proposed side-to-move turn correction.
@@ -857,13 +1112,21 @@ class ChessnutController extends Notifier<ChessnutState> with WidgetsBindingObse
 
     final session = ref.read(gameSessionProvider);
     // Bind to current connection and revision
-    if (proposal.deviceId != state.connectedDeviceId ||
+    if (!state.isConnected ||
+        !session.legal ||
+        !session.turnRecoverable ||
+        (state.syncState != ChessnutSyncState.synchronized &&
+            state.syncState != ChessnutSyncState.mismatch) ||
+        proposal.reportedPlacement != _latestReportedPlacement ||
+        proposal.deviceId != state.connectedDeviceId ||
         proposal.revision != session.revision) {
       state = state.copyWith(clearPendingTurnRecovery: true);
       return;
     }
 
-    ref.read(gameSessionProvider.notifier).applyTurnCorrection(
+    ref
+        .read(gameSessionProvider.notifier)
+        .applyTurnCorrection(
           correctedPreMove: proposal.correctedPreMove,
           move: proposal.move,
         );
@@ -881,20 +1144,7 @@ class ChessnutController extends Notifier<ChessnutState> with WidgetsBindingObse
   }
 
   /// User action: In mismatch state, push the app position to physical board.
-  Future<void> sendAppPositionToBoard() async {
-    _clearBoardLeds();
-    final session = ref.read(gameSessionProvider);
-    final appPlacement = ChessnutCodec.extractPlacement(session.fen);
-
-    state = state.copyWith(
-      syncState: ChessnutSyncState.aligning,
-      statusMessage: 'Sending app position to board...',
-      mismatchedSquares: const {},
-      clearMismatchedPlacement: true,
-    );
-
-    await _sendTargetCommand(appPlacement);
-  }
+  Future<void> sendAppPositionToBoard() => startOrResume();
 
   static List<NormalMove> _generateAllLegalMoves(Position pos) {
     final moves = <NormalMove>[];

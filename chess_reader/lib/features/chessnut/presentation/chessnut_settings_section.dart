@@ -16,6 +16,7 @@ class ChessnutSettingsSection extends ConsumerWidget {
     final settingsNotifier = ref.read(settingsProvider.notifier);
     final chessnutState = ref.watch(chessnutControllerProvider);
     final controller = ref.read(chessnutControllerProvider.notifier);
+    if (!controller.isSupported) return const SizedBox.shrink();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

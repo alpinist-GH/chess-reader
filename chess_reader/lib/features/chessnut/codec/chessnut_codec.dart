@@ -91,6 +91,9 @@ class ChessnutCodec {
         final char = row[charIndex];
         final emptyCount = int.tryParse(char);
         if (emptyCount != null) {
+          if (emptyCount < 1 || emptyCount > 8 || fileIndex + emptyCount > 8) {
+            throw FormatException('Invalid empty-square count in row: $row');
+          }
           for (var i = 0; i < emptyCount; i++) {
             final chessnutIdx = rankIndex * 8 + (7 - fileIndex);
             squareNibbles[chessnutIdx] = 0;
@@ -99,7 +102,12 @@ class ChessnutCodec {
         } else {
           final nibble = _nibbleByPiece[char];
           if (nibble == null) {
-            throw FormatException('Invalid piece character in placement: $char');
+            throw FormatException(
+              'Invalid piece character in placement: $char',
+            );
+          }
+          if (fileIndex >= 8) {
+            throw FormatException('Too many files in row: $row');
           }
           final chessnutIdx = rankIndex * 8 + (7 - fileIndex);
           squareNibbles[chessnutIdx] = nibble;
@@ -122,7 +130,7 @@ class ChessnutCodec {
 
   /// Converts 32 bytes of Chessnut board data starting at [offset] into a FEN placement string.
   static String boardBytesToPlacement(Uint8List bytes, [int offset = 0]) {
-    if (bytes.length < offset + 32) {
+    if (offset < 0 || bytes.length < offset + 32) {
       throw FormatException(
         'Packet too short for board data: ${bytes.length} < ${offset + 32}',
       );
@@ -249,7 +257,9 @@ class ChessnutCodec {
   /// Decodes battery status response packet (5 bytes).
   static ChessnutBatteryState? decodeBatteryResponse(Uint8List packet) {
     if (packet.length < ChessnutConstants.batteryResponseLength) return null;
-    if (packet[0] != 0x41 || packet[1] != 0x03 || packet[2] != 0x0C) return null;
+    if (packet[0] != 0x41 || packet[1] != 0x03 || packet[2] != 0x0C) {
+      return null;
+    }
 
     final charging = packet[3] == 1;
     final level = packet[4].clamp(0, 100);
@@ -262,25 +272,35 @@ class ChessnutCodec {
   }
 
   /// Decodes piece status response packet (139 bytes).
-  static List<ChessnutPieceStatus>? decodePieceStatusResponse(Uint8List packet) {
-    if (packet.length < ChessnutConstants.pieceStatusResponseLength) return null;
-    if (packet[0] != 0x41 || packet[1] != 0x89 || packet[2] != 0x0B) return null;
+  static List<ChessnutPieceStatus>? decodePieceStatusResponse(
+    Uint8List packet,
+  ) {
+    if (packet.length < ChessnutConstants.pieceStatusResponseLength) {
+      return null;
+    }
+    if (packet[0] != 0x41 || packet[1] != 0x89 || packet[2] != 0x0B) {
+      return null;
+    }
 
     final list = <ChessnutPieceStatus>[];
     for (var i = 0; i < ChessnutConstants.totalNominalPieces; i++) {
       final offset = 3 + i * 4;
-      final pieceChar = i < nominalPieceOrder.length ? nominalPieceOrder[i] : '?';
+      final pieceChar = i < nominalPieceOrder.length
+          ? nominalPieceOrder[i]
+          : '?';
       final x = packet[offset + 1];
       final y = packet[offset + 2];
       final bat = packet[offset + 3].clamp(0, 100);
 
-      list.add(ChessnutPieceStatus(
-        pieceIndex: i,
-        pieceChar: pieceChar,
-        x: x,
-        y: y,
-        battery: bat,
-      ));
+      list.add(
+        ChessnutPieceStatus(
+          pieceIndex: i,
+          pieceChar: pieceChar,
+          x: x,
+          y: y,
+          battery: bat,
+        ),
+      );
     }
     return list;
   }
@@ -292,11 +312,17 @@ class ChessnutCodec {
   /// Max total pieces per color on board: 16.
   static ChessnutInventoryCheck validateInventory(String placement) {
     final cleanPlacement = extractPlacement(placement);
+    try {
+      placementToBoardBytes(cleanPlacement);
+    } on FormatException catch (e) {
+      return ChessnutInventoryCheck.invalid(e.message);
+    }
     final counts = <String, int>{};
 
     for (var i = 0; i < cleanPlacement.length; i++) {
       final char = cleanPlacement[i];
-      if (char == '/' || (char.codeUnitAt(0) >= 48 && char.codeUnitAt(0) <= 57)) {
+      if (char == '/' ||
+          (char.codeUnitAt(0) >= 48 && char.codeUnitAt(0) <= 57)) {
         continue;
       }
       counts[char] = (counts[char] ?? 0) + 1;
@@ -308,7 +334,13 @@ class ChessnutCodec {
     final whiteBishops = counts['B'] ?? 0;
     final whiteQueens = counts['Q'] ?? 0;
     final whiteKings = counts['K'] ?? 0;
-    final totalWhite = whitePawns + whiteRooks + whiteKnights + whiteBishops + whiteQueens + whiteKings;
+    final totalWhite =
+        whitePawns +
+        whiteRooks +
+        whiteKnights +
+        whiteBishops +
+        whiteQueens +
+        whiteKings;
 
     final blackPawns = counts['p'] ?? 0;
     final blackRooks = counts['r'] ?? 0;
@@ -316,49 +348,83 @@ class ChessnutCodec {
     final blackBishops = counts['b'] ?? 0;
     final blackQueens = counts['q'] ?? 0;
     final blackKings = counts['k'] ?? 0;
-    final totalBlack = blackPawns + blackRooks + blackKnights + blackBishops + blackQueens + blackKings;
+    final totalBlack =
+        blackPawns +
+        blackRooks +
+        blackKnights +
+        blackBishops +
+        blackQueens +
+        blackKings;
 
     if (whiteKings > ChessnutConstants.maxKingsPerColor) {
-      return ChessnutInventoryCheck.invalid('Board supports at most 1 White King (found $whiteKings).');
+      return ChessnutInventoryCheck.invalid(
+        'Board supports at most 1 White King (found $whiteKings).',
+      );
     }
     if (blackKings > ChessnutConstants.maxKingsPerColor) {
-      return ChessnutInventoryCheck.invalid('Board supports at most 1 Black King (found $blackKings).');
+      return ChessnutInventoryCheck.invalid(
+        'Board supports at most 1 Black King (found $blackKings).',
+      );
     }
     if (whiteQueens > ChessnutConstants.maxQueensPerColor) {
-      return ChessnutInventoryCheck.invalid('Board supports at most 2 White Queens (found $whiteQueens).');
+      return ChessnutInventoryCheck.invalid(
+        'Board supports at most 2 White Queens (found $whiteQueens).',
+      );
     }
     if (blackQueens > ChessnutConstants.maxQueensPerColor) {
-      return ChessnutInventoryCheck.invalid('Board supports at most 2 Black Queens (found $blackQueens).');
+      return ChessnutInventoryCheck.invalid(
+        'Board supports at most 2 Black Queens (found $blackQueens).',
+      );
     }
     if (whiteRooks > ChessnutConstants.maxRooksPerColor) {
-      return ChessnutInventoryCheck.invalid('Board supports at most 2 White Rooks (found $whiteRooks).');
+      return ChessnutInventoryCheck.invalid(
+        'Board supports at most 2 White Rooks (found $whiteRooks).',
+      );
     }
     if (blackRooks > ChessnutConstants.maxRooksPerColor) {
-      return ChessnutInventoryCheck.invalid('Board supports at most 2 Black Rooks (found $blackRooks).');
+      return ChessnutInventoryCheck.invalid(
+        'Board supports at most 2 Black Rooks (found $blackRooks).',
+      );
     }
     if (whiteBishops > ChessnutConstants.maxBishopsPerColor) {
-      return ChessnutInventoryCheck.invalid('Board supports at most 2 White Bishops (found $whiteBishops).');
+      return ChessnutInventoryCheck.invalid(
+        'Board supports at most 2 White Bishops (found $whiteBishops).',
+      );
     }
     if (blackBishops > ChessnutConstants.maxBishopsPerColor) {
-      return ChessnutInventoryCheck.invalid('Board supports at most 2 Black Bishops (found $blackBishops).');
+      return ChessnutInventoryCheck.invalid(
+        'Board supports at most 2 Black Bishops (found $blackBishops).',
+      );
     }
     if (whiteKnights > ChessnutConstants.maxKnightsPerColor) {
-      return ChessnutInventoryCheck.invalid('Board supports at most 2 White Knights (found $whiteKnights).');
+      return ChessnutInventoryCheck.invalid(
+        'Board supports at most 2 White Knights (found $whiteKnights).',
+      );
     }
     if (blackKnights > ChessnutConstants.maxKnightsPerColor) {
-      return ChessnutInventoryCheck.invalid('Board supports at most 2 Black Knights (found $blackKnights).');
+      return ChessnutInventoryCheck.invalid(
+        'Board supports at most 2 Black Knights (found $blackKnights).',
+      );
     }
     if (whitePawns > ChessnutConstants.maxPawnsPerColor) {
-      return ChessnutInventoryCheck.invalid('Board supports at most 8 White Pawns (found $whitePawns).');
+      return ChessnutInventoryCheck.invalid(
+        'Board supports at most 8 White Pawns (found $whitePawns).',
+      );
     }
     if (blackPawns > ChessnutConstants.maxPawnsPerColor) {
-      return ChessnutInventoryCheck.invalid('Board supports at most 8 Black Pawns (found $blackPawns).');
+      return ChessnutInventoryCheck.invalid(
+        'Board supports at most 8 Black Pawns (found $blackPawns).',
+      );
     }
     if (totalWhite > ChessnutConstants.maxPiecesPerColorOnBoard) {
-      return ChessnutInventoryCheck.invalid('Board supports at most 16 White pieces on the board (found $totalWhite).');
+      return ChessnutInventoryCheck.invalid(
+        'Board supports at most 16 White pieces on the board (found $totalWhite).',
+      );
     }
     if (totalBlack > ChessnutConstants.maxPiecesPerColorOnBoard) {
-      return ChessnutInventoryCheck.invalid('Board supports at most 16 Black pieces on the board (found $totalBlack).');
+      return ChessnutInventoryCheck.invalid(
+        'Board supports at most 16 Black pieces on the board (found $totalBlack).',
+      );
     }
 
     return const ChessnutInventoryCheck.valid();

@@ -197,6 +197,13 @@ class GameSession extends Notifier<GameSessionState> {
     required Position correctedPreMove,
     required NormalMove move,
   }) {
+    if (!state.legal ||
+        !state.turnRecoverable ||
+        correctedPreMove.board != state.position.board ||
+        correctedPreMove.turn != state.position.turn.opposite ||
+        !correctedPreMove.isLegal(move)) {
+      return;
+    }
     _bookAnchor = (correctedPreMove, null);
     _undoStack.clear();
     _undoStack.add((correctedPreMove, null));
@@ -215,5 +222,6 @@ class GameSession extends Notifier<GameSessionState> {
       _bookAnchor == null || _bookAnchor!.$1.fen == pos.fen;
 }
 
-final gameSessionProvider =
-    NotifierProvider<GameSession, GameSessionState>(GameSession.new);
+final gameSessionProvider = NotifierProvider<GameSession, GameSessionState>(
+  GameSession.new,
+);

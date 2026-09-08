@@ -11,6 +11,15 @@ class UniversalBleTransport implements ChessnutTransport {
     _initCallbacks();
   }
 
+  // No hardware captures establish these contracts yet. Keep motor commands
+  // disabled until a verified implementation can supply them per connection.
+  @override
+  bool get motionProtocolVerified => false;
+  @override
+  Map<String, int>? get availablePieces => null;
+
+  Timer? _scanTimer;
+  bool _disposed = false;
   final _scanController = StreamController<BleDevice>.broadcast();
   final _connectionControllers = <String, StreamController<bool>>{};
   void Function(Uint8List value)? _fenReportCallback;
@@ -18,36 +27,42 @@ class UniversalBleTransport implements ChessnutTransport {
   String? _activeDeviceId;
 
   static bool _sameUuid(String a, String b) =>
-      a.replaceAll('-', '').toLowerCase() == b.replaceAll('-', '').toLowerCase();
+      a.replaceAll('-', '').toLowerCase() ==
+      b.replaceAll('-', '').toLowerCase();
 
   void _initCallbacks() {
     UniversalBle.onScanResult = (BleDevice device) {
-      _scanController.add(device);
+      if (!_disposed) _scanController.add(device);
     };
 
-    UniversalBle.onConnectionChange = (String deviceId, bool isConnected, String? error) {
-      if (_connectionControllers.containsKey(deviceId)) {
-        _connectionControllers[deviceId]?.add(isConnected);
-      }
-    };
+    UniversalBle.onConnectionChange =
+        (String deviceId, bool isConnected, String? error) {
+          if (!_disposed && _connectionControllers.containsKey(deviceId)) {
+            _connectionControllers[deviceId]?.add(isConnected);
+          }
+        };
 
-    UniversalBle.onValueChange = (
-      String deviceId,
-      String characteristicId,
-      Uint8List value,
-      int? timestamp,
-    ) {
-      if (deviceId != _activeDeviceId) return;
+    UniversalBle.onValueChange =
+        (
+          String deviceId,
+          String characteristicId,
+          Uint8List value,
+          int? timestamp,
+        ) {
+          if (_disposed || deviceId != _activeDeviceId) return;
 
-      if (_sameUuid(characteristicId, ChessnutConstants.fenCharacteristicUuid)) {
-        _fenReportCallback?.call(value);
-      } else if (_sameUuid(
-        characteristicId,
-        ChessnutConstants.commandNotifyCharacteristicUuid,
-      )) {
-        _commandResponseCallback?.call(value);
-      }
-    };
+          if (_sameUuid(
+            characteristicId,
+            ChessnutConstants.fenCharacteristicUuid,
+          )) {
+            _fenReportCallback?.call(value);
+          } else if (_sameUuid(
+            characteristicId,
+            ChessnutConstants.commandNotifyCharacteristicUuid,
+          )) {
+            _commandResponseCallback?.call(value);
+          }
+        };
   }
 
   @override
@@ -89,14 +104,14 @@ class UniversalBleTransport implements ChessnutTransport {
 
     await UniversalBle.startScan();
     if (timeout != null) {
-      Future.delayed(timeout, () {
-        stopScan();
-      });
+      _scanTimer?.cancel();
+      _scanTimer = Timer(timeout, stopScan);
     }
   }
 
   @override
   Future<void> stopScan() async {
+    _scanTimer?.cancel();
     try {
       await UniversalBle.stopScan();
     } catch (_) {}
@@ -135,17 +150,25 @@ class UniversalBleTransport implements ChessnutTransport {
 
       for (final s in services) {
         for (final c in s.characteristics) {
-          if (_sameUuid(c.uuid, ChessnutConstants.fenCharacteristicUuid)) {
+          // subscribeNotifications below requires notify, not indication-only.
+          final notifies = c.properties.contains(CharacteristicProperty.notify);
+          if (_sameUuid(s.uuid, ChessnutConstants.fenServiceUuid) &&
+              notifies &&
+              _sameUuid(c.uuid, ChessnutConstants.fenCharacteristicUuid)) {
             hasFenChar = true;
-          } else if (_sameUuid(
-            c.uuid,
-            ChessnutConstants.commandWriteCharacteristicUuid,
-          )) {
+          } else if (_sameUuid(s.uuid, ChessnutConstants.commandServiceUuid) &&
+              c.properties.contains(CharacteristicProperty.write) &&
+              _sameUuid(
+                c.uuid,
+                ChessnutConstants.commandWriteCharacteristicUuid,
+              )) {
             hasCmdWriteChar = true;
-          } else if (_sameUuid(
-            c.uuid,
-            ChessnutConstants.commandNotifyCharacteristicUuid,
-          )) {
+          } else if (_sameUuid(s.uuid, ChessnutConstants.commandServiceUuid) &&
+              notifies &&
+              _sameUuid(
+                c.uuid,
+                ChessnutConstants.commandNotifyCharacteristicUuid,
+              )) {
             hasCmdNotifyChar = true;
           }
         }
@@ -192,14 +215,17 @@ class UniversalBleTransport implements ChessnutTransport {
 
   @override
   Stream<bool> connectionStateStream(String deviceId) {
-    return _connectionControllers.putIfAbsent(
-      deviceId,
-      () => StreamController<bool>.broadcast(),
-    ).stream;
+    return _connectionControllers
+        .putIfAbsent(deviceId, () => StreamController<bool>.broadcast())
+        .stream;
   }
 
   @override
   void dispose() {
+    _disposed = true;
+    _scanTimer?.cancel();
+    _fenReportCallback = null;
+    _commandResponseCallback = null;
     _scanController.close();
     for (final c in _connectionControllers.values) {
       c.close();

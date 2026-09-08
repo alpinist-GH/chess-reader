@@ -3,6 +3,14 @@ import 'package:universal_ble/universal_ble.dart';
 
 /// Abstract BLE transport interface for communicating with a Chessnut Move board.
 abstract class ChessnutTransport {
+  /// True only after completion, interruption, stop encoding and complete packet
+  /// transfers have been validated for this connection/firmware.
+  bool get motionProtocolVerified;
+
+  /// Currently verified available pieces, including off-board reserves.
+  /// Null means unknown; battery coordinates alone do not establish presence.
+  Map<String, int>? get availablePieces;
+
   /// Stream of discovered BLE devices during scan.
   Stream<BleDevice> get scanResults;
 

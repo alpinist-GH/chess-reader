@@ -8,6 +8,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:chess_reader/core/settings/app_settings.dart';
 import 'package:chess_reader/core/state/game_session.dart';
 import 'package:chess_reader/features/board/board_panel.dart';
+import 'package:chess_reader/features/chessnut/state/chessnut_controller.dart';
+import 'package:chess_reader/features/chessnut/transport/fake_chessnut_board.dart';
 
 void main() {
   group('GameSession', () {
@@ -62,7 +64,14 @@ void main() {
     // The board appears once a book is open; test the panel directly so the
     // board-follows-session wiring is covered without a real book file.
     await tester.pumpWidget(ProviderScope(
-      overrides: [sharedPrefsProvider.overrideWithValue(prefs)],
+      overrides: [
+        sharedPrefsProvider.overrideWithValue(prefs),
+        chessnutTransportProvider.overrideWith((ref) {
+          final board = FakeChessnutBoard();
+          ref.onDispose(board.dispose);
+          return board;
+        }),
+      ],
       child: const MaterialApp(home: Scaffold(body: BoardPanel())),
     ));
     await tester.pump();

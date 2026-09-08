@@ -57,6 +57,7 @@ void main() {
       addTearDown(container.dispose);
 
       final session = container.read(gameSessionProvider.notifier);
+      session.loadFen('8/8/8/8/8/4k3/8/4K3 w - - 0 1', turnRecoverable: true);
       // Suppose diagram was white to move: 8/8/8/8/8/4k3/8/4K3 w - - 0 1
       // Corrected pre-move has black to move: 8/8/8/8/8/4k3/8/4K3 b - - 0 1
       final preMove = Chess.fromSetup(

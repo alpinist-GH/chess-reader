@@ -13,6 +13,7 @@ class ChessnutStatusWidget extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(chessnutControllerProvider);
     final controller = ref.read(chessnutControllerProvider.notifier);
+    if (!controller.isSupported) return const SizedBox.shrink();
 
     // If completely disconnected and no device remembered, show minimal connect button
     if (state.connectionState == ChessnutConnectionState.disconnected &&
@@ -67,6 +68,14 @@ class ChessnutStatusWidget extends ConsumerWidget {
                 _buildActionButtons(context, state, controller),
               ],
             ),
+
+            if (state.isConnected && state.syncState == ChessnutSyncState.paused &&
+                (state.lastError != null || state.statusMessage != null))
+              Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Text(state.lastError ?? state.statusMessage!,
+                    style: Theme.of(context).textTheme.bodySmall),
+              ),
 
             // Low battery warning
             if (state.boardBattery?.isLow == true || state.isAnyPieceBatteryLow)

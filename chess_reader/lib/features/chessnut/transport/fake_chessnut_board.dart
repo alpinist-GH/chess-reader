@@ -13,8 +13,18 @@ class FakeChessnutBoard implements ChessnutTransport {
     String? initialPlacement,
     this.simulatedMtu = ChessnutConstants.desiredAndroidMtu,
     this.requiredServicesValid = true,
-  }) : currentPlacement = initialPlacement ??
-            ChessnutCodec.extractPlacement(Chess.initial.fen);
+  }) : currentPlacement =
+           initialPlacement ??
+           ChessnutCodec.extractPlacement(Chess.initial.fen);
+
+  @override
+  bool motionProtocolVerified = true;
+  @override
+  Map<String, int>? availablePieces = {
+    for (final piece in ChessnutCodec.nominalPieceOrder.toSet())
+      piece: ChessnutCodec.nominalPieceOrder.where((p) => p == piece).length,
+  };
+  bool autoCompleteMotion = true;
 
   final _scanController = StreamController<BleDevice>.broadcast();
   final _availabilityController =
@@ -60,15 +70,17 @@ class FakeChessnutBoard implements ChessnutTransport {
   @override
   Future<void> startScan({Duration? timeout}) async {
     isScanning = true;
-    _scanController.add(BleDevice(
-      deviceId: fakeDeviceId,
-      name: fakeDeviceName,
-      rssi: -55,
-      services: [
-        ChessnutConstants.fenServiceUuid,
-        ChessnutConstants.commandServiceUuid,
-      ],
-    ));
+    _scanController.add(
+      BleDevice(
+        deviceId: fakeDeviceId,
+        name: fakeDeviceName,
+        rssi: -55,
+        services: [
+          ChessnutConstants.fenServiceUuid,
+          ChessnutConstants.commandServiceUuid,
+        ],
+      ),
+    );
     if (timeout != null) {
       _scanTimeoutTimer?.cancel();
       _scanTimeoutTimer = Timer(timeout, stopScan);
@@ -118,13 +130,19 @@ class FakeChessnutBoard implements ChessnutTransport {
     receivedCommands.add(Uint8List.fromList(data));
 
     // Enable FEN reporting command: [0x21, 0x01, 0x00]
-    if (data.length == 3 && data[0] == 0x21 && data[1] == 0x01 && data[2] == 0x00) {
+    if (data.length == 3 &&
+        data[0] == 0x21 &&
+        data[1] == 0x01 &&
+        data[2] == 0x00) {
       emitCurrentFenNotification();
       return;
     }
 
     // Battery query command: [0x41, 0x01, 0x0C]
-    if (data.length == 3 && data[0] == 0x41 && data[1] == 0x01 && data[2] == 0x0C) {
+    if (data.length == 3 &&
+        data[0] == 0x41 &&
+        data[1] == 0x01 &&
+        data[2] == 0x0C) {
       final response = Uint8List(5);
       response[0] = 0x41;
       response[1] = 0x03;
@@ -136,7 +154,10 @@ class FakeChessnutBoard implements ChessnutTransport {
     }
 
     // Piece status query command: [0x41, 0x01, 0x0B]
-    if (data.length == 3 && data[0] == 0x41 && data[1] == 0x01 && data[2] == 0x0B) {
+    if (data.length == 3 &&
+        data[0] == 0x41 &&
+        data[1] == 0x01 &&
+        data[2] == 0x0B) {
       final response = Uint8List(139);
       response[0] = 0x41;
       response[1] = 0x89;
@@ -164,8 +185,10 @@ class FakeChessnutBoard implements ChessnutTransport {
 
       if (!isStop) {
         // Update simulated physical board placement and emit notification
-        currentPlacement = ChessnutCodec.boardBytesToPlacement(data, 2);
-        emitCurrentFenNotification();
+        if (autoCompleteMotion) {
+          currentPlacement = ChessnutCodec.boardBytesToPlacement(data, 2);
+          emitCurrentFenNotification();
+        }
       }
       return;
     }
@@ -189,32 +212,50 @@ class FakeChessnutBoard implements ChessnutTransport {
 
   /// Simulates White or Black castling intermediate state
   /// (King has moved to destination square, Rook is still unmoved).
-  void simulateCastlingIntermediate({required Side side, required bool kingside}) {
-    final pos = Chess.fromSetup(Setup.parseFen('$currentPlacement w - - 0 1'), ignoreImpossibleCheck: true);
+  void simulateCastlingIntermediate({
+    required Side side,
+    required bool kingside,
+  }) {
+    final pos = Chess.fromSetup(
+      Setup.parseFen('$currentPlacement w - - 0 1'),
+      ignoreImpossibleCheck: true,
+    );
     final Board testBoard;
     if (side == Side.white) {
       if (kingside) {
         // e1 to g1, rook remains on h1
         testBoard = pos.board
             .removePieceAt(Square.e1)
-            .setPieceAt(Square.g1, const Piece(color: Side.white, role: Role.king));
+            .setPieceAt(
+              Square.g1,
+              const Piece(color: Side.white, role: Role.king),
+            );
       } else {
         // e1 to c1, rook remains on a1
         testBoard = pos.board
             .removePieceAt(Square.e1)
-            .setPieceAt(Square.c1, const Piece(color: Side.white, role: Role.king));
+            .setPieceAt(
+              Square.c1,
+              const Piece(color: Side.white, role: Role.king),
+            );
       }
     } else {
       if (kingside) {
         // e8 to g8, rook remains on h8
         testBoard = pos.board
             .removePieceAt(Square.e8)
-            .setPieceAt(Square.g8, const Piece(color: Side.black, role: Role.king));
+            .setPieceAt(
+              Square.g8,
+              const Piece(color: Side.black, role: Role.king),
+            );
       } else {
         // e8 to c8, rook remains on a8
         testBoard = pos.board
             .removePieceAt(Square.e8)
-            .setPieceAt(Square.c8, const Piece(color: Side.black, role: Role.king));
+            .setPieceAt(
+              Square.c8,
+              const Piece(color: Side.black, role: Role.king),
+            );
       }
     }
     currentPlacement = ChessnutCodec.extractPlacement(testBoard.fen);
@@ -251,6 +292,11 @@ class FakeChessnutBoard implements ChessnutTransport {
   /// Simulates piece battery update.
   void simulatePieceBattery(int pieceIndex, int battery) {
     pieceBatteries[pieceIndex] = battery;
+  }
+
+  void simulateAvailability(AvailabilityState availability) {
+    availabilityState = availability;
+    _availabilityController.add(availability);
   }
 
   /// Simulates Bluetooth disconnection.
