@@ -345,13 +345,6 @@ class ChessnutController extends Notifier<ChessnutState>
           return;
         }
 
-        // Validate MTU on Android / verify transport capacity
-        final mtu = await _transport.requestMtu(
-          deviceId,
-          ChessnutConstants.desiredAndroidMtu,
-        );
-
-        if (!current()) return;
         // Validate required GATT services
         final servicesValid = await _transport.validateRequiredServices(
           deviceId,
@@ -361,6 +354,29 @@ class ChessnutController extends Notifier<ChessnutState>
           throw StateError(
             'Device is missing required Chessnut Move GATT services.',
           );
+        }
+
+        // Query negotiated transport capacity (Android: requests a larger
+        // MTU; Apple/Windows: MTU is OS-managed, so this reads back the
+        // value already negotiated during connection/service discovery).
+        // Queried after service discovery rather than immediately on
+        // connect, since on CoreBluetooth the negotiated value can still
+        // reflect the pre-negotiation default if read too early.
+        var mtu = await _transport.requestMtu(
+          deviceId,
+          ChessnutConstants.desiredAndroidMtu,
+        );
+        if (!current()) return;
+        if (mtu < ChessnutConstants.pieceStatusReportMinMtu) {
+          // One retry after a short delay: negotiation can still be
+          // settling immediately after service discovery completes.
+          await Future<void>.delayed(const Duration(milliseconds: 500));
+          if (!current()) return;
+          mtu = await _transport.requestMtu(
+            deviceId,
+            ChessnutConstants.desiredAndroidMtu,
+          );
+          if (!current()) return;
         }
 
         // Subscribe to FEN and command responses
