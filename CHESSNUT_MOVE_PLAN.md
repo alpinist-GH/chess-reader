@@ -69,6 +69,14 @@ Second real-hardware session, same macOS debug build. To exercise the real Start
 
 With these three confirmed, the only remaining item is repeating MTU/service verification on iOS, Android, and Windows — a separate per-platform session, not blocked on further macOS testing. `motionProtocolVerified` remains `false` pending that and an explicit decision to re-enable it in `UniversalBleTransport` (a deliberate code change, not automatic from this log).
 
+#### iOS MTU/service verification (2026-09-08, iPad, debug build over USB)
+
+Ran the debug build on the user's iPad (wired via USB, `flutter run`) and connected to the same physical board. **MTU negotiates to 185**, identical to macOS, well above the 142-byte piece-status floor; no retry needed, no "Bluetooth capacity is insufficient" error. `validateRequiredServices` passed with no errors. `ios/Podfile.lock` was missing the `universal_ble` pod entirely (never previously run for iOS) — `pod install` (triggered automatically by `flutter run`) added it; committed as a legitimate lockfile fix, not a manual edit.
+
+Did not attempt a live Start/Resume + physical-move test on this platform: `motionProtocolVerified` is still hardcoded `false`, so `startOrResume()`/`_sendTargetCommand` immediately errors ("Automatic movement awaits hardware validation...") and falls back to Paused on every platform, by design — this is not iOS-specific and was expected. Movement/completion/Stop/interruption/presence protocol behavior is BLE-hardware-level, not platform-level, and was already established on macOS; per-platform sessions are scoped to MTU/GATT negotiation only, per the plan above.
+
+Remaining before `motionProtocolVerified` can be reconsidered: repeat MTU/service verification on Android and Windows.
+
 ### Platform configuration
 
 Concrete, because all of it is currently absent:
