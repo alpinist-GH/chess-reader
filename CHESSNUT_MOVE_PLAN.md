@@ -77,6 +77,16 @@ Did not attempt a live Start/Resume + physical-move test on this platform: `moti
 
 Remaining before `motionProtocolVerified` can be reconsidered: repeat MTU/service verification on Android and Windows.
 
+#### Android MTU/service verification (2026-09-08, Samsung Galaxy Tab S6 Lite / SM-X400, Android 16, debug build over USB)
+
+Ran the debug build on the user's tablet (wired via USB) and connected to the same physical board. `AndroidManifest.xml` already had the full permission set from the plan (`BLUETOOTH_SCAN`/`neverForLocation`, `BLUETOOTH_CONNECT`, legacy `BLUETOOTH`/`BLUETOOTH_ADMIN`/`ACCESS_FINE_LOCATION` capped at `maxSdkVersion=30`, BLE feature `required=false`) — no changes needed. Runtime permission grant succeeded (device is API 36, so only the SCAN/CONNECT path applied).
+
+App requested MTU 247 (`desiredAndroidMtu`); confirmed via `adb logcat` (`gatt_process_mtu_rsp`) that the board negotiated up to **300** — comfortably above the 142-byte piece-status floor, no retry needed. `validateRequiredServices` passed; FEN (`1b7e8262`) and command-response (`1b7e8273`) notification subscriptions both succeeded with no errors. Two `flutter run`/`flutter attach` debug sessions dropped mid-session before any BLE activity ("Lost connection to device", exit code 0) — the app itself and the USB connection stayed fine both times; a fresh `flutter attach` reconnected the debug session without needing to reinstall. The negotiated-MTU debug print did not appear over the `flutter attach` VM-service stream (likely because the connect happened moments before the debug session started listening) — confirmed instead directly via `adb logcat`, which is a more reliable channel for this kind of check going forward.
+
+Same as iOS: did not attempt live Start/Resume movement — gated off everywhere by `motionProtocolVerified = false`, not Android-specific.
+
+Remaining before `motionProtocolVerified` can be reconsidered: Windows MTU/service verification.
+
 ### Platform configuration
 
 Concrete, because all of it is currently absent:
