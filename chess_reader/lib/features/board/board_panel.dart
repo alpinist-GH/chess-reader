@@ -8,6 +8,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/settings/app_settings.dart';
 import '../../core/state/game_session.dart';
+import '../chessnut/presentation/chessnut_status_widget.dart';
 import '../engine/presentation/engine_panel.dart';
 import 'external_links.dart';
 import 'fen_anchor_dialog.dart';
@@ -106,6 +107,7 @@ class _BoardPanelState extends ConsumerState<BoardPanel> {
                   ref.read(gameSessionProvider.notifier).backToBook(),
             ),
           ),
+        const ChessnutStatusWidget(),
         Wrap(
           alignment: WrapAlignment.center,
           crossAxisAlignment: WrapCrossAlignment.center,

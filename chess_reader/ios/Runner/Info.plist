@@ -6,6 +6,8 @@
 	<false/>
 	<key>NSCameraUsageDescription</key>
 	<string>Scan the pages of a printed chess book with the camera to import it.</string>
+	<key>NSBluetoothAlwaysUsageDescription</key>
+	<string>ChessBook Reader connects to your Chessnut Move electronic chess board via Bluetooth to synchronize moves.</string>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>

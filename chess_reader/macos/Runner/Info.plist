@@ -30,5 +30,7 @@
 	<string>MainMenu</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
+	<key>NSBluetoothAlwaysUsageDescription</key>
+	<string>ChessBook Reader connects to your Chessnut Move electronic chess board via Bluetooth to synchronize moves.</string>
 </dict>
 </plist>

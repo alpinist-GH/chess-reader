@@ -38,7 +38,7 @@ class OpenedBook extends Notifier<String?> {
     ref.read(activeLineProvider.notifier).clear();
     ref.read(currentPageProvider.notifier).set(1);
     ref.read(epubJumpProvider.notifier).consumed();
-    ref.read(gameSessionProvider.notifier).reset();
+    ref.read(gameSessionProvider.notifier).reset(origin: PositionOrigin.bookReset);
   }
 }
 

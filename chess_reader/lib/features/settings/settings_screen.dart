@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/settings/app_settings.dart';
+import '../chessnut/presentation/chessnut_settings_section.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -131,6 +132,7 @@ class SettingsScreen extends ConsumerWidget {
               onChanged: (v) => notifier.setTextScale(v),
             ),
           ),
+          const ChessnutSettingsSection(),
         ],
       ),
     );

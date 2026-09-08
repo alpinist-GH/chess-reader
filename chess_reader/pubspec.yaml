@@ -66,6 +66,8 @@ dependencies:
   # Assemble the captured page images into a single PDF that flows through the
   # existing import + OCR/conversion pipeline.
   pdf: ^3.11.1
+  # Cross-platform BLE support for Chessnut Move e-board.
+  universal_ble: ^2.3.0
 
 # Use a vendored fork of multistockfish_sf16 that adds a macOS native build,
 # so the FFI Stockfish engine runs on macOS too (required for a sandboxed Mac

@@ -341,7 +341,9 @@ class _DiagramTile extends ConsumerWidget {
     );
 
     void load() {
-      final ok = ref.read(gameSessionProvider.notifier).loadFen(fen);
+      final ok = ref
+          .read(gameSessionProvider.notifier)
+          .loadFen(fen, turnRecoverable: true);
       if (!ok) {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
             content: Text('Could not read this diagram reliably')));

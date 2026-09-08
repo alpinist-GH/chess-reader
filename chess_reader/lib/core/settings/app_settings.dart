@@ -19,6 +19,8 @@ class AppSettings {
     this.boardFraction = 0.4,
     this.themeMode = ThemeMode.system,
     this.boardPlacement = BoardPlacement.auto,
+    this.chessnutDeviceId,
+    this.chessnutAutoReconnect = true,
   });
 
   final PieceSet pieceSet;
@@ -40,6 +42,12 @@ class AppSettings {
   /// How the board pane is arranged relative to the book pane.
   final BoardPlacement boardPlacement;
 
+  /// Remembered Bluetooth device identifier for Chessnut Move board.
+  final String? chessnutDeviceId;
+
+  /// Whether to automatically reconnect to the remembered Chessnut board.
+  final bool chessnutAutoReconnect;
+
   ChessboardColorScheme get boardColors =>
       boardThemes[boardThemeName] ?? ChessboardColorScheme.brown;
 
@@ -52,6 +60,9 @@ class AppSettings {
     double? boardFraction,
     ThemeMode? themeMode,
     BoardPlacement? boardPlacement,
+    String? chessnutDeviceId,
+    bool clearChessnutDevice = false,
+    bool? chessnutAutoReconnect,
   }) {
     return AppSettings(
       pieceSet: pieceSet ?? this.pieceSet,
@@ -62,6 +73,11 @@ class AppSettings {
       boardFraction: boardFraction ?? this.boardFraction,
       themeMode: themeMode ?? this.themeMode,
       boardPlacement: boardPlacement ?? this.boardPlacement,
+      chessnutDeviceId: clearChessnutDevice
+          ? null
+          : (chessnutDeviceId ?? this.chessnutDeviceId),
+      chessnutAutoReconnect:
+          chessnutAutoReconnect ?? this.chessnutAutoReconnect,
     );
   }
 }
@@ -91,6 +107,8 @@ class SettingsNotifier extends Notifier<AppSettings> {
   static const _kBoardFraction = 'boardFraction';
   static const _kThemeMode = 'themeMode';
   static const _kBoardPlacement = 'boardPlacement';
+  static const _kChessnutDeviceId = 'chessnutDeviceId';
+  static const _kChessnutAutoReconnect = 'chessnutAutoReconnect';
 
   SharedPreferences get _prefs => ref.read(sharedPrefsProvider);
 
@@ -115,6 +133,8 @@ class SettingsNotifier extends Notifier<AppSettings> {
         (b) => b.name == p.getString(_kBoardPlacement),
         orElse: () => BoardPlacement.auto,
       ),
+      chessnutDeviceId: p.getString(_kChessnutDeviceId),
+      chessnutAutoReconnect: p.getBool(_kChessnutAutoReconnect) ?? true,
     );
   }
 
@@ -157,6 +177,21 @@ class SettingsNotifier extends Notifier<AppSettings> {
   void setBoardPlacement(BoardPlacement placement) {
     _prefs.setString(_kBoardPlacement, placement.name);
     state = state.copyWith(boardPlacement: placement);
+  }
+
+  void setChessnutDevice(String? deviceId) {
+    if (deviceId != null) {
+      _prefs.setString(_kChessnutDeviceId, deviceId);
+      state = state.copyWith(chessnutDeviceId: deviceId);
+    } else {
+      _prefs.remove(_kChessnutDeviceId);
+      state = state.copyWith(clearChessnutDevice: true);
+    }
+  }
+
+  void setChessnutAutoReconnect(bool autoReconnect) {
+    _prefs.setBool(_kChessnutAutoReconnect, autoReconnect);
+    state = state.copyWith(chessnutAutoReconnect: autoReconnect);
   }
 }
 

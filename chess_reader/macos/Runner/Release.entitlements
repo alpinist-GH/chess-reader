@@ -9,5 +9,7 @@
 	     silently fails under the sandbox (App Store + notarized builds). -->
 	<key>com.apple.security.files.user-selected.read-write</key>
 	<true/>
+	<key>com.apple.security.device.bluetooth</key>
+	<true/>
 </dict>
 </plist>

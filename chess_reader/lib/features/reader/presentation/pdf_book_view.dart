@@ -205,8 +205,9 @@ class _DiagramAnchorsOverlay extends ConsumerWidget {
             child: GestureDetector(
               behavior: HitTestBehavior.opaque,
               onTap: () {
-                final ok =
-                    ref.read(gameSessionProvider.notifier).loadFen(d.fen);
+                final ok = ref
+                    .read(gameSessionProvider.notifier)
+                    .loadFen(d.fen, turnRecoverable: true);
                 if (!ok) {
                   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
                       content:
