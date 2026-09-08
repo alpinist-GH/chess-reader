@@ -68,6 +68,35 @@ void main() {
       expect(state.connectionState, ChessnutConnectionState.error);
       expect(state.lastError, contains('missing required Chessnut Move'));
     });
+
+    test('auto-synchronizes without Start/Resume when the board already matches the app', () async {
+      final controller = container.read(chessnutControllerProvider.notifier);
+      await controller.connectToDevice(FakeChessnutBoard.fakeDeviceId);
+      expect(container.read(chessnutControllerProvider).syncState,
+          ChessnutSyncState.paused);
+
+      // A physical FEN report arrives (as real hardware streams continuously)
+      // already showing the same placement as the app's current position.
+      // No motion is required, so the Start/Resume gate should be skipped.
+      fakeBoard.simulatePhysicalMove(
+        ChessnutCodec.extractPlacement(Chess.initial.fen),
+      );
+
+      final state = container.read(chessnutControllerProvider);
+      expect(state.syncState, ChessnutSyncState.synchronized);
+      expect(fakeBoard.receivedCommands.any((cmd) => cmd.length == 35), isFalse);
+    });
+
+    test('stays paused, waiting for Start/Resume, when the board does not match the app', () async {
+      final controller = container.read(chessnutControllerProvider.notifier);
+      await controller.connectToDevice(FakeChessnutBoard.fakeDeviceId);
+
+      final e4Pos = Chess.initial.playUnchecked(NormalMove.fromUci('e2e4'));
+      fakeBoard.simulatePhysicalMove(ChessnutCodec.extractPlacement(e4Pos.fen));
+
+      final state = container.read(chessnutControllerProvider);
+      expect(state.syncState, ChessnutSyncState.paused);
+    });
   });
 
   group('ChessnutController App-to-Board synchronization', () {

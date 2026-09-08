@@ -890,6 +890,20 @@ class ChessnutController extends Notifier<ChessnutState>
           clearIntermediateHint: true,
         );
         _clearBoardLeds();
+      } else if (state.syncState == ChessnutSyncState.paused) {
+        // No motion required to match the app: skip the Start/Resume
+        // gate entirely rather than waiting for an explicit user tap.
+        state = state.copyWith(
+          syncState: ChessnutSyncState.synchronized,
+          statusMessage: 'Synchronized automatically (board already matched).',
+          clearLastError: true,
+          canSendDiagramAnyway: false,
+          clearUnvalidatedPlacement: true,
+          mismatchedSquares: const {},
+          clearMismatchedPlacement: true,
+          clearIntermediateHint: true,
+        );
+        _clearBoardLeds();
       }
       return;
     }
