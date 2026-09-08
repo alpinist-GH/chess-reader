@@ -159,6 +159,13 @@ void main() {
       expect(stopCmd[0], 0x42);
       expect(stopCmd[1], 0x21);
       expect(stopCmd[34], 0);
+
+      // A stray physical report that still matches the (unmoved) app
+      // position must not silently un-pause: Stop requires an explicit
+      // Start/Resume, even though nothing would need to move.
+      fakeBoard.simulatePhysicalMove(ChessnutCodec.extractPlacement(Chess.initial.fen));
+      expect(container.read(chessnutControllerProvider).syncState,
+          ChessnutSyncState.paused);
     });
 
     test('book reset pauses synchronization without moving physical pieces', () async {
@@ -176,6 +183,13 @@ void main() {
       final state = container.read(chessnutControllerProvider);
       expect(state.syncState, ChessnutSyncState.paused);
       expect(fakeBoard.receivedCommands.length, countBefore);
+
+      // The physical board still shows the same (unmoved) placement the
+      // reset landed on. A stray report confirming that must not silently
+      // resume synchronization — book reset requires explicit Start/Resume.
+      fakeBoard.simulatePhysicalMove(ChessnutCodec.extractPlacement(Chess.initial.fen));
+      expect(container.read(chessnutControllerProvider).syncState,
+          ChessnutSyncState.paused);
     });
 
     test('inventory limit check pauses when position exceeds max pieces', () async {

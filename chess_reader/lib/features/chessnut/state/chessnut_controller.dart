@@ -51,6 +51,16 @@ class ChessnutController extends Notifier<ChessnutState>
   String? _pendingTargetPlacement;
   String? _currentSynchronizedPlacement;
 
+  /// True only for the fresh "just connected, never yet manually engaged"
+  /// paused state. Distinguishes that specific state — where a matching
+  /// physical report can safely skip Start/Resume because nothing has
+  /// happened yet — from every other reason the connection can be paused
+  /// (explicit Pause/Stop, book reset, backgrounding, error/timeout
+  /// recovery), all of which intentionally require explicit
+  /// resynchronization per the plan and must not be silently reversed by
+  /// a report that merely happens to still match.
+  bool _autoSyncEligible = false;
+
   StreamSubscription<BleDevice>? _scanSubscription;
   StreamSubscription<bool>? _connectionSubscription;
   StreamSubscription<AvailabilityState>? _availabilitySubscription;
@@ -405,6 +415,7 @@ class ChessnutController extends Notifier<ChessnutState>
         ref.read(settingsProvider.notifier).setChessnutDevice(deviceId);
 
         _reconnectAttempts = 0;
+        _autoSyncEligible = true;
         state = state.copyWith(
           connectionState: ChessnutConnectionState.connected,
           syncState: ChessnutSyncState.paused, // Initially paused per spec
@@ -438,6 +449,7 @@ class ChessnutController extends Notifier<ChessnutState>
     if (_disposed) return;
     _connectionEpoch++;
     _motionEpoch++;
+    _autoSyncEligible = false;
     _inFlightTargetPlacement = null;
     _pendingTargetPlacement = null;
     _currentSynchronizedPlacement = null;
@@ -574,6 +586,7 @@ class ChessnutController extends Notifier<ChessnutState>
   /// User action: Start or Resume synchronization.
   Future<void> startOrResume() async {
     if (!state.isConnected) return;
+    _autoSyncEligible = false;
 
     final session = ref.read(gameSessionProvider);
     final placement = ChessnutCodec.extractPlacement(session.fen);
@@ -617,6 +630,7 @@ class ChessnutController extends Notifier<ChessnutState>
 
   /// User action: Pause synchronization.
   Future<void> pause() async {
+    _autoSyncEligible = false;
     final wasMoving = _inFlightTargetPlacement != null;
     final deviceId = state.connectedDeviceId;
     _motionEpoch++;
@@ -890,9 +904,15 @@ class ChessnutController extends Notifier<ChessnutState>
           clearIntermediateHint: true,
         );
         _clearBoardLeds();
-      } else if (state.syncState == ChessnutSyncState.paused) {
+      } else if (state.syncState == ChessnutSyncState.paused &&
+          _autoSyncEligible) {
         // No motion required to match the app: skip the Start/Resume
         // gate entirely rather than waiting for an explicit user tap.
+        // Only applies to the fresh post-connect paused state — every
+        // other reason for being paused (explicit Pause/Stop, book
+        // reset, backgrounding, error/timeout recovery) clears
+        // _autoSyncEligible and still requires an explicit Start/Resume.
+        _autoSyncEligible = false;
         state = state.copyWith(
           syncState: ChessnutSyncState.synchronized,
           statusMessage: 'Synchronized automatically (board already matched).',
