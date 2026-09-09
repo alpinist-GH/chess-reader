@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/entitlements/pro_entitlement.dart';
 import '../../../core/settings/app_settings.dart';
 import '../model/chessnut_state.dart';
 import '../state/chessnut_controller.dart';
@@ -21,20 +22,34 @@ class ChessnutSettingsSection extends ConsumerWidget {
     final chessnutState = ref.watch(chessnutControllerProvider);
     final controller = ref.read(chessnutControllerProvider.notifier);
     if (!controller.isSupported) return const SizedBox.shrink();
+    final isPro = ref.watch(proEntitlementProvider);
+
+    final header = Padding(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
+      child: Text(
+        'Chessnut Move Board',
+        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+              color: Theme.of(context).colorScheme.primary,
+            ),
+      ),
+    );
+
+    if (!isPro) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (showDivider) const Divider(),
+          header,
+          const _ProLockedCard(),
+        ],
+      );
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (showDivider) const Divider(),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
-          child: Text(
-            'Chessnut Move Board',
-            style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-          ),
-        ),
+        header,
 
         // Status message or error banner
         if (chessnutState.statusMessage != null || chessnutState.lastError != null)
@@ -133,6 +148,59 @@ class ChessnutSettingsSection extends ConsumerWidget {
             );
           }),
       ],
+    );
+  }
+}
+
+/// Upsell shown in place of the connect/scan controls when the user hasn't
+/// purchased Pro. Board discovery/sync stays disabled until then.
+class _ProLockedCard extends StatelessWidget {
+  const _ProLockedCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+      child: Card(
+        margin: EdgeInsets.zero,
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(Icons.lock_outline,
+                      color: Theme.of(context).colorScheme.primary),
+                  const SizedBox(width: 8),
+                  const Text('Pro feature',
+                      style: TextStyle(fontWeight: FontWeight.bold)),
+                ],
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Sync a physical Chessnut Move board with the app — piece '
+                'moves on the board move in the reader, and vice versa. '
+                'Part of the Pro upgrade, alongside play vs computer.',
+              ),
+              const SizedBox(height: 12),
+              Align(
+                alignment: Alignment.centerRight,
+                child: FilledButton(
+                  // TODO(pro-upgrade): open the purchase flow once in-app
+                  // purchases are wired up.
+                  onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Pro upgrade is coming soon.'),
+                    ),
+                  ),
+                  child: const Text('Upgrade to Pro'),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

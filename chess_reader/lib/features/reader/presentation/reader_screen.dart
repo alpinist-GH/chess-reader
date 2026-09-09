@@ -7,6 +7,7 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 
+import '../../../core/entitlements/pro_entitlement.dart';
 import '../../../core/persistence/library_store.dart';
 import '../../../core/settings/app_settings.dart';
 import '../../board/board_panel.dart';
@@ -344,6 +345,7 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
     final canRunOcr = bookPath != null && _canRunOcr(bookPath);
     final chessnutController = ref.watch(chessnutControllerProvider.notifier);
     final chessnutState = ref.watch(chessnutControllerProvider);
+    final isChessnutPro = ref.watch(proEntitlementProvider);
 
     return Scaffold(
       endDrawer: bookPath != null ? ReaderDrawer(path: bookPath) : null,
@@ -354,9 +356,15 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
             Tooltip(
               message: 'Chessnut Move board: ${_chessnutTooltip(chessnutState)}',
               child: TextButton.icon(
-                icon: _chessnutToolbarIcon(context, chessnutState),
+                icon: !isChessnutPro
+                    ? const Icon(Icons.lock_outline, size: 20)
+                    : _chessnutToolbarIcon(context, chessnutState),
                 label: Text(
-                  'Chessnut Move${chessnutState.isConnected ? '' : ' (connect)'}',
+                  'Chessnut Move${!isChessnutPro
+                      ? ' (Pro)'
+                      : chessnutState.isConnected
+                          ? ''
+                          : ' (connect)'}',
                 ),
                 onPressed: () => Navigator.of(context).push(
                   MaterialPageRoute(
