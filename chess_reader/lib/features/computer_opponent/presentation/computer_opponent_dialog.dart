@@ -179,8 +179,12 @@ Future<void> showComputerOpponentDialog(BuildContext context, WidgetRef ref) asy
 
 Future<void> _showProUpgradeDialog(BuildContext context, WidgetRef ref) async {
   final controller = TextEditingController();
+  // Captured before the dialog closes: `context` inside the builder is
+  // deactivated once the route is popped, so looking anything up through it
+  // afterwards throws.
+  final messenger = ScaffoldMessenger.of(context);
 
-  await showDialog<void>(
+  final unlocked = await showDialog<bool>(
     context: context,
     builder: (context) => AlertDialog(
       title: const Row(
@@ -217,24 +221,27 @@ Future<void> _showProUpgradeDialog(BuildContext context, WidgetRef ref) async {
       ),
       actions: [
         TextButton(
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () => Navigator.of(context).pop(false),
           child: const Text('Cancel'),
         ),
         FilledButton(
           onPressed: () {
-            final code = controller.text.trim();
-            final ok = ref.read(proTestUnlockProvider.notifier).redeem(code);
-            Navigator.of(context).pop();
-            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            final ok =
+                ref.read(proTestUnlockProvider.notifier).redeem(controller.text);
+            Navigator.of(context).pop(ok);
+            messenger.showSnackBar(SnackBar(
               content: Text(ok ? 'Pro unlocked for testing!' : 'Invalid code.'),
             ));
-            if (ok && context.mounted) {
-              showComputerOpponentDialog(context, ref);
-            }
           },
           child: const Text('Unlock Pro'),
         ),
       ],
     ),
   );
+
+  controller.dispose();
+
+  if (unlocked == true && context.mounted) {
+    await showComputerOpponentDialog(context, ref);
+  }
 }

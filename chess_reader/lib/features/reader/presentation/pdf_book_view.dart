@@ -206,7 +206,7 @@ class _DiagramAnchorsOverlay extends ConsumerWidget {
             child: GestureDetector(
               behavior: HitTestBehavior.opaque,
               onTap: () {
-                if (ref.read(computerOpponentProvider).isGameActive) {
+                if (ref.read(computerOpponentProvider).ownsBoard) {
                   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
                     content:
                         Text('Cannot load diagram while a game is in progress'),

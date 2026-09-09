@@ -152,6 +152,50 @@ void main() {
       expect(e5Color, ChessnutConstants.ledGreen);
     });
 
+    test('an in-progress opponent move keeps the green guidance LEDs lit',
+        () async {
+      await connectAndSyncBoard();
+
+      fakeEngine.nextBestmove = 'e7e5';
+      final opponent = container.read(computerOpponentProvider.notifier);
+      await opponent.startGame(chosenSide: Side.white);
+
+      container
+          .read(gameSessionProvider.notifier)
+          .playMove(NormalMove.fromUci('e2e4'));
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+      expect(container.read(computerOpponentProvider).phase,
+          ComputerGamePhase.awaitingPhysicalMove);
+
+      fakeBoard.receivedCommands.clear();
+
+      // The user lifts the e7 pawn: an intermediate placement that stays put
+      // well past the 350ms stability window but is inside the mismatch grace
+      // period. It must not repaint the guidance LEDs red.
+      final lifted = ChessnutCodec.extractPlacement(
+        Chess.initial.play(NormalMove.fromUci('e2e4')).board
+            .removePieceAt(Square.e7)
+            .fen,
+      );
+      fakeBoard.simulatePhysicalMove(lifted);
+      await settle();
+
+      expect(container.read(chessnutControllerProvider).syncState,
+          isNot(ChessnutSyncState.mismatch));
+      final ledCommands = fakeBoard.receivedCommands.where(
+        (cmd) => cmd.length == 34 && cmd[0] == 0x43 && cmd[1] == 0x20,
+      );
+      expect(ledCommands, isEmpty);
+
+      // Completing the move is still recognized.
+      fakeBoard.simulatePhysicalMove(
+        container.read(computerOpponentProvider).expectedPhysicalPlacement!,
+      );
+      await settle();
+      expect(container.read(computerOpponentProvider).phase,
+          ComputerGamePhase.humanTurn);
+    });
+
     test('physical placement matching computer move enables human turn without double-playing',
         () async {
       await connectAndSyncBoard();

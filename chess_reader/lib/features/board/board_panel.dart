@@ -60,7 +60,7 @@ class _BoardPanelState extends ConsumerState<BoardPanel> {
 
     final opponent = ref.read(computerOpponentProvider);
     final PlayerSide playerSide;
-    if (opponent.isGameActive) {
+    if (opponent.ownsBoard) {
       if (opponent.phase == ComputerGamePhase.humanTurn &&
           s.position.turn == opponent.humanSide) {
         playerSide = opponent.humanSide == Side.white
@@ -137,7 +137,7 @@ class _BoardPanelState extends ConsumerState<BoardPanel> {
           ),
         ),
         const SizedBox(height: 8),
-        if (opponent.isGameActive || opponent.isFinished)
+        if (opponent.showsGameBar)
           const ComputerGameBar()
         else if (!session.onBookLine)
           Padding(
@@ -157,14 +157,14 @@ class _BoardPanelState extends ConsumerState<BoardPanel> {
             IconButton(
               tooltip: 'Undo move',
               icon: const Icon(Icons.undo),
-              onPressed: (opponent.isGameActive || !session.canUndo)
+              onPressed: (opponent.ownsBoard || !session.canUndo)
                   ? null
                   : () => ref.read(gameSessionProvider.notifier).undo(),
             ),
             IconButton(
               tooltip: 'Reset board',
               icon: const Icon(Icons.restart_alt),
-              onPressed: opponent.isGameActive
+              onPressed: opponent.ownsBoard
                   ? null
                   : () => ref.read(gameSessionProvider.notifier).reset(),
             ),
@@ -177,23 +177,23 @@ class _BoardPanelState extends ConsumerState<BoardPanel> {
             IconButton(
               tooltip: 'Set position from FEN',
               icon: const Icon(Icons.edit_location_alt_outlined),
-              onPressed: opponent.isGameActive
+              onPressed: opponent.ownsBoard
                   ? null
                   : () => showFenAnchorDialog(context, ref),
             ),
             IconButton(
-              tooltip: opponent.isGameActive
+              tooltip: opponent.ownsBoard
                   ? 'Game vs computer in progress'
                   : 'Play vs computer',
               icon: Icon(
-                opponent.isGameActive
+                opponent.ownsBoard
                     ? Icons.smart_toy
                     : Icons.smart_toy_outlined,
-                color: opponent.isGameActive
+                color: opponent.ownsBoard
                     ? Theme.of(context).colorScheme.primary
                     : null,
               ),
-              onPressed: opponent.isGameActive
+              onPressed: opponent.ownsBoard
                   ? null
                   : () => showComputerOpponentDialog(context, ref),
             ),

@@ -36,10 +36,10 @@ class OpenedBook extends Notifier<String?> {
   /// Clears per-book transient state so switching books doesn't carry over the
   /// previous book's board, selected move, or scroll/jump intent.
   void _resetReadingState() {
-    final opponent = ref.read(computerOpponentProvider);
-    if (opponent.isGameActive || opponent.isFinished) {
-      ref.read(computerOpponentProvider.notifier).returnToBook();
-    }
+    // Abandon rather than return to book: the saved reader context belongs to
+    // the book being closed, and restoring it asynchronously would clobber the
+    // state this method is in the middle of resetting for the new book.
+    ref.read(computerOpponentProvider.notifier).abandonGame();
     ref.read(activeLineProvider.notifier).clear();
     ref.read(currentPageProvider.notifier).set(1);
     ref.read(epubJumpProvider.notifier).consumed();
@@ -79,15 +79,21 @@ class ActiveLineNotifier extends Notifier<ActiveLine?> {
 
   void clear() => state = null;
 
+  /// Puts back a previously captured selection without touching the board.
+  /// Used when exiting a game vs computer: the board is restored from the
+  /// session snapshot, which already holds any excursion made off this line,
+  /// so re-applying the line would snap the excursion away.
+  void restore(ActiveLine? line) => state = line;
+
   /// User tapped a move in the book: show its resulting position.
   void select(List<ResolvedMove> moves, int index, Object sourceKey) {
-    if (ref.read(computerOpponentProvider).isGameActive) return;
+    if (ref.read(computerOpponentProvider).ownsBoard) return;
     state = ActiveLine(moves: moves, index: index, sourceKey: sourceKey);
     _applyToBoard();
   }
 
   void next() {
-    if (ref.read(computerOpponentProvider).isGameActive) return;
+    if (ref.read(computerOpponentProvider).ownsBoard) return;
     final line = state;
     if (line == null || !line.hasNext) return;
     state = ActiveLine(
@@ -96,7 +102,7 @@ class ActiveLineNotifier extends Notifier<ActiveLine?> {
   }
 
   void previous() {
-    if (ref.read(computerOpponentProvider).isGameActive) return;
+    if (ref.read(computerOpponentProvider).ownsBoard) return;
     final line = state;
     if (line == null || !line.hasPrevious) return;
     state = ActiveLine(

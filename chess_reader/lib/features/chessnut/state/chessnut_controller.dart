@@ -230,7 +230,7 @@ class ChessnutController extends Notifier<ChessnutState>
     }
 
     // In LED-only mode for computer opponent games, suppress all motor targets.
-    if (ref.read(computerOpponentProvider).isGameActive) {
+    if (ref.read(computerOpponentProvider).ownsBoard) {
       return;
     }
 
@@ -637,7 +637,7 @@ class ChessnutController extends Notifier<ChessnutState>
     if (!state.isConnected) return;
     _autoSyncEligible = false;
 
-    if (ref.read(computerOpponentProvider).isGameActive) {
+    if (ref.read(computerOpponentProvider).ownsBoard) {
       state = state.copyWith(
         syncState: ChessnutSyncState.synchronized,
         statusMessage: 'Synchronized with board (LED mode).',
@@ -1002,8 +1002,7 @@ class ChessnutController extends Notifier<ChessnutState>
       _currentSynchronizedPlacement = placement;
 
       final opponent = ref.read(computerOpponentProvider);
-      if (opponent.isGameActive &&
-          opponent.phase == ComputerGamePhase.awaitingPhysicalMove &&
+      if (opponent.phase == ComputerGamePhase.awaitingPhysicalMove &&
           placement == opponent.expectedPhysicalPlacement) {
         _clearBoardLeds();
         ref.read(computerOpponentProvider.notifier).onPhysicalMoveMatched();
@@ -1103,7 +1102,7 @@ class ChessnutController extends Notifier<ChessnutState>
     }
 
     final opponent = ref.read(computerOpponentProvider);
-    if (opponent.isGameActive) {
+    if (opponent.ownsBoard) {
       if (opponent.phase == ComputerGamePhase.awaitingPhysicalMove) {
         if (reportedPlacement == opponent.expectedPhysicalPlacement) {
           _stabilityTimer?.cancel();
@@ -1119,10 +1118,13 @@ class ChessnutController extends Notifier<ChessnutState>
             clearIntermediateHint: true,
           );
           return;
-        } else {
-          _triggerMismatch(reportedPlacement);
-          return;
         }
+        // Mid-move placements (piece lifted, rook not yet moved) are the norm
+        // while the user executes the opponent's move. Go through the same
+        // grace period as everywhere else so a transient placement doesn't
+        // immediately replace the green guidance LEDs with red mismatch ones.
+        _scheduleMismatchGrace(session, reportedPlacement);
+        return;
       }
 
       if (opponent.phase != ComputerGamePhase.humanTurn) {
@@ -1159,7 +1161,7 @@ class ChessnutController extends Notifier<ChessnutState>
     }
 
     // 2. Physical Takeback (Seamless Undo) matching (suppressed during computer games)
-    if (!opponent.isGameActive) {
+    if (!opponent.ownsBoard) {
       final prev = ref.read(gameSessionProvider.notifier).previousPosition;
       if (prev != null) {
         final prevPlacement = ChessnutCodec.extractPlacement(prev.$1.fen);
@@ -1186,7 +1188,7 @@ class ChessnutController extends Notifier<ChessnutState>
     }
 
     // 3. Restricted side-to-move recovery for newly imported diagrams (suppressed during computer games)
-    if (!opponent.isGameActive && session.legal && session.turnRecoverable) {
+    if (!opponent.ownsBoard && session.legal && session.turnRecoverable) {
       final candidateSetup = Setup(
         board: session.position.board,
         turn: session.position.turn.opposite,
@@ -1248,18 +1250,27 @@ class ChessnutController extends Notifier<ChessnutState>
     }
 
     // 5. Timer 2: Grace period (~1.75s) before mismatch UI and red LEDs
-    if (_graceTimer == null || !_graceTimer!.isActive) {
-      final revision = session.revision;
-      final epoch = _connectionEpoch;
-      _graceTimer = Timer(ChessnutConstants.mismatchGraceDuration, () {
-        if (!_disposed &&
-            epoch == _connectionEpoch &&
-            revision == ref.read(gameSessionProvider).revision &&
-            reportedPlacement == _latestReportedPlacement) {
-          _triggerMismatch(reportedPlacement);
-        }
-      });
-    }
+    _scheduleMismatchGrace(session, reportedPlacement);
+  }
+
+  /// Arms the ~1.75s grace timer that turns a persistent unexpected placement
+  /// into the mismatch state and red LEDs. A timer already running is left
+  /// alone so a series of intermediate placements shares one grace period.
+  void _scheduleMismatchGrace(
+    GameSessionState session,
+    String reportedPlacement,
+  ) {
+    if (_graceTimer != null && _graceTimer!.isActive) return;
+    final revision = session.revision;
+    final epoch = _connectionEpoch;
+    _graceTimer = Timer(ChessnutConstants.mismatchGraceDuration, () {
+      if (!_disposed &&
+          epoch == _connectionEpoch &&
+          revision == ref.read(gameSessionProvider).revision &&
+          reportedPlacement == _latestReportedPlacement) {
+        _triggerMismatch(reportedPlacement);
+      }
+    });
   }
 
   String? _detectIntermediateHint(

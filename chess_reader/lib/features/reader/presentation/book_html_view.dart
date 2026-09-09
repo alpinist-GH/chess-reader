@@ -342,7 +342,7 @@ class _DiagramTile extends ConsumerWidget {
     );
 
     void load() {
-      if (ref.read(computerOpponentProvider).isGameActive) {
+      if (ref.read(computerOpponentProvider).ownsBoard) {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
           content: Text('Cannot load diagram while a game is in progress'),
         ));

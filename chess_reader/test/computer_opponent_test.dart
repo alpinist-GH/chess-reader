@@ -3,7 +3,10 @@ import 'package:chess_reader/core/settings/app_settings.dart';
 import 'package:chess_reader/core/state/game_session.dart';
 import 'package:chess_reader/features/computer_opponent/domain/computer_opponent_models.dart';
 import 'package:chess_reader/features/computer_opponent/state/computer_opponent_provider.dart';
+import 'package:chess_reader/core/models/move_token.dart';
 import 'package:chess_reader/features/engine/state/analysis_provider.dart';
+import 'package:chess_reader/features/reader/domain/move_resolver.dart';
+import 'package:chess_reader/features/reader/state/book_providers.dart';
 import 'package:dartchess/dartchess.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -328,6 +331,200 @@ void main() {
           ComputerGamePhase.idle);
       expect(container.read(gameSessionProvider).fen, excursionFen);
       expect(container.read(gameSessionProvider).canUndo, isTrue);
+    });
+  });
+
+  group('Regressions', () {
+    ResolvedMove resolvedMove(String uci, Position before) => ResolvedMove(
+          token: MoveToken(san: uci, start: 0, end: uci.length),
+          move: NormalMove.fromUci(uci),
+          positionBefore: before,
+          positionAfter: before.play(NormalMove.fromUci(uci)),
+        );
+
+    test('a stopped search\'s belated bestmove is not played after resuming',
+        () async {
+      fakeEngine.autoRespondBestmove = false;
+      final opponent = container.read(computerOpponentProvider.notifier);
+      await opponent.startGame(chosenSide: Side.white);
+
+      container
+          .read(gameSessionProvider.notifier)
+          .playMove(NormalMove.fromUci('e2e4'));
+      expect(container.read(computerOpponentProvider).phase,
+          ComputerGamePhase.engineThinking);
+
+      // Backgrounding stops the search, but the engine still owes an answer.
+      opponent.didChangeAppLifecycleState(AppLifecycleState.paused);
+      opponent.resumeGame();
+      expect(container.read(computerOpponentProvider).phase,
+          ComputerGamePhase.engineThinking);
+
+      // The stopped search finally answers: it must be swallowed.
+      fakeEngine.pushLine('bestmove e7e5');
+      await Future<void>.delayed(const Duration(milliseconds: 20));
+      expect(container.read(computerOpponentProvider).phase,
+          ComputerGamePhase.engineThinking);
+      expect(container.read(gameSessionProvider).lastMove,
+          NormalMove.fromUci('e2e4'));
+
+      // The resumed search's own answer is the one that gets played.
+      fakeEngine.pushLine('bestmove g8f6');
+      await Future<void>.delayed(const Duration(milliseconds: 20));
+      expect(container.read(gameSessionProvider).lastMove,
+          NormalMove.fromUci('g8f6'));
+      expect(container.read(computerOpponentProvider).phase,
+          ComputerGamePhase.humanTurn);
+    });
+
+    test('returnToBook after a rematch still restores the book position',
+        () async {
+      final session = container.read(gameSessionProvider.notifier);
+      final bookPos = Chess.initial.play(NormalMove.fromUci('d2d4'));
+      session.setPosition(bookPos, lastMove: NormalMove.fromUci('d2d4'));
+      final bookFen = container.read(gameSessionProvider).fen;
+
+      fakeEngine.autoRespondBestmove = false;
+      final opponent = container.read(computerOpponentProvider.notifier);
+      await opponent.startGame(
+        chosenSide: Side.white,
+        startFrom: Chess.initial,
+      );
+      await opponent.resign();
+      await opponent.rematch();
+      expect(container.read(computerOpponentProvider).isGameActive, isTrue);
+
+      await opponent.returnToBook();
+      expect(container.read(gameSessionProvider).fen, bookFen);
+    });
+
+    test('analysis is restored after a rematch, not only after the first game',
+        () async {
+      await container.read(analysisProvider.notifier).toggle();
+      expect(container.read(analysisProvider).enabled, isTrue);
+
+      fakeEngine.autoRespondBestmove = false;
+      final opponent = container.read(computerOpponentProvider.notifier);
+      await opponent.startGame(chosenSide: Side.white);
+      await opponent.resign();
+      await opponent.rematch();
+      expect(container.read(analysisProvider).enabled, isFalse);
+
+      await opponent.returnToBook();
+      expect(container.read(analysisProvider).enabled, isTrue);
+    });
+
+    test('returnToBook restores the selected book line', () async {
+      final line = [
+        resolvedMove('d2d4', Chess.initial),
+        resolvedMove('g8f6', Chess.initial.play(NormalMove.fromUci('d2d4'))),
+      ];
+      container.read(activeLineProvider.notifier).select(line, 1, 'page-1');
+      // ...and then explored a variation off that book move.
+      container
+          .read(gameSessionProvider.notifier)
+          .playMove(NormalMove.fromUci('c2c4'));
+      final excursionFen = container.read(gameSessionProvider).fen;
+      expect(container.read(activeLineProvider), isNotNull);
+
+      fakeEngine.autoRespondBestmove = false;
+      final opponent = container.read(computerOpponentProvider.notifier);
+      await opponent.startGame(
+        chosenSide: Side.white,
+        startFrom: Chess.initial,
+      );
+      // Book navigation is inert while the game owns the board.
+      container.read(activeLineProvider.notifier).previous();
+      expect(container.read(activeLineProvider)!.index, 1);
+
+      await opponent.returnToBook();
+      final restored = container.read(activeLineProvider);
+      expect(restored, isNotNull);
+      expect(restored!.index, 1);
+      expect(restored.sourceKey, 'page-1');
+      // The excursion, not the book move the line points at, is what comes back.
+      expect(container.read(gameSessionProvider).fen, excursionFen);
+      expect(container.read(gameSessionProvider).canUndo, isTrue);
+    });
+
+    test('a session jump during the human turn is not mistaken for a move',
+        () async {
+      fakeEngine.autoRespondBestmove = false;
+      final opponent = container.read(computerOpponentProvider.notifier);
+      await opponent.startGame(chosenSide: Side.white);
+
+      // Something else moves the board wholesale (a restored snapshot, a
+      // diagram anchor). `lastMove` is set, but it is not the human's move.
+      container.read(gameSessionProvider.notifier).setPosition(
+            Chess.initial.play(NormalMove.fromUci('d2d4')),
+            lastMove: NormalMove.fromUci('d2d4'),
+          );
+
+      expect(container.read(computerOpponentProvider).phase,
+          ComputerGamePhase.humanTurn);
+      expect(container.read(computerOpponentProvider).history, isEmpty);
+      expect(fakeEngine.sentCommands, isNot(contains('go movetime 1000')));
+    });
+
+    test('castling is sent to the engine in the standard king-move form',
+        () async {
+      // White to move with both sides able to castle short.
+      final pos = Chess.fromSetup(Setup.parseFen(
+        'rnbqk2r/pppp1ppp/5n2/2b1p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 4 4',
+      ));
+      fakeEngine.autoRespondBestmove = false;
+      final opponent = container.read(computerOpponentProvider.notifier);
+      await opponent.startGame(chosenSide: Side.white, startFrom: pos);
+
+      // dartchess normalizes castling to king-takes-rook (e1h1); the engine
+      // must still be told e1g1.
+      container
+          .read(gameSessionProvider.notifier)
+          .playMove(NormalMove.fromUci('e1h1'));
+
+      expect(
+        fakeEngine.sentCommands,
+        contains(predicate<String>((c) =>
+            c.startsWith('position fen ') && c.endsWith(' moves e1g1'))),
+      );
+    });
+
+    test('closing the book abandons the game without restoring its snapshot',
+        () async {
+      fakeEngine.autoRespondBestmove = false;
+      final opponent = container.read(computerOpponentProvider.notifier);
+      await opponent.startGame(chosenSide: Side.white);
+      expect(container.read(computerOpponentProvider).isGameActive, isTrue);
+
+      container.read(openedBookProvider.notifier).close();
+
+      expect(container.read(computerOpponentProvider).phase,
+          ComputerGamePhase.idle);
+      expect(container.read(gameSessionProvider).fen, kInitialFEN);
+      expect(container.read(activeLineProvider), isNull);
+    });
+
+    test('retryEngine reports a failure instead of throwing', () async {
+      fakeEngine.autoRespondBestmove = false;
+      final opponent = container.read(computerOpponentProvider.notifier);
+      await opponent.startGame(chosenSide: Side.white);
+
+      // Force the next engine start to blow up.
+      fakeEngine.failOnStart = true;
+      await opponent.rematch();
+      expect(container.read(computerOpponentProvider).phase,
+          ComputerGamePhase.error);
+
+      await opponent.retryEngine();
+      expect(container.read(computerOpponentProvider).phase,
+          ComputerGamePhase.error);
+      expect(container.read(computerOpponentProvider).errorMessage,
+          contains('Failed to start chess engine'));
+
+      fakeEngine.failOnStart = false;
+      await opponent.retryEngine();
+      expect(container.read(computerOpponentProvider).phase,
+          ComputerGamePhase.humanTurn);
     });
   });
 }

@@ -108,6 +108,7 @@ class AnalysisNotifier extends Notifier<AnalysisState> {
   }
 
   bool _wasEnabledBeforeOpponent = false;
+  bool _pausedForOpponent = false;
 
   /// Stops and disposes the engine, if running. Safe to call when no engine
   /// has been started. Used both on provider disposal and when the app is
@@ -125,7 +126,13 @@ class AnalysisNotifier extends Notifier<AnalysisState> {
   /// preserving whether analysis was enabled so it can be restored on game exit.
   Future<void> pauseForOpponent() async {
     _debounce?.cancel();
-    _wasEnabledBeforeOpponent = state.enabled;
+    // A rematch (or a new game started from the finished banner) pauses again
+    // while analysis is already paused. Keep the flag captured the first time,
+    // otherwise the "was it on before the game?" answer becomes a permanent no.
+    if (!_pausedForOpponent) {
+      _wasEnabledBeforeOpponent = state.enabled;
+      _pausedForOpponent = true;
+    }
     if (_searchingFen != null) _engine?.send('stop');
     _searchingFen = null;
     _pendingFen = null;
@@ -135,6 +142,8 @@ class AnalysisNotifier extends Notifier<AnalysisState> {
 
   /// Restores analysis if it was enabled prior to playing against the computer.
   Future<void> resumeFromOpponent() async {
+    if (!_pausedForOpponent) return;
+    _pausedForOpponent = false;
     if (_wasEnabledBeforeOpponent) {
       _wasEnabledBeforeOpponent = false;
       await toggle();

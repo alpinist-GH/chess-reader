@@ -106,6 +106,25 @@ class SavedReaderContext {
   final ActiveLine? activeLine;
 }
 
+/// Returns the UCI string to send to a UCI engine for [move] played in
+/// [before].
+///
+/// dartchess normalizes castling to the king-takes-own-rook form (`e1h1`),
+/// which engines only accept with `UCI_Chess960` enabled. Rewrite it to the
+/// standard king-moves-two-squares form (`e1g1`) so replaying the move list
+/// never desynchronizes the engine from the app.
+String uciForEngine(Position before, NormalMove move) {
+  final piece = before.board.pieceAt(move.from);
+  if (piece == null || piece.role != Role.king) return move.uci;
+  final target = before.board.pieceAt(move.to);
+  if (target == null || target.color != piece.color || target.role != Role.rook) {
+    return move.uci;
+  }
+  final kingside = move.to.file > move.from.file;
+  final kingTo = Square(move.from.rank * 8 + (kingside ? 6 : 2));
+  return NormalMove(from: move.from, to: kingTo).uci;
+}
+
 /// Computes a normalized repetition key for [pos], incorporating board placement,
 /// active color, castling rights, and legally capturable en-passant square.
 String repetitionKeyFor(Position pos) {
@@ -153,6 +172,17 @@ class ComputerOpponentState {
       phase == ComputerGamePhase.engineThinking ||
       phase == ComputerGamePhase.awaitingPhysicalMove ||
       phase == ComputerGamePhase.paused;
+
+  /// True whenever the computer game owns the board, i.e. anything other than
+  /// [ComputerGamePhase.idle]. Free play, undo/reset, FEN loading, diagram
+  /// anchors and book navigation stay disabled until the game is exited, so
+  /// the finished and error banners can't be silently played out from under.
+  bool get ownsBoard => phase != ComputerGamePhase.idle;
+
+  /// True while the status banner (active game, result, or engine error)
+  /// should be visible in place of the normal board controls.
+  bool get showsGameBar =>
+      phase != ComputerGamePhase.idle && phase != ComputerGamePhase.setup;
 
   bool get isHumanTurn => phase == ComputerGamePhase.humanTurn;
 

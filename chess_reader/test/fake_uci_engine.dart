@@ -11,6 +11,9 @@ class FakeUciEngine implements UciEngine {
   String? nextBestmove = 'e7e5';
   bool autoRespondBestmove = true;
 
+  /// When true, [start] throws, simulating a missing/broken engine binary.
+  bool failOnStart = false;
+
   @override
   Stream<String> get lines {
     if (_controller.isClosed) {
@@ -21,6 +24,7 @@ class FakeUciEngine implements UciEngine {
 
   @override
   Future<void> start() async {
+    if (failOnStart) throw StateError('engine unavailable');
     disposed = false;
     started = true;
     if (_controller.isClosed) {

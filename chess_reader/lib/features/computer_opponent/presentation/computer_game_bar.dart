@@ -114,17 +114,30 @@ class ComputerGameBar extends ConsumerWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                TextButton(
-                  onPressed: () =>
-                      ref.read(computerOpponentProvider.notifier).returnToBook(),
-                  child: const Text('End Game'),
-                ),
-                const SizedBox(width: 8),
-                FilledButton(
-                  onPressed: () =>
-                      ref.read(computerOpponentProvider.notifier).retryEngine(),
-                  child: const Text('Retry Engine'),
-                ),
+                // Nothing to retry when the failure happened before a game was
+                // ever set up (entitlement, unusable start position).
+                if (opponent.savedReaderContext == null)
+                  FilledButton(
+                    onPressed: () => ref
+                        .read(computerOpponentProvider.notifier)
+                        .returnToBook(),
+                    child: const Text('Dismiss'),
+                  )
+                else ...[
+                  TextButton(
+                    onPressed: () => ref
+                        .read(computerOpponentProvider.notifier)
+                        .returnToBook(),
+                    child: const Text('End Game'),
+                  ),
+                  const SizedBox(width: 8),
+                  FilledButton(
+                    onPressed: () => ref
+                        .read(computerOpponentProvider.notifier)
+                        .retryEngine(),
+                    child: const Text('Retry Engine'),
+                  ),
+                ],
               ],
             ),
           ],
