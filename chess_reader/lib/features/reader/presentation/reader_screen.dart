@@ -10,6 +10,10 @@ import 'package:share_plus/share_plus.dart';
 import '../../../core/persistence/library_store.dart';
 import '../../../core/settings/app_settings.dart';
 import '../../board/board_panel.dart';
+import '../../chessnut/model/chessnut_state.dart';
+import '../../chessnut/presentation/chessnut_icon.dart';
+import '../../chessnut/presentation/chessnut_quick_settings_screen.dart';
+import '../../chessnut/state/chessnut_controller.dart';
 import '../../library/about.dart';
 import '../../library/converted_library_screen.dart';
 import '../../library/library_home.dart';
@@ -28,6 +32,45 @@ import 'pdf_html_view.dart';
 import 'reader_drawer.dart';
 
 bool _isEpub(String path) => path.toLowerCase().endsWith('.epub');
+
+/// Compact connection/sync summary for the toolbar tooltip.
+String _chessnutTooltip(ChessnutState state) {
+  if (!state.isConnected) return state.statusMessage ?? 'Not connected';
+  return switch (state.syncState) {
+    ChessnutSyncState.synchronized => 'In sync',
+    ChessnutSyncState.moving => 'Pieces moving...',
+    ChessnutSyncState.aligning => 'Aligning board...',
+    ChessnutSyncState.mismatch => 'Position mismatch',
+    ChessnutSyncState.paused => 'Connected, paused',
+    ChessnutSyncState.error => state.lastError ?? 'Sync error',
+  };
+}
+
+/// Toolbar icon reflecting Chessnut connection/sync state at a glance, so
+/// the feature stays visible without opening Settings.
+Widget _chessnutToolbarIcon(BuildContext context, ChessnutState state) {
+  if (state.connectionState == ChessnutConnectionState.connecting ||
+      state.connectionState == ChessnutConnectionState.scanning ||
+      state.syncState == ChessnutSyncState.moving ||
+      state.syncState == ChessnutSyncState.aligning) {
+    return const SizedBox(
+      width: 20,
+      height: 20,
+      child: CircularProgressIndicator(strokeWidth: 2),
+    );
+  }
+  if (!state.isConnected) {
+    return const ChessnutIcon();
+  }
+  final badgeColor = switch (state.syncState) {
+    ChessnutSyncState.synchronized => Colors.green,
+    ChessnutSyncState.mismatch => Colors.amber[800],
+    ChessnutSyncState.error => Theme.of(context).colorScheme.error,
+    ChessnutSyncState.paused => Colors.blueGrey,
+    ChessnutSyncState.moving || ChessnutSyncState.aligning => Colors.blueGrey,
+  };
+  return ChessnutIcon(badgeColor: badgeColor);
+}
 
 /// Main screen: a library home until a book is opened, then the book pane and
 /// board (side-by-side on wide layouts, a toggleable board panel on phones).
@@ -299,12 +342,28 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
     if (bookPath != null) _handleOpenedPdf(bookPath);
     final showViewToggle = bookPath != null && !_isEpub(bookPath);
     final canRunOcr = bookPath != null && _canRunOcr(bookPath);
+    final chessnutController = ref.watch(chessnutControllerProvider.notifier);
+    final chessnutState = ref.watch(chessnutControllerProvider);
 
     return Scaffold(
       endDrawer: bookPath != null ? ReaderDrawer(path: bookPath) : null,
       appBar: AppBar(
         title: const Text('ChessBook Reader'),
         actions: [
+          if (chessnutController.isSupported)
+            Tooltip(
+              message: 'Chessnut Move board: ${_chessnutTooltip(chessnutState)}',
+              child: TextButton.icon(
+                icon: _chessnutToolbarIcon(context, chessnutState),
+                label: Text(
+                  'Chessnut Move${chessnutState.isConnected ? '' : ' (connect)'}',
+                ),
+                onPressed: () => Navigator.of(context).push(
+                  MaterialPageRoute(
+                      builder: (_) => const ChessnutQuickSettingsScreen()),
+                ),
+              ),
+            ),
           if (canRunOcr)
             TextButton.icon(
               onPressed: () => _runOcrNow(bookPath),

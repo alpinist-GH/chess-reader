@@ -8,7 +8,11 @@ import '../state/chessnut_controller.dart';
 /// Chessnut Move section within Settings for discovery, connection,
 /// remembered board management, and auto-reconnect preferences.
 class ChessnutSettingsSection extends ConsumerWidget {
-  const ChessnutSettingsSection({super.key});
+  const ChessnutSettingsSection({super.key, this.showDivider = true});
+
+  /// Whether to lead with a [Divider], appropriate when embedded after other
+  /// sections (the general Settings screen) but not on a standalone page.
+  final bool showDivider;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -21,7 +25,7 @@ class ChessnutSettingsSection extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Divider(),
+        if (showDivider) const Divider(),
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
           child: Text(
