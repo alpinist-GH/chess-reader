@@ -4,6 +4,31 @@ All notable changes to ChessBook Reader are documented here. The project loosely
 follows [Keep a Changelog](https://keepachangelog.com/) and
 [Semantic Versioning](https://semver.org/).
 
+## [2.0.0] — 2026-09-09
+
+### Added
+- **Chessnut Move electronic board support** (Pro): pair a Chessnut Move over
+  Bluetooth for two-way sync with the app — moves you tap in the book or make
+  on the virtual board move the physical pieces, and moves you make on the
+  physical board update the app. On-board LEDs guide you back in sync if a
+  mismatch is detected.
+- **Play vs Computer** (Pro): play a full game against the built-in Stockfish
+  engine from any position — a book anchor, a diagram, or a fresh start — at
+  an adjustable, human-like strength. If a Chessnut Move is connected, the
+  engine's moves are prompted on the physical board via LEDs.
+- **Guess the Move** (Pro): a training mode that quizzes you to predict the
+  next move in a book's game line before it's revealed, with hints and a
+  running score.
+- **Pro Unlock**: a one-time in-app purchase unlocks Chessnut Move sync, Play
+  vs Computer, and Guess the Move for good, with 5 free trial sessions shared
+  across the three so you can try them first.
+- The empty-library screen now links to the Internet Archive to browse
+  public-domain chess books.
+
+### Fixed
+- The macOS About panel now shows the author's name instead of the bundle
+  identifier.
+
 ## [1.4.15] — 2026-08-19
 
 ### Changed
