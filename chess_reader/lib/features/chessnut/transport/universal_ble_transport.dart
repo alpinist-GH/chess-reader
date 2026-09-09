@@ -11,12 +11,16 @@ class UniversalBleTransport implements ChessnutTransport {
     _initCallbacks();
   }
 
-  // No hardware captures establish these contracts yet. Keep motor commands
-  // disabled until a verified implementation can supply them per connection.
+  // Verified on real hardware (macOS: completion, stop, manual interruption,
+  // and piece-presence semantics; macOS/iOS/Android/Windows: MTU and required
+  // services) — see CHESSNUT_MOVE_PLAN.md's Milestone 1 validation log.
   @override
-  bool get motionProtocolVerified => false;
+  bool get motionProtocolVerified => true;
+
+  // Null until the controller decodes a piece-status response for this
+  // connection; battery coordinates alone do not establish presence.
   @override
-  Map<String, int>? get availablePieces => null;
+  Map<String, int>? availablePieces;
 
   Timer? _scanTimer;
   bool _disposed = false;
@@ -127,6 +131,7 @@ class UniversalBleTransport implements ChessnutTransport {
   Future<void> disconnect(String deviceId) async {
     if (_activeDeviceId == deviceId) {
       _activeDeviceId = null;
+      availablePieces = null;
     }
     await UniversalBle.disconnect(deviceId);
   }

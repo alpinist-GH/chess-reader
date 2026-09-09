@@ -119,8 +119,12 @@ void main() {
       expect(state.syncState, ChessnutSyncState.synchronized);
       expect(fakeBoard.receivedCommands.isNotEmpty, isTrue);
 
-      // Verify target command bytes: starts with 0x42, 0x21
-      final targetCmd = fakeBoard.receivedCommands.first;
+      // Verify target command bytes: starts with 0x42, 0x21. startOrResume
+      // also issues a piece-status query first to confirm inventory is
+      // still current, so the target command is not necessarily first.
+      final targetCmd = fakeBoard.receivedCommands.firstWhere(
+        (c) => c.length == 35,
+      );
       expect(targetCmd.length, 35);
       expect(targetCmd[0], 0x42);
       expect(targetCmd[1], 0x21);

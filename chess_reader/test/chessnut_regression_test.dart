@@ -255,8 +255,11 @@ void main() {
     test('every motion entry point rejects unverified $reason', () async {
       if (reason == 'protocol') board.motionProtocolVerified = false;
       if (reason == 'mtu') board.simulatedMtu = 23;
-      if (reason == 'inventory') board.availablePieces = null;
-      if (reason == 'missing piece') board.availablePieces = {};
+      if (reason == 'inventory') {
+        board.respondToPieceStatusQuery = false;
+        board.availablePieces = null;
+      }
+      if (reason == 'missing piece') board.setPieceAvailability('K', false);
       await controller.connectToDevice(FakeChessnutBoard.fakeDeviceId);
       board.receivedCommands.clear();
       await controller.startOrResume();

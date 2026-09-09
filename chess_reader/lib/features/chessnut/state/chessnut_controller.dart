@@ -46,6 +46,7 @@ class ChessnutController extends Notifier<ChessnutState>
   Timer? _reconnectTimer;
   int _reconnectAttempts = 0;
   bool _explicitlyDisconnected = false;
+  Completer<void>? _pieceStatusCompleter;
 
   String? _inFlightTargetPlacement;
   String? _pendingTargetPlacement;
@@ -454,6 +455,11 @@ class ChessnutController extends Notifier<ChessnutState>
     _pendingTargetPlacement = null;
     _currentSynchronizedPlacement = null;
     _latestReportedPlacement = null;
+    _transport.availablePieces = null;
+    if (_pieceStatusCompleter != null && !_pieceStatusCompleter!.isCompleted) {
+      _pieceStatusCompleter!.complete();
+    }
+    _pieceStatusCompleter = null;
     _cleanupTimers();
     state = state.copyWith(
       connectionState: ChessnutConnectionState.disconnected,
@@ -573,6 +579,33 @@ class ChessnutController extends Notifier<ChessnutState>
     } catch (_) {}
   }
 
+  /// Requests a fresh piece-status report and waits for it to be decoded
+  /// (updating [ChessnutTransport.availablePieces]) before returning, rather
+  /// than authorizing motion from a report that may be up to
+  /// [ChessnutConstants.batteryPollInterval] stale. Leaves availability
+  /// unchanged (typically still null / last-known) on timeout or failure;
+  /// the caller treats null as unverified and refuses to move.
+  Future<void> _refreshAvailablePieces(String deviceId) async {
+    if ((state.negotiatedMtu ?? 0) < ChessnutConstants.pieceStatusReportMinMtu) {
+      return;
+    }
+    final completer = Completer<void>();
+    _pieceStatusCompleter = completer;
+    try {
+      await _transport.writeCommand(
+        deviceId,
+        ChessnutCodec.encodePieceStatusQueryCommand(),
+      );
+      await completer.future.timeout(const Duration(seconds: 2));
+    } catch (_) {
+      // Write failure or no response in time.
+    } finally {
+      if (identical(_pieceStatusCompleter, completer)) {
+        _pieceStatusCompleter = null;
+      }
+    }
+  }
+
   void _startBatteryPollingTimer() {
     _batteryPollTimer?.cancel();
     _batteryPollTimer = Timer.periodic(
@@ -624,6 +657,18 @@ class ChessnutController extends Notifier<ChessnutState>
       clearUnvalidatedPlacement: true,
       clearPendingTurnRecovery: true,
     );
+
+    // Resuming (after any pause, backgrounding, or reconnect) is exactly
+    // when a piece is most likely to have gone missing unnoticed; confirm
+    // inventory now rather than trusting a report that may be up to
+    // batteryPollInterval stale. Deliberately not done on every rapid
+    // navigation send: that path must stay synchronous (see
+    // _sendTargetCommand) so back-to-back position changes correctly
+    // collapse into a single in-flight command plus one pending target.
+    final deviceId = state.connectedDeviceId;
+    if (deviceId != null) {
+      await _refreshAvailablePieces(deviceId);
+    }
 
     await _sendTargetCommand(placement);
   }
@@ -701,6 +746,14 @@ class ChessnutController extends Notifier<ChessnutState>
       clearUnvalidatedPlacement: true,
     );
 
+    // See startOrResume: confirm inventory now rather than trusting a
+    // report that may be up to batteryPollInterval stale, since this is a
+    // deliberate one-off override rather than the rapid navigation path.
+    final deviceId = state.connectedDeviceId;
+    if (deviceId != null) {
+      await _refreshAvailablePieces(deviceId);
+    }
+
     await _sendTargetCommand(placement);
   }
 
@@ -741,7 +794,6 @@ class ChessnutController extends Notifier<ChessnutState>
 
     if (!_foreground) return;
     final inventory = ChessnutCodec.validateInventory(placement);
-    final available = _transport.availablePieces;
     String? error;
     if (!inventory.isValid) {
       error = inventory.errorMessage;
@@ -751,21 +803,26 @@ class ChessnutController extends Notifier<ChessnutState>
     } else if (!_transport.motionProtocolVerified) {
       error =
           'Automatic movement awaits hardware validation of completion and stopping.';
-    } else if (available == null) {
-      error =
-          'Piece availability is unknown. Verify the physical inventory first.';
-    } else {
-      final required = <String, int>{};
-      for (final piece in placement.split('')) {
-        if (ChessnutCodec.nominalPieceOrder.contains(piece)) {
-          required[piece] = (required[piece] ?? 0) + 1;
+    }
+
+    final available = _transport.availablePieces;
+    if (error == null) {
+      if (available == null) {
+        error =
+            'Piece availability is unknown. Verify the physical inventory first.';
+      } else {
+        final required = <String, int>{};
+        for (final piece in placement.split('')) {
+          if (ChessnutCodec.nominalPieceOrder.contains(piece)) {
+            required[piece] = (required[piece] ?? 0) + 1;
+          }
         }
-      }
-      for (final entry in required.entries) {
-        if (entry.value > (available[entry.key] ?? 0)) {
-          error =
-              'Required piece unavailable: ${entry.key} (need ${entry.value}).';
-          break;
+        for (final entry in required.entries) {
+          if (entry.value > (available[entry.key] ?? 0)) {
+            error =
+                'Required piece unavailable: ${entry.key} (need ${entry.value}).';
+            break;
+          }
         }
       }
     }
@@ -837,9 +894,33 @@ class ChessnutController extends Notifier<ChessnutState>
     }
 
     // Piece status response
-    final pieces = ChessnutCodec.decodePieceStatusResponse(packet);
-    if (pieces != null) {
-      state = state.copyWith(pieceStatuses: pieces);
+    final isPieceStatusResponse =
+        packet.length >= 3 &&
+        packet[0] == 0x41 &&
+        packet[1] == 0x89 &&
+        packet[2] == 0x0B;
+    if (isPieceStatusResponse) {
+      final pieces = ChessnutCodec.decodePieceStatusResponse(packet);
+      if (pieces != null) {
+        state = state.copyWith(pieceStatuses: pieces);
+        // (0, 0) is the confirmed sentinel for a piece lifted fully off the
+        // board; any other coordinate (including an off-board reserve slot)
+        // counts as available.
+        final available = <String, int>{};
+        for (final p in pieces) {
+          if (p.x == 0 && p.y == 0) continue;
+          available[p.pieceChar] = (available[p.pieceChar] ?? 0) + 1;
+        }
+        _transport.availablePieces = available;
+      } else {
+        // Header matched but per-piece identities were missing, duplicated,
+        // or out of range: the report cannot be trusted to attribute
+        // coordinates to the correct pieces, so treat availability as
+        // unverified rather than authorizing motion from it.
+        _transport.availablePieces = null;
+      }
+      _pieceStatusCompleter?.complete();
+      _pieceStatusCompleter = null;
       return;
     }
   }

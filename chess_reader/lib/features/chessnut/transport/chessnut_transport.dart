@@ -10,6 +10,7 @@ abstract class ChessnutTransport {
   /// Currently verified available pieces, including off-board reserves.
   /// Null means unknown; battery coordinates alone do not establish presence.
   Map<String, int>? get availablePieces;
+  set availablePieces(Map<String, int>? value);
 
   /// Stream of discovered BLE devices during scan.
   Stream<BleDevice> get scanResults;

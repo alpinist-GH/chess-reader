@@ -25,6 +25,8 @@ class FakeChessnutBoard implements ChessnutTransport {
       piece: ChessnutCodec.nominalPieceOrder.where((p) => p == piece).length,
   };
   bool autoCompleteMotion = true;
+  bool respondToPieceStatusQuery = true;
+  final Set<int> absentPieceIndices = {};
 
   final _scanController = StreamController<BleDevice>.broadcast();
   final _availabilityController =
@@ -158,15 +160,17 @@ class FakeChessnutBoard implements ChessnutTransport {
         data[0] == 0x41 &&
         data[1] == 0x01 &&
         data[2] == 0x0B) {
+      if (!respondToPieceStatusQuery) return;
       final response = Uint8List(139);
       response[0] = 0x41;
       response[1] = 0x89;
       response[2] = 0x0B;
       for (var i = 0; i < ChessnutConstants.totalNominalPieces; i++) {
         final offset = 3 + i * 4;
+        final absent = absentPieceIndices.contains(i);
         response[offset] = i + 1; // piece identity
-        response[offset + 1] = 100; // x
-        response[offset + 2] = 100; // y
+        response[offset + 1] = absent ? 0 : 100; // x
+        response[offset + 2] = absent ? 0 : 100; // y
         response[offset + 3] = pieceBatteries[i] ?? 85; // battery
       }
       onCommandResponse?.call(response);
@@ -292,6 +296,20 @@ class FakeChessnutBoard implements ChessnutTransport {
   /// Simulates piece battery update.
   void simulatePieceBattery(int pieceIndex, int battery) {
     pieceBatteries[pieceIndex] = battery;
+  }
+
+  /// Marks every motorized piece of [pieceChar] as physically present or
+  /// absent (reported as coordinate (0, 0)) in the next piece-status query
+  /// response, matching the hardware-confirmed absence sentinel.
+  void setPieceAvailability(String pieceChar, bool available) {
+    for (var i = 0; i < ChessnutCodec.nominalPieceOrder.length; i++) {
+      if (ChessnutCodec.nominalPieceOrder[i] != pieceChar) continue;
+      if (available) {
+        absentPieceIndices.remove(i);
+      } else {
+        absentPieceIndices.add(i);
+      }
+    }
   }
 
   void simulateAvailability(AvailabilityState availability) {
