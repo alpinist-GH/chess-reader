@@ -8,6 +8,9 @@ import '../../../core/settings/app_settings.dart';
 import '../model/chessnut_state.dart';
 import '../state/chessnut_controller.dart';
 
+const _kChessnutSyncDescription = 'Sync a physical Chessnut Move board with '
+    'the app — piece moves on the board move in the reader, and vice versa.';
+
 /// Chessnut Move section within Settings for discovery, connection,
 /// remembered board management, and auto-reconnect preferences.
 class ChessnutSettingsSection extends ConsumerWidget {
@@ -87,7 +90,14 @@ class ChessnutSettingsSection extends ConsumerWidget {
                   )
                 else
                   FilledButton.tonal(
-                    onPressed: () {
+                    onPressed: () async {
+                      final proceed = await presentProFeatureGate(
+                        context,
+                        ref,
+                        featureName: 'Chessnut Move sync',
+                        featureDescription: _kChessnutSyncDescription,
+                      );
+                      if (!context.mounted || !proceed) return;
                       ref.read(proTrialRemainingProvider.notifier).consumeIfEligible();
                       controller.connectToDevice(
                         settings.chessnutDeviceId!,
@@ -150,7 +160,14 @@ class ChessnutSettingsSection extends ConsumerWidget {
                       backgroundColor: Colors.greenAccent,
                     )
                   : FilledButton.tonal(
-                      onPressed: () {
+                      onPressed: () async {
+                        final proceed = await presentProFeatureGate(
+                          context,
+                          ref,
+                          featureName: 'Chessnut Move sync',
+                          featureDescription: _kChessnutSyncDescription,
+                        );
+                        if (!context.mounted || !proceed) return;
                         ref.read(proTrialRemainingProvider.notifier).consumeIfEligible();
                         controller.connectToDevice(
                           device.deviceId,

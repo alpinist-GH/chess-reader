@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 
+import 'pro_entitlement.dart';
 import 'pro_trial.dart';
 import 'purchase_service.dart';
 
@@ -16,6 +17,97 @@ Future<bool> showProPurchaseDialog(BuildContext context, WidgetRef ref) async {
     builder: (context) => const _ProPurchaseDialog(),
   );
   return result ?? ref.read(proPurchasedProvider);
+}
+
+/// Gate to call right before entering a Pro-gated feature. Once purchased,
+/// returns `true` immediately with no interruption. While free trial credits
+/// remain, shows a short dialog naming the feature and the remaining credit
+/// count, returning whether the caller should proceed (the caller is still
+/// responsible for spending the credit itself). Once credits are exhausted,
+/// shows the full purchase dialog instead.
+Future<bool> presentProFeatureGate(
+  BuildContext context,
+  WidgetRef ref, {
+  required String featureName,
+  required String featureDescription,
+}) async {
+  if (ref.read(proPurchasedProvider)) return true;
+  if (!ref.read(proEntitlementProvider)) {
+    return showProPurchaseDialog(context, ref);
+  }
+  final remaining = ref.read(proTrialRemainingProvider);
+  final proceed = await showDialog<bool>(
+    context: context,
+    builder: (context) => _ProFeatureIntroDialog(
+      featureName: featureName,
+      featureDescription: featureDescription,
+      remaining: remaining,
+    ),
+  );
+  return proceed ?? false;
+}
+
+class _ProFeatureIntroDialog extends StatelessWidget {
+  const _ProFeatureIntroDialog({
+    required this.featureName,
+    required this.featureDescription,
+    required this.remaining,
+  });
+
+  final String featureName;
+  final String featureDescription;
+  final int remaining;
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Row(
+        children: [
+          Icon(Icons.workspace_premium_outlined,
+              color: Theme.of(context).colorScheme.primary),
+          const SizedBox(width: 8),
+          Expanded(child: Text(featureName)),
+        ],
+      ),
+      content: SizedBox(
+        width: 360,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(featureDescription),
+            const SizedBox(height: 12),
+            const Text(
+              'Part of the Pro upgrade, alongside Chessnut Move board sync, '
+              'Play vs Computer, and Guess the Move training — sharing a pool '
+              'of $kProTrialCredits free sessions before a one-time Pro '
+              'Unlock.',
+            ),
+            const SizedBox(height: 12),
+            Text(
+              remaining == 1
+                  ? 'You have 1 free session left.'
+                  : 'You have $remaining free sessions left.',
+              style: Theme.of(context)
+                  .textTheme
+                  .titleSmall
+                  ?.copyWith(fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(false),
+          child: const Text('Not now'),
+        ),
+        FilledButton(
+          onPressed: () => Navigator.of(context).pop(true),
+          child: const Text('Continue'),
+        ),
+      ],
+    );
+  }
 }
 
 class _ProPurchaseDialog extends ConsumerStatefulWidget {

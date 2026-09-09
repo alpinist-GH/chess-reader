@@ -2,6 +2,9 @@ import 'package:chessground/chessground.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/entitlements/pro_purchase_dialog.dart';
+import '../../core/entitlements/pro_trial.dart';
+import '../../core/entitlements/purchase_service.dart';
 import '../../core/settings/app_settings.dart';
 import '../chessnut/presentation/chessnut_settings_section.dart';
 
@@ -132,9 +135,54 @@ class SettingsScreen extends ConsumerWidget {
               onChanged: (v) => notifier.setTextScale(v),
             ),
           ),
+          const Divider(),
+          const _ProStatusSection(),
           const ChessnutSettingsSection(),
         ],
       ),
+    );
+  }
+}
+
+class _ProStatusSection extends ConsumerWidget {
+  const _ProStatusSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final purchased = ref.watch(proPurchasedProvider);
+    final remaining = ref.watch(proTrialRemainingProvider);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const _SectionHeader('Pro'),
+        if (purchased)
+          const ListTile(
+            leading: Icon(Icons.verified, color: Colors.green),
+            title: Text('Pro unlocked'),
+            subtitle: Text(
+              'Chessnut Move sync, Play vs Computer, and Guess the Move are '
+              'unlocked on this device and any other you sign in on.',
+            ),
+          )
+        else
+          ListTile(
+            leading: const Icon(Icons.lock_outline),
+            title: Text(
+              remaining > 0
+                  ? '$remaining of $kProTrialCredits free sessions left'
+                  : 'Free sessions used up',
+            ),
+            subtitle: const Text(
+              'Chessnut Move sync, Play vs Computer, and Guess the Move '
+              'training.',
+            ),
+            trailing: FilledButton(
+              onPressed: () => showProPurchaseDialog(context, ref),
+              child: const Text('Upgrade to Pro'),
+            ),
+          ),
+      ],
     );
   }
 }

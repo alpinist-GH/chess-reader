@@ -261,13 +261,14 @@ class _BoardPanelState extends ConsumerState<BoardPanel> {
                   ? null
                   : canStartGuess
                   ? () async {
-                      if (!ref.read(proEntitlementProvider)) {
-                        final unlocked = await showProPurchaseDialog(
-                          context,
-                          ref,
-                        );
-                        if (!context.mounted || !unlocked) return;
-                      }
+                      final proceed = await presentProFeatureGate(
+                        context,
+                        ref,
+                        featureName: 'Guess the Move',
+                        featureDescription:
+                            "Test yourself by predicting each move before it's revealed.",
+                      );
+                      if (!context.mounted || !proceed) return;
                       ref.read(guessMoveProvider.notifier).start();
                     }
                   : null,

@@ -2,23 +2,24 @@ import 'package:dartchess/dartchess.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/entitlements/pro_entitlement.dart';
 import '../../../core/entitlements/pro_purchase_dialog.dart';
 import '../../../core/entitlements/pro_trial.dart';
 import '../../../core/state/game_session.dart';
 import '../domain/computer_opponent_models.dart';
 import '../state/computer_opponent_provider.dart';
 
-/// Shows the "Play vs Computer" setup sheet or Pro unlock dialog.
+/// Shows the "Play vs Computer" setup sheet, after a Pro feature gate (an
+/// info dialog with the remaining trial count, or the full purchase dialog
+/// once credits are exhausted).
 Future<void> showComputerOpponentDialog(BuildContext context, WidgetRef ref) async {
-  final hasAccess = ref.read(proEntitlementProvider);
-  if (!hasAccess) {
-    final unlocked = await showProPurchaseDialog(context, ref);
-    if (unlocked && context.mounted) {
-      await showComputerOpponentDialog(context, ref);
-    }
-    return;
-  }
+  final proceed = await presentProFeatureGate(
+    context,
+    ref,
+    featureName: 'Play vs Computer',
+    featureDescription:
+        'Play a full game against the built-in Stockfish engine.',
+  );
+  if (!proceed || !context.mounted) return;
 
   final session = ref.read(gameSessionProvider);
   final canStartFromCurrent = session.legal &&
