@@ -22,6 +22,10 @@ class ChessnutSettingsSection extends ConsumerWidget {
     final chessnutState = ref.watch(chessnutControllerProvider);
     final controller = ref.read(chessnutControllerProvider.notifier);
     if (!controller.isSupported) return const SizedBox.shrink();
+    // Only touch the Bluetooth adapter once the user actually views this
+    // section (reached via the "Chessnut Move" toolbar button or Settings),
+    // not when the app starts.
+    controller.ensureAvailabilityListening();
     final isPro = ref.watch(proEntitlementProvider);
 
     final header = Padding(

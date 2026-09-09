@@ -30,6 +30,7 @@ class ChessnutController extends Notifier<ChessnutState>
 
   bool _disposed = false;
   bool _foreground = true;
+  bool _availabilityListeningStarted = false;
   AvailabilityState? _availability;
   bool get isSupported => _availability != AvailabilityState.unsupported;
   bool get _bluetoothAvailable =>
@@ -84,10 +85,21 @@ class ChessnutController extends Notifier<ChessnutState>
     });
 
     _listenToAppSession();
-    _listenToAvailability();
     _checkInitialAutoReconnect();
 
     return const ChessnutState();
+  }
+
+  /// Starts querying/observing Bluetooth adapter state. Deferred out of
+  /// [build] because merely querying adapter state (e.g. instantiating
+  /// CBCentralManager on iOS) is enough to trigger the OS Bluetooth
+  /// permission prompt — this must only happen once the user actually
+  /// engages with the Chessnut feature (opening its settings, scanning, or
+  /// connecting), not the moment the app opens.
+  void ensureAvailabilityListening() {
+    if (_availabilityListeningStarted || _disposed) return;
+    _availabilityListeningStarted = true;
+    _listenToAvailability();
   }
 
   void _cleanupTimers() {
@@ -257,6 +269,7 @@ class ChessnutController extends Notifier<ChessnutState>
   // --- Scan and Connection Management ---
 
   Future<void> startScan() async {
+    ensureAvailabilityListening();
     if (state.isConnected ||
         state.connectionState == ChessnutConnectionState.connecting) {
       return;
@@ -326,6 +339,7 @@ class ChessnutController extends Notifier<ChessnutState>
   }
 
   Future<void> connectToDevice(String deviceId, {String? nameHint}) async {
+    ensureAvailabilityListening();
     if (_disposed ||
         _connectionBusy ||
         !_foreground ||
