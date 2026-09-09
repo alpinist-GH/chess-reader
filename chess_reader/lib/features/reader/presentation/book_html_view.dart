@@ -13,6 +13,7 @@ import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import '../../../core/persistence/library_store.dart';
 import '../../../core/settings/app_settings.dart';
 import '../../../core/state/game_session.dart';
+import '../../computer_opponent/state/computer_opponent_provider.dart';
 import '../../vision/domain/board_annotations.dart';
 import '../data/epub_book.dart';
 import '../state/book_providers.dart';
@@ -341,6 +342,12 @@ class _DiagramTile extends ConsumerWidget {
     );
 
     void load() {
+      if (ref.read(computerOpponentProvider).isGameActive) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Cannot load diagram while a game is in progress'),
+        ));
+        return;
+      }
       final ok = ref
           .read(gameSessionProvider.notifier)
           .loadFen(fen, turnRecoverable: true);

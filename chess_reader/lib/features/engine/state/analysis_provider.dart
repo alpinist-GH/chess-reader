@@ -9,6 +9,12 @@ import '../data/engine_factory.dart';
 import '../domain/uci_engine.dart';
 import '../domain/uci_parser.dart';
 
+/// Factory provider for creating a UCI engine for analysis.
+/// Overridden in tests to provide fake or mock engines.
+final analysisEngineFactoryProvider = Provider<UciEngine Function()>(
+  (ref) => createEngine,
+);
+
 /// What the engine currently thinks about the position on the board.
 class AnalysisState {
   const AnalysisState({
@@ -101,6 +107,8 @@ class AnalysisNotifier extends Notifier<AnalysisState> {
     return const AnalysisState();
   }
 
+  bool _wasEnabledBeforeOpponent = false;
+
   /// Stops and disposes the engine, if running. Safe to call when no engine
   /// has been started. Used both on provider disposal and when the app is
   /// quitting, so the native Stockfish process isn't left blocked on a
@@ -111,6 +119,26 @@ class AnalysisNotifier extends Notifier<AnalysisState> {
     final engine = _engine;
     _engine = null;
     await engine?.dispose();
+  }
+
+  /// Shuts down the analysis engine completely for computer opponent play,
+  /// preserving whether analysis was enabled so it can be restored on game exit.
+  Future<void> pauseForOpponent() async {
+    _debounce?.cancel();
+    _wasEnabledBeforeOpponent = state.enabled;
+    if (_searchingFen != null) _engine?.send('stop');
+    _searchingFen = null;
+    _pendingFen = null;
+    state = const AnalysisState(enabled: false, running: false);
+    await stopEngine();
+  }
+
+  /// Restores analysis if it was enabled prior to playing against the computer.
+  Future<void> resumeFromOpponent() async {
+    if (_wasEnabledBeforeOpponent) {
+      _wasEnabledBeforeOpponent = false;
+      await toggle();
+    }
   }
 
   Future<void> toggle() async {
@@ -133,7 +161,8 @@ class AnalysisNotifier extends Notifier<AnalysisState> {
 
   Future<void> _ensureStarted() async {
     if (_engine != null) return;
-    final engine = createEngine();
+    final factory = ref.read(analysisEngineFactoryProvider);
+    final engine = factory();
     await engine.start();
     _subscription = engine.lines.listen(_onLine);
     final threads = ref.read(settingsProvider).engineThreads;

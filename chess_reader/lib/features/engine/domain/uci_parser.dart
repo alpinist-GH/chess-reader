@@ -70,8 +70,50 @@ UciInfo? parseInfoLine(String line) {
 }
 
 /// Returns the best move of a `bestmove ...` line, or null otherwise.
+/// Ignores non-moves such as `(none)` or `0000`. Supports promotions like `e7e8q`.
 String? parseBestmove(String line) {
   if (!line.startsWith('bestmove')) return null;
   final parts = line.split(RegExp(r'\s+'));
-  return parts.length > 1 ? parts[1] : null;
+  if (parts.length <= 1) return null;
+  final move = parts[1];
+  if (move == '(none)' || move == '0000') return null;
+  return move;
+}
+
+/// Advertised capabilities of a UCI engine discovered from `option` lines.
+class EngineCapabilities {
+  const EngineCapabilities({
+    this.supportsLimitStrength = false,
+    this.minElo = 1320,
+    this.maxElo = 3190,
+  });
+
+  final bool supportsLimitStrength;
+  final int minElo;
+  final int maxElo;
+}
+
+/// Parses UCI lines (e.g. from engine startup) to detect capabilities.
+EngineCapabilities parseEngineCapabilities(Iterable<String> lines) {
+  var supportsLimitStrength = false;
+  var minElo = 1320;
+  var maxElo = 3190;
+
+  for (final line in lines) {
+    if (!line.startsWith('option name ')) continue;
+    if (line.contains('name UCI_LimitStrength')) {
+      supportsLimitStrength = true;
+    } else if (line.contains('name UCI_Elo')) {
+      final minMatch = RegExp(r'\bmin\s+(\d+)\b').firstMatch(line);
+      final maxMatch = RegExp(r'\bmax\s+(\d+)\b').firstMatch(line);
+      if (minMatch != null) minElo = int.parse(minMatch.group(1)!);
+      if (maxMatch != null) maxElo = int.parse(maxMatch.group(1)!);
+    }
+  }
+
+  return EngineCapabilities(
+    supportsLimitStrength: supportsLimitStrength,
+    minElo: minElo,
+    maxElo: maxElo,
+  );
 }

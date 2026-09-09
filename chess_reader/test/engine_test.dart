@@ -35,7 +35,25 @@ void main() {
 
   test('parseBestmove', () {
     expect(parseBestmove('bestmove e2e4 ponder e7e5'), 'e2e4');
+    expect(parseBestmove('bestmove e7e8q'), 'e7e8q');
+    expect(parseBestmove('bestmove e7e8q ponder e2e4'), 'e7e8q');
+    expect(parseBestmove('bestmove (none)'), isNull);
+    expect(parseBestmove('bestmove 0000'), isNull);
     expect(parseBestmove('info depth 1'), isNull);
+  });
+
+  test('parseEngineCapabilities detects limit strength and Elo range', () {
+    final lines = [
+      'id name Stockfish 16',
+      'option name Threads type spin default 1 min 1 max 1024',
+      'option name UCI_LimitStrength type check default false',
+      'option name UCI_Elo type spin default 1320 min 1320 max 3190',
+      'uciok',
+    ];
+    final caps = parseEngineCapabilities(lines);
+    expect(caps.supportsLimitStrength, isTrue);
+    expect(caps.minElo, 1320);
+    expect(caps.maxElo, 3190);
   });
 
   test('pvToSan converts UCI pv from a FEN', () {

@@ -7,6 +7,8 @@ import 'package:universal_ble/universal_ble.dart';
 
 import '../../../core/settings/app_settings.dart';
 import '../../../core/state/game_session.dart';
+import '../../computer_opponent/domain/computer_opponent_models.dart';
+import '../../computer_opponent/state/computer_opponent_provider.dart';
 import '../codec/chessnut_codec.dart';
 import '../model/chessnut_constants.dart';
 import '../model/chessnut_state.dart';
@@ -204,6 +206,10 @@ class ChessnutController extends Notifier<ChessnutState>
       _currentSynchronizedPlacement = ChessnutCodec.extractPlacement(next.fen);
       return; // Physical moves and takebacks must never echo motor commands.
     }
+    if (next.origin == PositionOrigin.computer) {
+      // Opponent moves in LED-only mode never echo motor commands.
+      return;
+    }
     _latestReportedPlacement = null;
     state = state.copyWith(
       canSendDiagramAnyway: false,
@@ -220,6 +226,11 @@ class ChessnutController extends Notifier<ChessnutState>
     // Book lifecycle change (opening/closing book) pauses synchronization
     if (next.origin == PositionOrigin.bookReset) {
       pause();
+      return;
+    }
+
+    // In LED-only mode for computer opponent games, suppress all motor targets.
+    if (ref.read(computerOpponentProvider).isGameActive) {
       return;
     }
 
@@ -626,6 +637,15 @@ class ChessnutController extends Notifier<ChessnutState>
     if (!state.isConnected) return;
     _autoSyncEligible = false;
 
+    if (ref.read(computerOpponentProvider).isGameActive) {
+      state = state.copyWith(
+        syncState: ChessnutSyncState.synchronized,
+        statusMessage: 'Synchronized with board (LED mode).',
+        clearLastError: true,
+      );
+      return;
+    }
+
     final session = ref.read(gameSessionProvider);
     final placement = ChessnutCodec.extractPlacement(session.fen);
 
@@ -980,6 +1000,23 @@ class ChessnutController extends Notifier<ChessnutState>
       _stabilityTimer?.cancel();
       _graceTimer?.cancel();
       _currentSynchronizedPlacement = placement;
+
+      final opponent = ref.read(computerOpponentProvider);
+      if (opponent.isGameActive &&
+          opponent.phase == ComputerGamePhase.awaitingPhysicalMove &&
+          placement == opponent.expectedPhysicalPlacement) {
+        _clearBoardLeds();
+        ref.read(computerOpponentProvider.notifier).onPhysicalMoveMatched();
+        state = state.copyWith(
+          syncState: ChessnutSyncState.synchronized,
+          statusMessage: 'Opponent move acknowledged on board.',
+          mismatchedSquares: const {},
+          clearMismatchedPlacement: true,
+          clearIntermediateHint: true,
+        );
+        return;
+      }
+
       if (state.syncState == ChessnutSyncState.mismatch ||
           state.syncState == ChessnutSyncState.aligning) {
         state = state.copyWith(
@@ -1065,6 +1102,35 @@ class ChessnutController extends Notifier<ChessnutState>
       return;
     }
 
+    final opponent = ref.read(computerOpponentProvider);
+    if (opponent.isGameActive) {
+      if (opponent.phase == ComputerGamePhase.awaitingPhysicalMove) {
+        if (reportedPlacement == opponent.expectedPhysicalPlacement) {
+          _stabilityTimer?.cancel();
+          _graceTimer?.cancel();
+          _clearBoardLeds();
+          _currentSynchronizedPlacement = reportedPlacement;
+          ref.read(computerOpponentProvider.notifier).onPhysicalMoveMatched();
+          state = state.copyWith(
+            syncState: ChessnutSyncState.synchronized,
+            statusMessage: 'Opponent move acknowledged on board.',
+            mismatchedSquares: const {},
+            clearMismatchedPlacement: true,
+            clearIntermediateHint: true,
+          );
+          return;
+        } else {
+          _triggerMismatch(reportedPlacement);
+          return;
+        }
+      }
+
+      if (opponent.phase != ComputerGamePhase.humanTurn) {
+        // Out-of-turn physical move attempt: ignore it.
+        return;
+      }
+    }
+
     // 1. Legal-move matching
     if (session.legal) {
       for (final move in _generateAllLegalMoves(session.position)) {
@@ -1092,33 +1158,35 @@ class ChessnutController extends Notifier<ChessnutState>
       }
     }
 
-    // 2. Physical Takeback (Seamless Undo) matching
-    final prev = ref.read(gameSessionProvider.notifier).previousPosition;
-    if (prev != null) {
-      final prevPlacement = ChessnutCodec.extractPlacement(prev.$1.fen);
-      if (prevPlacement == reportedPlacement) {
-        // Physical takeback detected!
-        _stabilityTimer?.cancel();
-        _graceTimer?.cancel();
-        _clearBoardLeds();
+    // 2. Physical Takeback (Seamless Undo) matching (suppressed during computer games)
+    if (!opponent.isGameActive) {
+      final prev = ref.read(gameSessionProvider.notifier).previousPosition;
+      if (prev != null) {
+        final prevPlacement = ChessnutCodec.extractPlacement(prev.$1.fen);
+        if (prevPlacement == reportedPlacement) {
+          // Physical takeback detected!
+          _stabilityTimer?.cancel();
+          _graceTimer?.cancel();
+          _clearBoardLeds();
 
-        ref
-            .read(gameSessionProvider.notifier)
-            .undo(origin: PositionOrigin.physical);
+          ref
+              .read(gameSessionProvider.notifier)
+              .undo(origin: PositionOrigin.physical);
 
-        state = state.copyWith(
-          syncState: ChessnutSyncState.synchronized,
-          statusMessage: 'Takeback recognized.',
-          mismatchedSquares: const {},
-          clearMismatchedPlacement: true,
-          clearIntermediateHint: true,
-        );
-        return;
+          state = state.copyWith(
+            syncState: ChessnutSyncState.synchronized,
+            statusMessage: 'Takeback recognized.',
+            mismatchedSquares: const {},
+            clearMismatchedPlacement: true,
+            clearIntermediateHint: true,
+          );
+          return;
+        }
       }
     }
 
-    // 3. Restricted side-to-move recovery for newly imported diagrams
-    if (session.legal && session.turnRecoverable) {
+    // 3. Restricted side-to-move recovery for newly imported diagrams (suppressed during computer games)
+    if (!opponent.isGameActive && session.legal && session.turnRecoverable) {
       final candidateSetup = Setup(
         board: session.position.board,
         turn: session.position.turn.opposite,
@@ -1267,6 +1335,21 @@ class ChessnutController extends Notifier<ChessnutState>
   void _clearBoardLeds() {
     _writeLedOrStop(ChessnutCodec.encodeClearLedsCommand());
   }
+
+  /// Lights the LEDs in green for squares affected by the computer engine's move.
+  void guideOpponentMove(String prePlacement, String postPlacement) {
+    final diffSquares = ChessnutCodec.diffPlacements(prePlacement, postPlacement);
+    if (diffSquares.isEmpty) return;
+
+    final leds = <int, int>{};
+    for (final sq in diffSquares) {
+      leds[sq] = ChessnutConstants.ledGreen;
+    }
+    _writeLedOrStop(ChessnutCodec.encodeSquareLedsCommand(leds));
+  }
+
+  /// Clears all square LEDs on the physical board.
+  void clearLeds() => _clearBoardLeds();
 
   /// User action: Confirm proposed side-to-move turn correction.
   void confirmTurnRecovery() {

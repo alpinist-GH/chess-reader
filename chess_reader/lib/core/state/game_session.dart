@@ -16,6 +16,23 @@ enum PositionOrigin {
   /// Book lifecycle change: opening/closing a book clears book reading state.
   /// Synchronization should pause rather than moving physical pieces.
   bookReset,
+
+  /// Computer opponent move played during a game vs the engine.
+  computer,
+}
+
+/// Snapshot of reader/session state captured before starting a computer game,
+/// allowing complete restoration back to the exact reader position and excursion.
+class GameSessionSnapshot {
+  const GameSessionSnapshot({
+    required this.state,
+    required this.undoStack,
+    required this.bookAnchor,
+  });
+
+  final GameSessionState state;
+  final List<(Position, NormalMove?)> undoStack;
+  final (Position, NormalMove?)? bookAnchor;
 }
 
 /// Immutable snapshot of the board state the app is currently showing.
@@ -215,6 +232,37 @@ class GameSession extends Notifier<GameSessionState> {
       origin: PositionOrigin.physical,
       revision: state.revision + 1,
       turnRecoverable: false,
+    );
+  }
+
+  /// Captures the full session state including undo stack and book anchor.
+  GameSessionSnapshot captureSnapshot() {
+    return GameSessionSnapshot(
+      state: state,
+      undoStack: List.of(_undoStack),
+      bookAnchor: _bookAnchor,
+    );
+  }
+
+  /// Restores a previously captured snapshot.
+  void restoreSnapshot(
+    GameSessionSnapshot snapshot, {
+    PositionOrigin origin = PositionOrigin.app,
+  }) {
+    _undoStack
+      ..clear()
+      ..addAll(snapshot.undoStack);
+    _bookAnchor = snapshot.bookAnchor;
+    state = GameSessionState(
+      position: snapshot.state.position,
+      lastMove: snapshot.state.lastMove,
+      canUndo: _undoStack.isNotEmpty,
+      onBookLine: snapshot.state.onBookLine,
+      legal: snapshot.state.legal,
+      displayFen: snapshot.state.displayFen,
+      origin: origin,
+      revision: state.revision + 1,
+      turnRecoverable: snapshot.state.turnRecoverable,
     );
   }
 

@@ -4,6 +4,7 @@ import 'package:pdfrx/pdfrx.dart';
 
 import '../../../core/persistence/library_store.dart';
 import '../../../core/state/game_session.dart';
+import '../../computer_opponent/state/computer_opponent_provider.dart';
 import '../data/book_conversion.dart';
 import '../data/page_moves_service.dart';
 import '../state/book_providers.dart';
@@ -205,6 +206,13 @@ class _DiagramAnchorsOverlay extends ConsumerWidget {
             child: GestureDetector(
               behavior: HitTestBehavior.opaque,
               onTap: () {
+                if (ref.read(computerOpponentProvider).isGameActive) {
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                    content:
+                        Text('Cannot load diagram while a game is in progress'),
+                  ));
+                  return;
+                }
                 final ok = ref
                     .read(gameSessionProvider.notifier)
                     .loadFen(d.fen, turnRecoverable: true);
