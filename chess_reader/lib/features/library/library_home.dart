@@ -11,13 +11,13 @@ import 'book_cover.dart';
 import 'open_book_button.dart';
 import 'scan_book_button.dart';
 
-/// Public-domain chess books on Project Gutenberg, offered as a starting
-/// point instead of bundling EPUBs in the app: some storefronts (e.g. the
-/// China mainland App Store) require a publishing permit for apps that ship
-/// book content, which bundled samples would trigger.
+/// Public-domain chess books on Project Gutenberg and the Internet Archive,
+/// offered as a starting point instead of bundling EPUBs in the app: some
+/// storefronts (e.g. the China mainland App Store) require a publishing
+/// permit for apps that ship book content, which bundled samples would
+/// trigger.
 const _kGutenbergLaskerUrl = 'https://www.gutenberg.org/ebooks/5614';
-const _kGutenbergChessSearchUrl =
-    'https://www.gutenberg.org/ebooks/search/?query=chess';
+const _kArchiveOrgChessUrl = 'https://archive.org/details/folkscanomy_chess';
 
 /// Shown when no book is open: a prominent "open" action plus a bookshelf grid
 /// of recently-opened books (cover art extracted from each file) for one-tap
@@ -54,10 +54,10 @@ class LibraryHome extends ConsumerWidget {
               ),
               TextButton.icon(
                 icon: const Icon(Icons.search),
-                label: const Text('Browse more chess books on Project '
-                    'Gutenberg'),
+                label: const Text('Browse more chess books on the '
+                    'Internet Archive'),
                 onPressed: () => launchUrl(
-                  Uri.parse(_kGutenbergChessSearchUrl),
+                  Uri.parse(_kArchiveOrgChessUrl),
                   mode: LaunchMode.externalApplication,
                 ),
               ),
