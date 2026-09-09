@@ -119,10 +119,27 @@ void main() {
     testWidgets('shows a locked upsell card, not the connect controls, '
         'without Pro entitlement', (tester) async {
       final prefs = await SharedPreferences.getInstance();
-      await tester.pumpWidget(createWidgetUnderTest(
-        ListView(children: const [ChessnutSettingsSection()]),
-        prefs: prefs,
-      ));
+      final container = ProviderContainer(
+        overrides: [
+          sharedPrefsProvider.overrideWithValue(prefs),
+          chessnutTransportProvider.overrideWithValue(fakeBoard),
+          // kDebugMode unlocks Pro for on-device testing; simulate the
+          // locked (release/no-purchase) case explicitly here.
+          proEntitlementProvider.overrideWithValue(false),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: MaterialApp(
+            home: Scaffold(
+              body: ListView(children: const [ChessnutSettingsSection()]),
+            ),
+          ),
+        ),
+      );
 
       expect(find.text('Chessnut Move Board'), findsOneWidget);
       expect(find.text('Pro feature'), findsOneWidget);
