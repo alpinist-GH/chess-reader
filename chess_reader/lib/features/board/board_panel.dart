@@ -7,6 +7,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/settings/app_settings.dart';
+import '../../core/entitlements/pro_entitlement.dart';
+import '../../core/entitlements/pro_purchase_dialog.dart';
 import '../../core/state/game_session.dart';
 import '../chessnut/presentation/chessnut_status_widget.dart';
 import '../computer_opponent/domain/computer_opponent_models.dart';
@@ -137,6 +139,13 @@ class _BoardPanelState extends ConsumerState<BoardPanel> {
     final opponent = ref.watch(computerOpponentProvider);
     final guess = ref.watch(guessMoveProvider);
     final activeLine = ref.watch(activeLineProvider);
+    final guessHasProAccess = ref.watch(proEntitlementProvider);
+    final canStartGuess =
+        activeLine != null &&
+        activeLine.index < activeLine.moves.length - 1 &&
+        session.legal &&
+        activeLine.moves[activeLine.index + 1].positionBefore.fen ==
+            session.fen;
     final settings = ref.watch(settingsProvider);
     final boardSettings = ChessboardSettings(
       pieceAssets: settings.pieceSet.assets,
@@ -230,29 +239,37 @@ class _BoardPanelState extends ConsumerState<BoardPanel> {
                   : () => showComputerOpponentDialog(context, ref),
             ),
             IconButton(
-              tooltip: guess.phase == GuessMovePhase.idle
+              tooltip: guess.phase == GuessMovePhase.idle && !guessHasProAccess
+                  ? 'Guess the next move (Pro)'
+                  : guess.phase == GuessMovePhase.idle
                   ? 'Guess the next move'
                   : 'Guess the move in progress',
               icon: Icon(
-                guess.phase == GuessMovePhase.idle
+                guess.phase == GuessMovePhase.idle && !guessHasProAccess
+                    ? Icons.lock_outline
+                    : guess.phase == GuessMovePhase.idle
                     ? Icons.school_outlined
                     : Icons.school,
-                color: guess.phase == GuessMovePhase.idle
+                color: guess.phase == GuessMovePhase.idle && !guessHasProAccess
+                    ? Theme.of(context).colorScheme.primary
+                    : guess.phase == GuessMovePhase.idle
                     ? null
                     : Theme.of(context).colorScheme.primary,
               ),
               onPressed:
                   opponent.ownsBoard || guess.phase != GuessMovePhase.idle
                   ? null
-                  : (activeLine != null &&
-                        activeLine.index < activeLine.moves.length - 1 &&
-                        session.legal &&
-                        activeLine
-                                .moves[activeLine.index + 1]
-                                .positionBefore
-                                .fen ==
-                            session.fen)
-                  ? () => ref.read(guessMoveProvider.notifier).start()
+                  : canStartGuess
+                  ? () async {
+                      if (!ref.read(proEntitlementProvider)) {
+                        final unlocked = await showProPurchaseDialog(
+                          context,
+                          ref,
+                        );
+                        if (!context.mounted || !unlocked) return;
+                      }
+                      ref.read(guessMoveProvider.notifier).start();
+                    }
                   : null,
             ),
             const SizedBox(width: 12),

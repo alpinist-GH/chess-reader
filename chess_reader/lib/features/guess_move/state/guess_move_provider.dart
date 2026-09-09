@@ -1,6 +1,8 @@
 import 'package:dartchess/dartchess.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/entitlements/pro_entitlement.dart';
+import '../../../core/entitlements/pro_trial.dart';
 import '../../../core/state/game_session.dart';
 import '../../reader/state/book_providers.dart';
 import '../domain/guess_move_models.dart';
@@ -35,6 +37,7 @@ class GuessMoveNotifier extends Notifier<GuessMoveState> {
 
   void start() {
     if (state.isActive) return;
+    if (!ref.read(proEntitlementProvider)) return;
     final line = ref.read(activeLineProvider);
     final session = ref.read(gameSessionProvider);
     if (line == null || !session.legal || line.index >= line.moves.length - 1) {
@@ -46,6 +49,7 @@ class GuessMoveNotifier extends Notifier<GuessMoveState> {
     // a caller. Refuse to grade a move against a different position.
     if (target.positionBefore.fen != session.fen) return;
 
+    ref.read(proTrialRemainingProvider.notifier).consumeIfEligible();
     _watchedRevision = session.revision;
     state = GuessMoveState(
       phase: GuessMovePhase.active,
