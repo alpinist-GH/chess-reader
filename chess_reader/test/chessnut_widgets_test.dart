@@ -1,3 +1,4 @@
+import 'package:chess_reader/core/entitlements/pro_entitlement.dart';
 import 'package:chess_reader/core/settings/app_settings.dart';
 import 'package:chess_reader/features/chessnut/presentation/chessnut_settings_section.dart';
 import 'package:chess_reader/features/chessnut/presentation/chessnut_status_widget.dart';
@@ -115,12 +116,26 @@ void main() {
   });
 
   group('ChessnutSettingsSection UI', () {
+    testWidgets('shows a locked upsell card, not the connect controls, '
+        'without Pro entitlement', (tester) async {
+      final prefs = await SharedPreferences.getInstance();
+      await tester.pumpWidget(createWidgetUnderTest(
+        ListView(children: const [ChessnutSettingsSection()]),
+        prefs: prefs,
+      ));
+
+      expect(find.text('Chessnut Move Board'), findsOneWidget);
+      expect(find.text('Pro feature'), findsOneWidget);
+      expect(find.text('Scan for boards'), findsNothing);
+    });
+
     testWidgets('renders Scan button and scan lists discovered devices', (tester) async {
       final prefs = await SharedPreferences.getInstance();
       final container = ProviderContainer(
         overrides: [
           sharedPrefsProvider.overrideWithValue(prefs),
           chessnutTransportProvider.overrideWithValue(fakeBoard),
+          proEntitlementProvider.overrideWithValue(true),
         ],
       );
 
