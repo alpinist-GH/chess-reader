@@ -10,7 +10,7 @@ Build a fully offline, cross-platform (Windows, macOS, Android, iOS) Flutter app
 - Easy-to-reach Prev/Next move buttons for stepping through the game without hunting in the text.
 - Auto-resume: reopening a book returns to the exact spot, board state included.
 - Bookmarks and inline notes; table-of-contents navigation.
-- Later (post-MVP, Forward Chess parity+): "Guess the Move" training mode, play vs Stockfish from any book position.
+- Later (post-MVP, Forward Chess parity+): "Guess the Move" training mode, play vs Stockfish from any book position (detailed in Phase 7 below).
 
 Where this app deliberately beats Forward Chess: it reads the **user's own** PDFs/EPUBs (Forward Chess cannot import PDF/PGN — store-only DRM content), works fully offline, allows setting up arbitrary positions (their analysis board can't), and ships real desktop apps (they dropped theirs in favor of web).
 
@@ -111,8 +111,22 @@ Pipeline: page raster (~200 dpi, already produced by pdfrx; EPUB images straight
 - Settings: engine depth/threads, board theme/piece set, text size.
 - Define `PositionSource` abstract interface (stream of FEN + confidence) for future camera and BLE smart-board pipelines — interface only, no implementation.
 
+### Phase 7 — Play vs Computer (Pro feature, post-MVP)
+
+**Goal:** from any position — book anchor, sandbox excursion, diagram, or a fresh start — the user plays a full game against Stockfish at an adjustable, human-like strength, on-screen and (if a Chessnut Move is connected) on the physical board via LED move prompts. Gated behind `proEntitlementProvider` (`lib/core/entitlements/pro_entitlement.dart`) alongside Chessnut Move, as already flagged in that file's doc comment and in `chessnut_settings_section.dart`.
+
+- **New feature module, reusing engine + game_session rather than forking them:** `features/computer_opponent/state/computer_opponent_provider.dart` — `ComputerOpponentNotifier extends Notifier<ComputerOpponentState>` (`enabled`, `humanSide`, `strength`, `thinking`, `error`). It owns its own `UciEngine` via the existing `engine_factory.dart`, separate from `analysisProvider`'s instance, so opponent-move search and any live eval bar never contend for one process's UCI serialization. `ref.listen(gameSessionProvider, ...)`: whenever the position is legal, a game is active, and it's not the human's turn, send `position fen` + `go` on the dedicated engine and apply the resulting `bestmove` through `GameSession.playMove` — the same call path a tapped book move or a physical Chessnut move already uses, so move list, undo, and board highlighting need no new branching.
+- **Mobile FFI caveat:** `multistockfish` (`data/ffi_engine.dart`) may only support one live instance; spike a two-engine round-trip on Android/iOS before committing to "analysis engine + opponent engine" running concurrently — fallback is auto-pausing `analysisProvider` for the duration of a game.
+- **Human-like strength, not depth-capping:** a shallow full-strength search still finds sharp tactics and doesn't feel human. Use `setoption name UCI_LimitStrength value true` + `setoption name UCI_Elo value N` (official range ~1320–3190); verify both the desktop bundled binaries and `multistockfish`'s embedded build honor these options on all four platforms. Expose presets (Beginner/Club/Advanced/Full Strength → e.g. 1350/1650/2000/uncapped) plus a raw Elo slider, persisted in `AppSettings` next to `engineDepth`/`engineThreads`. Full Strength disables `UCI_LimitStrength` and reuses the existing depth/movetime budget.
+- **Starting a game:** a "Play vs computer" action on the board panel (next to the external-links row), Pro-gated like Chessnut Move. Setup sheet: color (White/Black/Random), strength, and starting point — "from here" (current `gameSession` position, only when `state.legal`) or "new game" (`Chess.initial`).
+- **While a game is active:** book move-tapping and diagram anchors are disabled (they'd desync the game); the sandbox's "back to book"/reset actions become "resign"/"end game" instead. Game end uses `dartchess`'s position outcome (checkmate/stalemate/insufficient material/repetition/50-move) for a result banner, with rematch or return-to-book. The live eval bar is off by default during play (a real game, not an assisted one) — an explicit "show eval" toggle in the setup sheet re-enables `analysisProvider`.
+- **Physical board tie-in:** human moves already flow from Chessnut into `gameSession.playMove(origin: PositionOrigin.physical)` unchanged. For the engine's move — no robotic arm — light its from/to squares via `chessnut_codec.dart`'s existing `encodeSquareLedsCommand` (already used for mismatch highlighting) with `ledGreen`, clearing once the physical board reports the matching move. Genuine differentiator over Forward Chess, which has no physical-board support at all.
+- **Deliverable:** start a game from any position, play it to completion against Stockfish at a chosen human-like strength, on-screen and (if connected) via Chessnut LED prompts; Pro-gated end to end.
+- **Risks:** mobile single-FFI-instance limits (resolve via the spike above); `UCI_LimitStrength`/`UCI_Elo` behavior varies by Stockfish build — verify on the actual bundled/embedded binaries, not upstream docs; a game must leave `gameSession`/`computer_opponent_provider` consistent if the app backgrounds or the book closes mid-game (reuse the engine-stop-on-quit path already in `AnalysisNotifier.stopEngine()`).
+- **Verification:** `uci_parser.dart` unit tests for full `bestmove` lines including promotions (`bestmove e7e8q`); widget test that `playerSide` stays locked to the human's side until the engine replies; per-platform smoke test playing a full game to checkmate at the lowest strength preset; Chessnut smoke test that the correct two squares light up and clear on match.
+
 ### Post-MVP backlog (not planned in detail)
-"Guess the Move" training mode with accuracy tracking; play vs Stockfish from any book position (strength-limited via UCI_LimitStrength); spaced-repetition position trainer; camera physical-board sync; BLE smart boards (DGT/Chessnut).
+"Guess the Move" training mode with accuracy tracking; spaced-repetition position trainer; camera physical-board sync.
 
 ## Key risks & mitigations
 1. **Desktop Stockfish** — no maintained package → process-based UCI (decided); vendored-FFI contingency.
