@@ -14,6 +14,10 @@ import '../computer_opponent/presentation/computer_game_bar.dart';
 import '../computer_opponent/presentation/computer_opponent_dialog.dart';
 import '../computer_opponent/state/computer_opponent_provider.dart';
 import '../engine/presentation/engine_panel.dart';
+import '../guess_move/domain/guess_move_models.dart';
+import '../guess_move/presentation/guess_move_bar.dart';
+import '../guess_move/state/guess_move_provider.dart';
+import '../reader/state/book_providers.dart';
 import 'external_links.dart';
 import 'fen_anchor_dialog.dart';
 
@@ -36,8 +40,9 @@ class _BoardPanelState extends ConsumerState<BoardPanel> {
   @override
   void initState() {
     super.initState();
-    _controller =
-        ChessboardController(game: _gameDataFor(ref.read(gameSessionProvider)));
+    _controller = ChessboardController(
+      game: _gameDataFor(ref.read(gameSessionProvider)),
+    );
   }
 
   @override
@@ -59,8 +64,15 @@ class _BoardPanelState extends ConsumerState<BoardPanel> {
     }
 
     final opponent = ref.read(computerOpponentProvider);
+    final guess = ref.read(guessMoveProvider);
     final PlayerSide playerSide;
-    if (opponent.ownsBoard) {
+    if (guess.phase == GuessMovePhase.active) {
+      playerSide = s.position.turn == Side.white
+          ? PlayerSide.white
+          : PlayerSide.black;
+    } else if (guess.phase != GuessMovePhase.idle) {
+      playerSide = PlayerSide.none;
+    } else if (opponent.ownsBoard) {
       if (opponent.phase == ComputerGamePhase.humanTurn &&
           s.position.turn == opponent.humanSide) {
         playerSide = opponent.humanSide == Side.white
@@ -70,19 +82,22 @@ class _BoardPanelState extends ConsumerState<BoardPanel> {
         playerSide = PlayerSide.none;
       }
     } else {
-      playerSide =
-          s.position.turn == Side.white ? PlayerSide.white : PlayerSide.black;
+      playerSide = s.position.turn == Side.white
+          ? PlayerSide.white
+          : PlayerSide.black;
     }
 
     return GameData(
       fen: s.fen,
       lastMove: s.lastMove,
       playerSide: playerSide,
-      validMoves:
-          playerSide == PlayerSide.none ? const {} : makeLegalMoves(s.position),
+      validMoves: playerSide == PlayerSide.none
+          ? const {}
+          : makeLegalMoves(s.position),
       sideToMove: s.position.turn,
-      kingSquareInCheck:
-          s.position.isCheck ? s.position.board.kingOf(s.position.turn) : null,
+      kingSquareInCheck: s.position.isCheck
+          ? s.position.board.kingOf(s.position.turn)
+          : null,
     );
   }
 
@@ -108,9 +123,20 @@ class _BoardPanelState extends ConsumerState<BoardPanel> {
         );
       }
     });
+    ref.listen(guessMoveProvider, (previous, next) {
+      if (previous?.phase != next.phase ||
+          previous?.target?.move != next.target?.move) {
+        _controller.updatePosition(
+          _gameDataFor(ref.read(gameSessionProvider)),
+          resetPremove: true,
+        );
+      }
+    });
 
     final session = ref.watch(gameSessionProvider);
     final opponent = ref.watch(computerOpponentProvider);
+    final guess = ref.watch(guessMoveProvider);
+    final activeLine = ref.watch(activeLineProvider);
     final settings = ref.watch(settingsProvider);
     final boardSettings = ChessboardSettings(
       pieceAssets: settings.pieceSet.assets,
@@ -137,7 +163,9 @@ class _BoardPanelState extends ConsumerState<BoardPanel> {
           ),
         ),
         const SizedBox(height: 8),
-        if (opponent.showsGameBar)
+        if (guess.phase != GuessMovePhase.idle)
+          const GuessMoveBar()
+        else if (opponent.showsGameBar)
           const ComputerGameBar()
         else if (!session.onBookLine)
           Padding(
@@ -157,14 +185,18 @@ class _BoardPanelState extends ConsumerState<BoardPanel> {
             IconButton(
               tooltip: 'Undo move',
               icon: const Icon(Icons.undo),
-              onPressed: (opponent.ownsBoard || !session.canUndo)
+              onPressed:
+                  (opponent.ownsBoard ||
+                      guess.phase != GuessMovePhase.idle ||
+                      !session.canUndo)
                   ? null
                   : () => ref.read(gameSessionProvider.notifier).undo(),
             ),
             IconButton(
               tooltip: 'Reset board',
               icon: const Icon(Icons.restart_alt),
-              onPressed: opponent.ownsBoard
+              onPressed:
+                  opponent.ownsBoard || guess.phase != GuessMovePhase.idle
                   ? null
                   : () => ref.read(gameSessionProvider.notifier).reset(),
             ),
@@ -177,7 +209,8 @@ class _BoardPanelState extends ConsumerState<BoardPanel> {
             IconButton(
               tooltip: 'Set position from FEN',
               icon: const Icon(Icons.edit_location_alt_outlined),
-              onPressed: opponent.ownsBoard
+              onPressed:
+                  opponent.ownsBoard || guess.phase != GuessMovePhase.idle
                   ? null
                   : () => showFenAnchorDialog(context, ref),
             ),
@@ -186,31 +219,54 @@ class _BoardPanelState extends ConsumerState<BoardPanel> {
                   ? 'Game vs computer in progress'
                   : 'Play vs computer',
               icon: Icon(
-                opponent.ownsBoard
-                    ? Icons.smart_toy
-                    : Icons.smart_toy_outlined,
+                opponent.ownsBoard ? Icons.smart_toy : Icons.smart_toy_outlined,
                 color: opponent.ownsBoard
                     ? Theme.of(context).colorScheme.primary
                     : null,
               ),
-              onPressed: opponent.ownsBoard
+              onPressed:
+                  opponent.ownsBoard || guess.phase != GuessMovePhase.idle
                   ? null
                   : () => showComputerOpponentDialog(context, ref),
+            ),
+            IconButton(
+              tooltip: guess.phase == GuessMovePhase.idle
+                  ? 'Guess the next move'
+                  : 'Guess the move in progress',
+              icon: Icon(
+                guess.phase == GuessMovePhase.idle
+                    ? Icons.school_outlined
+                    : Icons.school,
+                color: guess.phase == GuessMovePhase.idle
+                    ? null
+                    : Theme.of(context).colorScheme.primary,
+              ),
+              onPressed:
+                  opponent.ownsBoard || guess.phase != GuessMovePhase.idle
+                  ? null
+                  : (activeLine != null &&
+                        activeLine.index < activeLine.moves.length - 1 &&
+                        session.legal &&
+                        activeLine
+                                .moves[activeLine.index + 1]
+                                .positionBefore
+                                .fen ==
+                            session.fen)
+                  ? () => ref.read(guessMoveProvider.notifier).start()
+                  : null,
             ),
             const SizedBox(width: 12),
             IconButton(
               tooltip: 'Open in Lichess',
               icon: const Icon(Icons.open_in_new),
-              onPressed: () => launchUrl(
-                Uri.parse(lichessAnalysisUrl(session.fen)),
-              ),
+              onPressed: () =>
+                  launchUrl(Uri.parse(lichessAnalysisUrl(session.fen))),
             ),
             IconButton(
               tooltip: 'Open in Chess.com',
               icon: const Icon(Icons.language),
-              onPressed: () => launchUrl(
-                Uri.parse(chessComAnalysisUrl(session.fen)),
-              ),
+              onPressed: () =>
+                  launchUrl(Uri.parse(chessComAnalysisUrl(session.fen))),
             ),
           ],
         ),

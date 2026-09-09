@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../guess_move/domain/guess_move_models.dart';
 import '../state/book_providers.dart';
+import '../../guess_move/state/guess_move_provider.dart';
 
 /// Horizontal strip showing the moves detected on the active page, with
 /// previous/next stepping. SAN is shown in plain letters here; inline piece
@@ -16,13 +18,14 @@ class MoveStrip extends ConsumerWidget {
       return const SizedBox.shrink();
     }
     final notifier = ref.read(activeLineProvider.notifier);
+    final guessing = ref.watch(guessMoveProvider).phase != GuessMovePhase.idle;
 
     return Row(
       children: [
         IconButton(
           tooltip: 'Previous move',
           icon: const Icon(Icons.chevron_left),
-          onPressed: active.hasPrevious ? notifier.previous : null,
+          onPressed: !guessing && active.hasPrevious ? notifier.previous : null,
         ),
         Expanded(
           child: SizedBox(
@@ -35,15 +38,17 @@ class MoveStrip extends ConsumerWidget {
                 final token = active.moves[i].token;
                 final label = token.moveNumber != null
                     ? (token.isWhiteHint == false
-                        ? '${token.moveNumber}...${token.san}'
-                        : '${token.moveNumber}.${token.san}')
+                          ? '${token.moveNumber}...${token.san}'
+                          : '${token.moveNumber}.${token.san}')
                     : token.san;
                 return ChoiceChip(
                   label: Text(label),
                   selected: i == active.index,
                   visualDensity: VisualDensity.compact,
-                  onSelected: (_) =>
-                      notifier.select(active.moves, i, active.sourceKey),
+                  onSelected: guessing
+                      ? null
+                      : (_) =>
+                            notifier.select(active.moves, i, active.sourceKey),
                 );
               },
             ),
@@ -52,7 +57,7 @@ class MoveStrip extends ConsumerWidget {
         IconButton(
           tooltip: 'Next move',
           icon: const Icon(Icons.chevron_right),
-          onPressed: active.hasNext ? notifier.next : null,
+          onPressed: !guessing && active.hasNext ? notifier.next : null,
         ),
       ],
     );
