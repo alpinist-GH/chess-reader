@@ -31,6 +31,7 @@ class ChessnutController extends Notifier<ChessnutState>
   bool _disposed = false;
   bool _foreground = true;
   bool _availabilityListeningStarted = false;
+  bool _featureEngaged = false;
   AvailabilityState? _availability;
   bool get isSupported => _availability != AvailabilityState.unsupported;
   bool get _bluetoothAvailable =>
@@ -85,7 +86,6 @@ class ChessnutController extends Notifier<ChessnutState>
     });
 
     _listenToAppSession();
-    _checkInitialAutoReconnect();
 
     return const ChessnutState();
   }
@@ -100,6 +100,15 @@ class ChessnutController extends Notifier<ChessnutState>
     if (_availabilityListeningStarted || _disposed) return;
     _availabilityListeningStarted = true;
     _listenToAvailability();
+  }
+
+  /// Marks the Chessnut UI as intentionally opened by the user. This is the
+  /// earliest point at which a remembered-board reconnect may initialize BLE.
+  void engageFeature() {
+    if (_disposed || _featureEngaged) return;
+    _featureEngaged = true;
+    ensureAvailabilityListening();
+    _checkAutoReconnectAfterFeatureEngagement();
   }
 
   void _cleanupTimers() {
@@ -155,10 +164,11 @@ class ChessnutController extends Notifier<ChessnutState>
     }
   }
 
-  void _checkInitialAutoReconnect() {
-    // Read persisted settings
+  void _checkAutoReconnectAfterFeatureEngagement() {
+    // Do not initialize Bluetooth or request permissions during app startup.
+    // Reconnect only after the user has opened the Chessnut feature.
     Future.microtask(() {
-      if (_disposed || !_foreground) return;
+      if (_disposed || !_foreground || !_featureEngaged) return;
       final settings = ref.read(settingsProvider);
       if (settings.chessnutAutoReconnect && settings.chessnutDeviceId != null) {
         connectToDevice(settings.chessnutDeviceId!, nameHint: 'Chessnut Move');
