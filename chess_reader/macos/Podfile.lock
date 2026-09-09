@@ -5,6 +5,9 @@ PODS:
     - FlutterMacOS
     - onnxruntime-objc (= 1.24.2)
   - FlutterMacOS (1.0.0)
+  - in_app_purchase_storekit (0.0.1):
+    - Flutter
+    - FlutterMacOS
   - multistockfish_sf16 (0.1.1):
     - FlutterMacOS
   - onnxruntime-c (1.24.2)
@@ -30,6 +33,7 @@ DEPENDENCIES:
   - file_selector_macos (from `Flutter/ephemeral/.symlinks/plugins/file_selector_macos/macos`)
   - flutter_onnxruntime (from `Flutter/ephemeral/.symlinks/plugins/flutter_onnxruntime/macos`)
   - FlutterMacOS (from `Flutter/ephemeral`)
+  - in_app_purchase_storekit (from `Flutter/ephemeral/.symlinks/plugins/in_app_purchase_storekit/darwin`)
   - multistockfish_sf16 (from `Flutter/ephemeral/.symlinks/plugins/multistockfish_sf16/macos`)
   - pdfium_flutter (from `Flutter/ephemeral/.symlinks/plugins/pdfium_flutter/darwin`)
   - share_plus (from `Flutter/ephemeral/.symlinks/plugins/share_plus/macos`)
@@ -49,6 +53,8 @@ EXTERNAL SOURCES:
     :path: Flutter/ephemeral/.symlinks/plugins/flutter_onnxruntime/macos
   FlutterMacOS:
     :path: Flutter/ephemeral
+  in_app_purchase_storekit:
+    :path: Flutter/ephemeral/.symlinks/plugins/in_app_purchase_storekit/darwin
   multistockfish_sf16:
     :path: Flutter/ephemeral/.symlinks/plugins/multistockfish_sf16/macos
   pdfium_flutter:
@@ -66,6 +72,7 @@ SPEC CHECKSUMS:
   file_selector_macos: 9e9e068e90ebee155097d00e89ae91edb2374db7
   flutter_onnxruntime: fb7bede79ac00a8e129c95d7e6b99c0f4e960d98
   FlutterMacOS: d0db08ddef1a9af05a5ec4b724367152bb0500b1
+  in_app_purchase_storekit: 22cca7d08eebca9babdf4d07d0baccb73325d3c8
   multistockfish_sf16: a296dc1122042e790a3ef03c082842e894d7b8ac
   onnxruntime-c: b58bafbc58707d165404665e46a7467a16e8e0e4
   onnxruntime-objc: 99e0fe4b6d606970c6c1350c194c7629ef6e6fc9

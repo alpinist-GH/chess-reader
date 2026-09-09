@@ -1,4 +1,6 @@
 import 'package:chess_reader/core/entitlements/pro_entitlement.dart';
+import 'package:chess_reader/core/entitlements/pro_trial.dart';
+import 'package:chess_reader/core/entitlements/purchase_service.dart';
 import 'package:chess_reader/core/settings/app_settings.dart';
 import 'package:chess_reader/features/chessnut/presentation/chessnut_settings_section.dart';
 import 'package:chess_reader/features/chessnut/presentation/chessnut_status_widget.dart';
@@ -8,6 +10,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import 'fakes/fake_pro_store_gateway.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -146,16 +150,20 @@ void main() {
       expect(find.text('Scan for boards'), findsNothing);
     });
 
-    testWidgets('redeeming the test code unlocks the section', (tester) async {
+    testWidgets('trial credits unlock the section without a purchase', (tester) async {
       final prefs = await SharedPreferences.getInstance();
       final container = ProviderContainer(
         overrides: [
           sharedPrefsProvider.overrideWithValue(prefs),
           chessnutTransportProvider.overrideWithValue(fakeBoard),
+          proStoreGatewayProvider.overrideWithValue(FakeProStoreGateway()),
           // Mirror release-build behavior (no kDebugMode shortcut) so this
-          // exercises the redeem flow itself, not the debug bypass.
-          proEntitlementProvider
-              .overrideWith((ref) => ref.watch(proTestUnlockProvider)),
+          // exercises the trial-credit path itself, not the debug bypass.
+          proEntitlementProvider.overrideWith(
+            (ref) =>
+                ref.watch(proPurchasedProvider) ||
+                ref.watch(proTrialRemainingProvider) > 0,
+          ),
         ],
       );
       addTearDown(container.dispose);
@@ -171,23 +179,48 @@ void main() {
         ),
       );
 
-      expect(find.text('Pro feature'), findsOneWidget);
-
-      await tester.tap(find.text('Have a test code?'));
-      await tester.pumpAndSettle();
-      await tester.enterText(find.byType(TextField), 'wrong');
-      await tester.tap(find.widgetWithText(FilledButton, 'Redeem'));
-      await tester.pumpAndSettle();
-      expect(find.text('Invalid code.'), findsOneWidget);
-      expect(find.text('Pro feature'), findsOneWidget);
-
-      await tester.tap(find.text('Have a test code?'));
-      await tester.pumpAndSettle();
-      await tester.enterText(find.byType(TextField), 'chess');
-      await tester.tap(find.widgetWithText(FilledButton, 'Redeem'));
-      await tester.pumpAndSettle();
-
+      // Fresh install: 5 free credits, so the section is unlocked already.
+      expect(container.read(proTrialRemainingProvider), kProTrialCredits);
       expect(find.text('Scan for boards'), findsOneWidget);
+    });
+
+    testWidgets('locks the section again once trial credits run out', (tester) async {
+      final prefs = await SharedPreferences.getInstance();
+      final container = ProviderContainer(
+        overrides: [
+          sharedPrefsProvider.overrideWithValue(prefs),
+          chessnutTransportProvider.overrideWithValue(fakeBoard),
+          proStoreGatewayProvider.overrideWithValue(FakeProStoreGateway()),
+          proEntitlementProvider.overrideWith(
+            (ref) =>
+                ref.watch(proPurchasedProvider) ||
+                ref.watch(proTrialRemainingProvider) > 0,
+          ),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      container.read(proTrialRemainingProvider.notifier).state = 0;
+
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: MaterialApp(
+            home: Scaffold(
+              body: ListView(children: const [ChessnutSettingsSection()]),
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text('Pro feature'), findsOneWidget);
+      expect(find.text('Scan for boards'), findsNothing);
+
+      // Tapping through opens the real purchase dialog (not the old
+      // test-code redeem flow).
+      await tester.tap(find.widgetWithText(FilledButton, 'Upgrade to Pro'));
+      await tester.pumpAndSettle();
+      expect(find.text('Pro Unlock'), findsOneWidget);
     });
 
     testWidgets('renders Scan button and scan lists discovered devices', (tester) async {

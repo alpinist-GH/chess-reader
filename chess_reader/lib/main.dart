@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'app.dart';
+import 'core/entitlements/purchase_service.dart';
 import 'core/settings/app_settings.dart';
 import 'features/engine/state/analysis_provider.dart';
 import 'features/library/about.dart';
@@ -16,6 +17,7 @@ Future<void> main() async {
   final container = ProviderContainer(
     overrides: [sharedPrefsProvider.overrideWithValue(prefs)],
   );
+  container.read(proPurchasedProvider.notifier).restoreOnStartup();
 
   // On desktop, closing the window/quitting asks Dart before the native side
   // tears down the Flutter engine. Without a response here, the engine

@@ -38,7 +38,11 @@ fi
 echo "Signing identity: $CERT"
 
 echo "Building ChessBook Reader ${VERSION} for macOS..."
-flutter build macos --release
+# DISTRIBUTION=devid tells the app it's the Developer-ID build (not from the
+# Mac App Store), so it doesn't offer a "Buy Pro" button StoreKit can't
+# actually complete outside App Store distribution. See
+# lib/core/entitlements/pro_purchase_dialog.dart.
+flutter build macos --release --dart-define=DISTRIBUTION=devid
 
 if [ ! -d "$APP" ]; then
   echo "error: $APP not found after build" >&2

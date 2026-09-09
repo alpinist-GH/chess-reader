@@ -7,6 +7,9 @@ PODS:
   - flutter_onnxruntime (0.0.1):
     - Flutter
     - onnxruntime-objc (= 1.24.2)
+  - in_app_purchase_storekit (0.0.1):
+    - Flutter
+    - FlutterMacOS
   - multistockfish_chess (0.3.0):
     - Flutter
   - multistockfish_sf16 (0.1.1):
@@ -39,6 +42,7 @@ DEPENDENCIES:
   - file_selector_ios (from `.symlinks/plugins/file_selector_ios/ios`)
   - Flutter (from `Flutter`)
   - flutter_onnxruntime (from `.symlinks/plugins/flutter_onnxruntime/ios`)
+  - in_app_purchase_storekit (from `.symlinks/plugins/in_app_purchase_storekit/darwin`)
   - multistockfish_chess (from `.symlinks/plugins/multistockfish_chess/ios`)
   - multistockfish_sf16 (from `.symlinks/plugins/multistockfish_sf16/ios`)
   - multistockfish_variant (from `.symlinks/plugins/multistockfish_variant/ios`)
@@ -63,6 +67,8 @@ EXTERNAL SOURCES:
     :path: Flutter
   flutter_onnxruntime:
     :path: ".symlinks/plugins/flutter_onnxruntime/ios"
+  in_app_purchase_storekit:
+    :path: ".symlinks/plugins/in_app_purchase_storekit/darwin"
   multistockfish_chess:
     :path: ".symlinks/plugins/multistockfish_chess/ios"
   multistockfish_sf16:
@@ -87,6 +93,7 @@ SPEC CHECKSUMS:
   file_selector_ios: ec57ec07954363dd730b642e765e58f199bb621a
   Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
   flutter_onnxruntime: 577a012771672fd168079e29be7909a9d0f9c302
+  in_app_purchase_storekit: 22cca7d08eebca9babdf4d07d0baccb73325d3c8
   multistockfish_chess: 826a3fb3746cbf66496bb1388eb664084fac393c
   multistockfish_sf16: dfd62eb23f5caaad596fa61e88624ead35f0a5e8
   multistockfish_variant: fba6f8034da46db2a1745a0fab420000c3db5cd9

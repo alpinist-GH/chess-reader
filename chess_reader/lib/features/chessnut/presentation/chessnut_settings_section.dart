@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/entitlements/pro_entitlement.dart';
+import '../../../core/entitlements/pro_purchase_dialog.dart';
+import '../../../core/entitlements/pro_trial.dart';
 import '../../../core/settings/app_settings.dart';
 import '../model/chessnut_state.dart';
 import '../state/chessnut_controller.dart';
@@ -85,10 +87,13 @@ class ChessnutSettingsSection extends ConsumerWidget {
                   )
                 else
                   FilledButton.tonal(
-                    onPressed: () => controller.connectToDevice(
-                      settings.chessnutDeviceId!,
-                      nameHint: 'Chessnut Move',
-                    ),
+                    onPressed: () {
+                      ref.read(proTrialRemainingProvider.notifier).consumeIfEligible();
+                      controller.connectToDevice(
+                        settings.chessnutDeviceId!,
+                        nameHint: 'Chessnut Move',
+                      );
+                    },
                     child: const Text('Connect'),
                   ),
                 const SizedBox(width: 8),
@@ -143,10 +148,13 @@ class ChessnutSettingsSection extends ConsumerWidget {
                       backgroundColor: Colors.greenAccent,
                     )
                   : FilledButton.tonal(
-                      onPressed: () => controller.connectToDevice(
-                        device.deviceId,
-                        nameHint: device.name,
-                      ),
+                      onPressed: () {
+                        ref.read(proTrialRemainingProvider.notifier).consumeIfEligible();
+                        controller.connectToDevice(
+                          device.deviceId,
+                          nameHint: device.name,
+                        );
+                      },
                       child: const Text('Connect'),
                     ),
             );
@@ -160,37 +168,6 @@ class ChessnutSettingsSection extends ConsumerWidget {
 /// purchased Pro. Board discovery/sync stays disabled until then.
 class _ProLockedCard extends ConsumerWidget {
   const _ProLockedCard();
-
-  Future<void> _promptTestCode(BuildContext context, WidgetRef ref) async {
-    final controller = TextEditingController();
-    final code = await showDialog<String>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Test unlock code'),
-        content: TextField(
-          controller: controller,
-          autofocus: true,
-          decoration: const InputDecoration(hintText: 'Code'),
-          onSubmitted: (v) => Navigator.of(context).pop(v),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(context).pop(controller.text),
-            child: const Text('Redeem'),
-          ),
-        ],
-      ),
-    );
-    if (code == null || !context.mounted) return;
-    final ok = ref.read(proTestUnlockProvider.notifier).redeem(code);
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(ok ? 'Pro unlocked for testing.' : 'Invalid code.'),
-    ));
-  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -219,25 +196,12 @@ class _ProLockedCard extends ConsumerWidget {
                 'Part of the Pro upgrade, alongside play vs computer.',
               ),
               const SizedBox(height: 12),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  TextButton(
-                    onPressed: () => _promptTestCode(context, ref),
-                    child: const Text('Have a test code?'),
-                  ),
-                  FilledButton(
-                    // TODO(pro-upgrade): open the purchase flow once
-                    // in-app purchases are wired up.
-                    onPressed: () =>
-                        ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Pro upgrade is coming soon.'),
-                      ),
-                    ),
-                    child: const Text('Upgrade to Pro'),
-                  ),
-                ],
+              Align(
+                alignment: Alignment.centerRight,
+                child: FilledButton(
+                  onPressed: () => showProPurchaseDialog(context, ref),
+                  child: const Text('Upgrade to Pro'),
+                ),
               ),
             ],
           ),
