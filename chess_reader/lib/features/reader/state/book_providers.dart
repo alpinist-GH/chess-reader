@@ -43,7 +43,9 @@ class OpenedBook extends Notifier<String?> {
     ref.read(activeLineProvider.notifier).clear();
     ref.read(currentPageProvider.notifier).set(1);
     ref.read(epubJumpProvider.notifier).consumed();
-    ref.read(gameSessionProvider.notifier).reset(origin: PositionOrigin.bookReset);
+    ref
+        .read(gameSessionProvider.notifier)
+        .reset(origin: PositionOrigin.bookReset);
   }
 }
 
@@ -97,8 +99,24 @@ class ActiveLineNotifier extends Notifier<ActiveLine?> {
     final line = state;
     if (line == null || !line.hasNext) return;
     state = ActiveLine(
-        moves: line.moves, index: line.index + 1, sourceKey: line.sourceKey);
+      moves: line.moves,
+      index: line.index + 1,
+      sourceKey: line.sourceKey,
+    );
     _applyToBoard();
+  }
+
+  /// Advances the selected line after a Guess the Move answer. Unlike [next],
+  /// this intentionally does not touch the board: the user's correct move has
+  /// already produced the desired position in the session.
+  void advanceForGuess() {
+    final line = state;
+    if (line == null || !line.hasNext) return;
+    state = ActiveLine(
+      moves: line.moves,
+      index: line.index + 1,
+      sourceKey: line.sourceKey,
+    );
   }
 
   void previous() {
@@ -106,7 +124,10 @@ class ActiveLineNotifier extends Notifier<ActiveLine?> {
     final line = state;
     if (line == null || !line.hasPrevious) return;
     state = ActiveLine(
-        moves: line.moves, index: line.index - 1, sourceKey: line.sourceKey);
+      moves: line.moves,
+      index: line.index - 1,
+      sourceKey: line.sourceKey,
+    );
     _applyToBoard();
   }
 
@@ -114,7 +135,9 @@ class ActiveLineNotifier extends Notifier<ActiveLine?> {
     final line = state;
     if (line == null) return;
     final resolved = line.moves[line.index];
-    ref.read(gameSessionProvider.notifier).setPosition(
+    ref
+        .read(gameSessionProvider.notifier)
+        .setPosition(
           resolved.positionAfter,
           lastMove: resolved.move is NormalMove
               ? resolved.move as NormalMove
@@ -123,5 +146,6 @@ class ActiveLineNotifier extends Notifier<ActiveLine?> {
   }
 }
 
-final activeLineProvider =
-    NotifierProvider<ActiveLineNotifier, ActiveLine?>(ActiveLineNotifier.new);
+final activeLineProvider = NotifierProvider<ActiveLineNotifier, ActiveLine?>(
+  ActiveLineNotifier.new,
+);
