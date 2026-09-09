@@ -131,6 +131,18 @@ Ran a Codex review against the diff. Two findings were real bugs and got fixed; 
 
 `flutter analyze` and the full test suite pass (same pre-existing `engine_test.dart` failure, unrelated).
 
+#### First real end-to-end session with `motionProtocolVerified` genuinely `true` (2026-09-08, macOS)
+
+Previous macOS sessions exercised Start/Resume, Stop, interruption, and piece-presence with the flag *temporarily* hardcoded true and reverted afterward. This session ran the committed code as-is (`motionProtocolVerified = true`, `availablePieces` wired to live piece-status polling) for the first time — no temporary edits.
+
+- **App-to-board:** tapping a book diagram then Start/Resume correctly sent the diagram's placement and the physical board moved to match.
+- **Board-to-app:** a physical pawn move by hand was correctly recognized and reflected on the virtual board.
+- **Physical takeback:** moving the same pawn back by hand correctly triggered Undo, restoring the exact prior position and turn (not recorded as a new move).
+- **Rapid navigation:** clicking through several book diagrams quickly settled the board on the latest target without getting stuck on intermediate positions.
+- **Bug found and fixed: false pause on desktop window-focus loss.** `ChessnutController.didChangeAppLifecycleState` treated `AppLifecycleState.inactive` the same as `hidden`/`paused` (true backgrounding), calling `_onAppBackgrounded()` → `pause()`. On macOS, `inactive` fires on ordinary focus loss (clicking another window, a system dialog) without the app actually backgrounding — confirmed live: switching focus away from the app mid-session paused synchronization every time, requiring a manual Resume tap on return. Fixed by dropping `inactive` from the backgrounding check, keeping only `hidden` (desktop minimize) and `paused` (the reliable "actually backgrounded" signal on both desktop and mobile) — `chessnut_controller.dart:156-166`. Re-verified live after the fix: switching window focus away and back no longer pauses synchronization. `flutter analyze` and the existing background/foreground regression test (`chessnut_regression_test.dart`, uses `AppLifecycleState.paused`) still pass unchanged.
+
+Not exercised this session: disconnect/reconnect and mismatch/red-LED handling — deferred, not blocking.
+
 ### Platform configuration
 
 Concrete, because all of it is currently absent:

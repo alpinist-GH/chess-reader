@@ -154,8 +154,13 @@ class ChessnutController extends Notifier<ChessnutState>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    // `inactive` fires on brief, non-backgrounding focus loss (alt-tab,
+    // clicking another window, a system dialog) on desktop platforms —
+    // treating it as backgrounding pauses synchronization on every such
+    // focus change, confirmed on real macOS hardware. `hidden`/`paused` are
+    // the reliable "actually backgrounded" signals on desktop and mobile
+    // respectively.
     if (state == AppLifecycleState.paused ||
-        state == AppLifecycleState.inactive ||
         state == AppLifecycleState.hidden) {
       _onAppBackgrounded();
     } else if (state == AppLifecycleState.resumed) {
