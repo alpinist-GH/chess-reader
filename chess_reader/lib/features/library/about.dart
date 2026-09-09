@@ -83,6 +83,13 @@ void showAppAboutDialog(BuildContext context) {
       const SizedBox(height: 8),
       _SourceLink(label: 'Stockfish source code', url: _kStockfishSourceUrl),
       _SourceLink(label: 'ChessBook Reader source code', url: _kAppSourceUrl),
+      const SizedBox(height: 12),
+      const Text(
+        '"Chessnut Move" is a product and trademark of Chessnut. ChessBook '
+        'Reader is not affiliated with or endorsed by Chessnut; it '
+        'independently implements Chessnut\'s published Bluetooth protocol '
+        'to support the Chessnut Move electronic board.',
+      ),
     ],
   );
 }
