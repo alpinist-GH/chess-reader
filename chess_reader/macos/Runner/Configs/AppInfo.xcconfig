@@ -11,4 +11,4 @@ PRODUCT_NAME = ChessBook Reader
 PRODUCT_BUNDLE_IDENTIFIER = com.alpinist.chessBookReader
 
 // The copyright displayed in application information
-PRODUCT_COPYRIGHT = Copyright © 2026 com.alpinist. All rights reserved.
+PRODUCT_COPYRIGHT = Copyright © 2026 Vu-Hung Quan. All rights reserved.
