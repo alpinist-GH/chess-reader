@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// App version shown in the About box. Keep in sync with pubspec `version`.
-const String kAppVersion = '1.4.15';
+const String kAppVersion = '2.0.0';
 
 /// Where users can obtain the corresponding source code. Bundling Stockfish
 /// (GPL v3) obliges us to offer its source; we link both upstream Stockfish
