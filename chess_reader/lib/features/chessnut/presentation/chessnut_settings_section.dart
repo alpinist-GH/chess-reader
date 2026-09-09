@@ -154,11 +154,42 @@ class ChessnutSettingsSection extends ConsumerWidget {
 
 /// Upsell shown in place of the connect/scan controls when the user hasn't
 /// purchased Pro. Board discovery/sync stays disabled until then.
-class _ProLockedCard extends StatelessWidget {
+class _ProLockedCard extends ConsumerWidget {
   const _ProLockedCard();
 
+  Future<void> _promptTestCode(BuildContext context, WidgetRef ref) async {
+    final controller = TextEditingController();
+    final code = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Test unlock code'),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          decoration: const InputDecoration(hintText: 'Code'),
+          onSubmitted: (v) => Navigator.of(context).pop(v),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(controller.text),
+            child: const Text('Redeem'),
+          ),
+        ],
+      ),
+    );
+    if (code == null || !context.mounted) return;
+    final ok = ref.read(proTestUnlockProvider.notifier).redeem(code);
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(ok ? 'Pro unlocked for testing.' : 'Invalid code.'),
+    ));
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
       child: Card(
@@ -184,18 +215,25 @@ class _ProLockedCard extends StatelessWidget {
                 'Part of the Pro upgrade, alongside play vs computer.',
               ),
               const SizedBox(height: 12),
-              Align(
-                alignment: Alignment.centerRight,
-                child: FilledButton(
-                  // TODO(pro-upgrade): open the purchase flow once in-app
-                  // purchases are wired up.
-                  onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Pro upgrade is coming soon.'),
-                    ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  TextButton(
+                    onPressed: () => _promptTestCode(context, ref),
+                    child: const Text('Have a test code?'),
                   ),
-                  child: const Text('Upgrade to Pro'),
-                ),
+                  FilledButton(
+                    // TODO(pro-upgrade): open the purchase flow once
+                    // in-app purchases are wired up.
+                    onPressed: () =>
+                        ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Pro upgrade is coming soon.'),
+                      ),
+                    ),
+                    child: const Text('Upgrade to Pro'),
+                  ),
+                ],
               ),
             ],
           ),

@@ -146,6 +146,50 @@ void main() {
       expect(find.text('Scan for boards'), findsNothing);
     });
 
+    testWidgets('redeeming the test code unlocks the section', (tester) async {
+      final prefs = await SharedPreferences.getInstance();
+      final container = ProviderContainer(
+        overrides: [
+          sharedPrefsProvider.overrideWithValue(prefs),
+          chessnutTransportProvider.overrideWithValue(fakeBoard),
+          // Mirror release-build behavior (no kDebugMode shortcut) so this
+          // exercises the redeem flow itself, not the debug bypass.
+          proEntitlementProvider
+              .overrideWith((ref) => ref.watch(proTestUnlockProvider)),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: MaterialApp(
+            home: Scaffold(
+              body: ListView(children: const [ChessnutSettingsSection()]),
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text('Pro feature'), findsOneWidget);
+
+      await tester.tap(find.text('Have a test code?'));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField), 'wrong');
+      await tester.tap(find.widgetWithText(FilledButton, 'Redeem'));
+      await tester.pumpAndSettle();
+      expect(find.text('Invalid code.'), findsOneWidget);
+      expect(find.text('Pro feature'), findsOneWidget);
+
+      await tester.tap(find.text('Have a test code?'));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField), 'chess');
+      await tester.tap(find.widgetWithText(FilledButton, 'Redeem'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Scan for boards'), findsOneWidget);
+    });
+
     testWidgets('renders Scan button and scan lists discovered devices', (tester) async {
       final prefs = await SharedPreferences.getInstance();
       final container = ProviderContainer(
