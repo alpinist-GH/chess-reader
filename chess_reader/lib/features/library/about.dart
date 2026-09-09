@@ -60,6 +60,10 @@ void showAppAboutDialog(BuildContext context) {
         'positions you can load with one tap.\n'
         '• Converts books to a reflowed reading view and can export them as '
         'standalone HTML.\n\n'
+        'Pro unlocks:\n'
+        '• Syncing a Chessnut Move electronic board.\n'
+        '• Playing against the computer.\n'
+        '• Guess the Move training.\n\n'
         'Everything runs locally — no internet connection or server is '
         'required.',
       ),
