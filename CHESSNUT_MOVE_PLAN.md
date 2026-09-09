@@ -96,6 +96,16 @@ Same as iOS: did not attempt live Start/Resume movement — gated off everywhere
 
 Remaining before `motionProtocolVerified` can be reconsidered: Windows MTU/service verification.
 
+#### Windows MTU/service verification (2026-09-08, debug build, `flutter run -d windows`)
+
+Ran the debug build on the user's Windows machine (`flutter run -d windows`, not just the standalone exe, so the console stayed attached) and connected to the same physical board with a temporary `debugPrint` added after the MTU query. **Negotiated MTU is 300**, identical to Android, well above the 142-byte piece-status floor; no retry needed, no "Bluetooth capacity is insufficient" error. `validateRequiredServices` passed with no errors logged. The temporary debug print was removed after the finding was recorded.
+
+Hit a real UX snag first: the first connect attempt did nothing — no error, no state change, nothing in the console. Root cause is a device- and platform-independent behavior already in `connectToDevice()` in `chessnut_controller.dart`: it silently no-ops if `_foreground` is `false`, `_connectionBusy`, or already connected/connecting, with no logging on any of those early returns. Launching via `flutter run` from a background terminal likely left the app window without OS focus, and/or a stale device/connection state from a prior session was blocking the guard. Forgetting the saved device and reconnecting (with the window focused) resolved it. Not Windows-specific and not a BLE/MTU issue — worth revisiting only if this recurs, since a silent no-op on a connect tap is a poor debugging experience regardless of platform.
+
+Same as the other platforms: did not attempt live Start/Resume movement — gated off everywhere by `motionProtocolVerified = false`.
+
+**All four platforms (macOS, iOS, Android, Windows) now have MTU/service verification confirmed.** The only remaining item before reconsidering `motionProtocolVerified` is a deliberate decision to flip it in `UniversalBleTransport`/`ChessnutController` and re-run the Stop/interruption/piece-presence protocol trials, which were only ever exercised on macOS.
+
 ### Platform configuration
 
 Concrete, because all of it is currently absent:
