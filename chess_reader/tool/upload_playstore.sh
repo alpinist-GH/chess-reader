@@ -21,6 +21,12 @@
 #
 # Run after `flutter build appbundle --release`:
 #   tool/upload_playstore.sh [internal|alpha|beta|production]
+#
+# In-app products (e.g. pro_unlock) are NOT handled by this script or the
+# service account it uses: the legacy `inappproducts` Android Publisher API
+# endpoint returns 403 "Please migrate to the new publishing API" for this
+# app (confirmed 2026-09-09). Create/edit one-time products manually in Play
+# Console under Monetize with Play -> Products -> One-time products.
 set -euo pipefail
 
 cd "$(dirname "$0")/.."

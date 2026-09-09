@@ -218,10 +218,9 @@ class ChessnutController extends Notifier<ChessnutState>
       _currentSynchronizedPlacement = ChessnutCodec.extractPlacement(next.fen);
       return; // Physical moves and takebacks must never echo motor commands.
     }
-    if (next.origin == PositionOrigin.computer) {
-      // Opponent moves in LED-only mode never echo motor commands.
-      return;
-    }
+    // Computer-opponent moves fall through to the normal sync logic below,
+    // so the engine's move drives the physical board exactly like any other
+    // app-origin position change.
     _latestReportedPlacement = null;
     state = state.copyWith(
       canSendDiagramAnyway: false,
@@ -238,11 +237,6 @@ class ChessnutController extends Notifier<ChessnutState>
     // Book lifecycle change (opening/closing book) pauses synchronization
     if (next.origin == PositionOrigin.bookReset) {
       pause();
-      return;
-    }
-
-    // In LED-only mode for computer opponent games, suppress all motor targets.
-    if (ref.read(computerOpponentProvider).ownsBoard) {
       return;
     }
 
@@ -650,15 +644,6 @@ class ChessnutController extends Notifier<ChessnutState>
   Future<void> startOrResume() async {
     if (!state.isConnected) return;
     _autoSyncEligible = false;
-
-    if (ref.read(computerOpponentProvider).ownsBoard) {
-      state = state.copyWith(
-        syncState: ChessnutSyncState.synchronized,
-        statusMessage: 'Synchronized with board (LED mode).',
-        clearLastError: true,
-      );
-      return;
-    }
 
     final session = ref.read(gameSessionProvider);
     final placement = ChessnutCodec.extractPlacement(session.fen);
@@ -1089,6 +1074,14 @@ class ChessnutController extends Notifier<ChessnutState>
     _inFlightTargetPlacement = null;
     _currentSynchronizedPlacement = placement;
 
+    // The physical board just finished carrying out the computer's move.
+    final opponent = ref.read(computerOpponentProvider);
+    if (opponent.ownsBoard &&
+        opponent.phase == ComputerGamePhase.awaitingPhysicalMove &&
+        placement == opponent.expectedPhysicalPlacement) {
+      ref.read(computerOpponentProvider.notifier).onPhysicalMoveMatched();
+    }
+
     // If a newer pending target arrived while in-flight, send it now
     if (_pendingTargetPlacement != null) {
       final nextTarget = _pendingTargetPlacement!;
@@ -1359,18 +1352,6 @@ class ChessnutController extends Notifier<ChessnutState>
 
   void _clearBoardLeds() {
     _writeLedOrStop(ChessnutCodec.encodeClearLedsCommand());
-  }
-
-  /// Lights the LEDs in green for squares affected by the computer engine's move.
-  void guideOpponentMove(String prePlacement, String postPlacement) {
-    final diffSquares = ChessnutCodec.diffPlacements(prePlacement, postPlacement);
-    if (diffSquares.isEmpty) return;
-
-    final leds = <int, int>{};
-    for (final sq in diffSquares) {
-      leds[sq] = ChessnutConstants.ledGreen;
-    }
-    _writeLedOrStop(ChessnutCodec.encodeSquareLedsCommand(leds));
   }
 
   /// Clears all square LEDs on the physical board.

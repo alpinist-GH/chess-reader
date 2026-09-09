@@ -304,10 +304,10 @@ class ComputerOpponentNotifier extends Notifier<ComputerOpponentState>
   }
 
   void _applyEngineMove(NormalMove move) {
-    final session = ref.read(gameSessionProvider);
-    final prePlacement = ChessnutCodec.extractPlacement(session.fen);
-
-    // Commit engine move to GameSession.
+    // Commit engine move to GameSession. The Chessnut controller observes
+    // this position change itself and, when connected, automatically drives
+    // the physical board to the new placement (see
+    // ChessnutController._onSessionPositionChanged).
     ref.read(gameSessionProvider.notifier).playMove(
           move,
           origin: PositionOrigin.computer,
@@ -333,17 +333,14 @@ class ComputerOpponentNotifier extends Notifier<ComputerOpponentState>
       return;
     }
 
-    // If Chessnut board is connected, guide move via LEDs and await physical placement.
+    // If a Chessnut board is connected, wait for it to finish physically
+    // carrying out the move before letting the human reply.
     final chessnut = ref.read(chessnutControllerProvider);
     if (chessnut.isConnected) {
       state = state.copyWith(
         phase: ComputerGamePhase.awaitingPhysicalMove,
         isAwaitingPhysical: true,
       );
-      ref.read(chessnutControllerProvider.notifier).guideOpponentMove(
-            prePlacement,
-            postPlacement,
-          );
     } else {
       state = state.copyWith(
         phase: ComputerGamePhase.humanTurn,

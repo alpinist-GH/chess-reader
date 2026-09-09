@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:chess_reader/core/entitlements/pro_entitlement.dart';
 import 'package:chess_reader/core/settings/app_settings.dart';
 import 'package:chess_reader/core/state/game_session.dart';
@@ -62,173 +64,128 @@ void main() {
   }
 
   group('Chessnut Move integration with Computer Opponent (Phase 7d)', () {
-    test('suppresses motor target commands throughout computer opponent game',
-        () async {
+    test(
+        'human and computer moves both drive the physical board via motor '
+        'target commands, not LEDs', () async {
       await connectAndSyncBoard();
-
-      // Start computer game
-      final opponent = container.read(computerOpponentProvider.notifier);
-      await opponent.startGame(chosenSide: Side.white);
-
-      fakeBoard.receivedCommands.clear();
-
-      // 1. Human plays 1. e4
-      container
-          .read(gameSessionProvider.notifier)
-          .playMove(NormalMove.fromUci('e2e4'));
-
-      // Motor target commands (length 35, 0x42 0x21 with mode 1) must NOT be queued/sent
-      final motorCommandsAfterE4 = fakeBoard.receivedCommands.where(
-        (cmd) =>
-            cmd.length == 35 &&
-            cmd[0] == 0x42 &&
-            cmd[1] == 0x21 &&
-            cmd[34] == 1,
-      );
-      expect(motorCommandsAfterE4, isEmpty);
-
-      // 2. Engine responds with e7e5
-      fakeEngine.nextBestmove = 'e7e5';
-      await Future<void>.delayed(const Duration(milliseconds: 30));
-
-      final motorCommandsAfterEngine = fakeBoard.receivedCommands.where(
-        (cmd) =>
-            cmd.length == 35 &&
-            cmd[0] == 0x42 &&
-            cmd[1] == 0x21 &&
-            cmd[34] == 1,
-      );
-      expect(motorCommandsAfterEngine, isEmpty);
-
-      // 3. User calls startOrResume manually during active game
-      await container.read(chessnutControllerProvider.notifier).startOrResume();
-      final motorCommandsAfterResume = fakeBoard.receivedCommands.where(
-        (cmd) =>
-            cmd.length == 35 &&
-            cmd[0] == 0x42 &&
-            cmd[1] == 0x21 &&
-            cmd[34] == 1,
-      );
-      expect(motorCommandsAfterResume, isEmpty);
-    });
-
-    test('opponent move triggers LED guidance on board and enters awaitingPhysicalMove',
-        () async {
-      await connectAndSyncBoard();
+      // Drive completion manually (the pattern used throughout
+      // chessnut_regression_test.dart for multi-move sequences): the fake
+      // board's one-shot auto-echo doesn't model real hardware's continuous
+      // FEN streaming, so a second app-origin move arriving while the first
+      // is still in flight (here, the engine's near-instant reply) would
+      // otherwise race the completion timer.
+      fakeBoard.autoCompleteMotion = false;
 
       fakeEngine.nextBestmove = 'e7e5';
       final opponent = container.read(computerOpponentProvider.notifier);
       await opponent.startGame(chosenSide: Side.white);
 
-      // Human plays 1. e4
       fakeBoard.receivedCommands.clear();
-      container
-          .read(gameSessionProvider.notifier)
-          .playMove(NormalMove.fromUci('e2e4'));
 
-      // Engine answers with e7e5
-      await Future<void>.delayed(const Duration(milliseconds: 50));
+      bool isMotorCommand(Uint8List cmd) =>
+          cmd.length == 35 && cmd[0] == 0x42 && cmd[1] == 0x21 && cmd[34] == 1;
 
-      final oppState = container.read(computerOpponentProvider);
-      expect(oppState.phase, ComputerGamePhase.awaitingPhysicalMove);
-      expect(oppState.isAwaitingPhysical, isTrue);
-
-      // Board must receive LED command (length 34, 0x43 0x20)
-      final ledCommands = fakeBoard.receivedCommands.where(
-        (cmd) => cmd.length == 34 && cmd[0] == 0x43 && cmd[1] == 0x20,
+      final afterE4 = ChessnutCodec.extractPlacement(
+        Chess.initial.play(NormalMove.fromUci('e2e4')).fen,
       );
-      expect(ledCommands, isNotEmpty);
-
-      final latestLedCmd = ledCommands.last;
-      final e7Sq = ChessnutCodec.squareToChessnutIndex(Square.e7);
-      final e5Sq = ChessnutCodec.squareToChessnutIndex(Square.e5);
-
-      final e7Byte = latestLedCmd[2 + e7Sq ~/ 2];
-      final e7Color = (e7Sq % 2 == 0) ? (e7Byte & 0x0F) : ((e7Byte >> 4) & 0x0F);
-      expect(e7Color, ChessnutConstants.ledGreen);
-
-      final e5Byte = latestLedCmd[2 + e5Sq ~/ 2];
-      final e5Color = (e5Sq % 2 == 0) ? (e5Byte & 0x0F) : ((e5Byte >> 4) & 0x0F);
-      expect(e5Color, ChessnutConstants.ledGreen);
-    });
-
-    test('an in-progress opponent move keeps the green guidance LEDs lit',
-        () async {
-      await connectAndSyncBoard();
-
-      fakeEngine.nextBestmove = 'e7e5';
-      final opponent = container.read(computerOpponentProvider.notifier);
-      await opponent.startGame(chosenSide: Side.white);
-
-      container
-          .read(gameSessionProvider.notifier)
-          .playMove(NormalMove.fromUci('e2e4'));
-      await Future<void>.delayed(const Duration(milliseconds: 50));
-      expect(container.read(computerOpponentProvider).phase,
-          ComputerGamePhase.awaitingPhysicalMove);
-
-      fakeBoard.receivedCommands.clear();
-
-      // The user lifts the e7 pawn: an intermediate placement that stays put
-      // well past the 350ms stability window but is inside the mismatch grace
-      // period. It must not repaint the guidance LEDs red.
-      final lifted = ChessnutCodec.extractPlacement(
-        Chess.initial.play(NormalMove.fromUci('e2e4')).board
-            .removePieceAt(Square.e7)
+      final afterE5 = ChessnutCodec.extractPlacement(
+        Chess.initial
+            .play(NormalMove.fromUci('e2e4'))
+            .play(NormalMove.fromUci('e7e5'))
             .fen,
       );
-      fakeBoard.simulatePhysicalMove(lifted);
+
+      // Human plays 1. e4 on screen: the physical board must follow.
+      container
+          .read(gameSessionProvider.notifier)
+          .playMove(NormalMove.fromUci('e2e4'));
+      // Let the engine's near-instant reply land and queue behind e4's
+      // still-in-flight motion.
+      await Future<void>.delayed(const Duration(milliseconds: 20));
+
+      // The physical board "arrives" at e4 (simulating the motor): this is
+      // what lets the already-queued e5 target actually get sent.
+      fakeBoard.simulatePhysicalMove(afterE4);
       await settle();
 
-      expect(container.read(chessnutControllerProvider).syncState,
-          isNot(ChessnutSyncState.mismatch));
-      final ledCommands = fakeBoard.receivedCommands.where(
-        (cmd) => cmd.length == 34 && cmd[0] == 0x43 && cmd[1] == 0x20,
-      );
-      expect(ledCommands, isEmpty);
+      final motorPlacements = fakeBoard.receivedCommands
+          .where(isMotorCommand)
+          .map((cmd) => ChessnutCodec.boardBytesToPlacement(cmd, 2))
+          .toList();
+      expect(motorPlacements, [afterE4, afterE5]);
 
-      // Completing the move is still recognized.
-      fakeBoard.simulatePhysicalMove(
-        container.read(computerOpponentProvider).expectedPhysicalPlacement!,
-      );
-      await settle();
-      expect(container.read(computerOpponentProvider).phase,
-          ComputerGamePhase.humanTurn);
+      // No colored guidance LED (green) should ever be sent for the engine's
+      // move now that the motor physically makes it.
+      final greenLedCommands = fakeBoard.receivedCommands.where((cmd) {
+        if (cmd.length != 34 || cmd[0] != 0x43 || cmd[1] != 0x20) {
+          return false;
+        }
+        for (var i = 2; i < 34; i++) {
+          final lo = cmd[i] & 0x0F;
+          final hi = (cmd[i] >> 4) & 0x0F;
+          if (lo == ChessnutConstants.ledGreen ||
+              hi == ChessnutConstants.ledGreen) {
+            return true;
+          }
+        }
+        return false;
+      });
+      expect(greenLedCommands, isEmpty);
     });
 
-    test('physical placement matching computer move enables human turn without double-playing',
-        () async {
+    test(
+        'computer opponent move automatically completes on the board and '
+        'returns to human turn without double-playing', () async {
       await connectAndSyncBoard();
+      fakeBoard.autoCompleteMotion = false;
 
       fakeEngine.nextBestmove = 'e7e5';
       final opponent = container.read(computerOpponentProvider.notifier);
       await opponent.startGame(chosenSide: Side.white);
 
+      final afterE4 = ChessnutCodec.extractPlacement(
+        Chess.initial.play(NormalMove.fromUci('e2e4')).fen,
+      );
+      final afterE5 = ChessnutCodec.extractPlacement(
+        Chess.initial
+            .play(NormalMove.fromUci('e2e4'))
+            .play(NormalMove.fromUci('e7e5'))
+            .fen,
+      );
+
       // Human plays 1. e4
       container
           .read(gameSessionProvider.notifier)
           .playMove(NormalMove.fromUci('e2e4'));
+      // Revision increments synchronously with the on-screen move, well
+      // before the physical board even starts moving.
+      final revAfterE4 = container.read(gameSessionProvider).revision;
 
-      await Future<void>.delayed(const Duration(milliseconds: 50));
+      // Engine's reply (e7e5) lands and queues behind e4's in-flight motion.
+      await Future<void>.delayed(const Duration(milliseconds: 20));
+
+      // The board "arrives" at e4: this both completes e4's motion and lets
+      // the queued e5 target get sent to the motor.
+      fakeBoard.simulatePhysicalMove(afterE4);
+      await settle();
       expect(container.read(computerOpponentProvider).phase,
           ComputerGamePhase.awaitingPhysicalMove);
 
-      final revBeforePhysical = container.read(gameSessionProvider).revision;
-      final expectedPlacement =
-          container.read(computerOpponentProvider).expectedPhysicalPlacement!;
-
-      // Simulate human moving physical pieces on the board to match the computer move
-      fakeBoard.simulatePhysicalMove(expectedPlacement);
+      // The board now "arrives" at e5 on its own — matching real motor-driven
+      // hardware, no legal-move re-matching is needed to advance the turn.
+      fakeBoard.simulatePhysicalMove(afterE5);
       await settle();
 
-      // Phase transitions to humanTurn and isAwaitingPhysical is cleared
       final oppState = container.read(computerOpponentProvider);
       expect(oppState.phase, ComputerGamePhase.humanTurn);
       expect(oppState.isAwaitingPhysical, isFalse);
 
-      // The move was already played in GameSession when computer made it,
-      // so the session revision must NOT have incremented again.
-      expect(container.read(gameSessionProvider).revision, revBeforePhysical);
+      // The engine's move increments the revision exactly once; the board
+      // settling on the commanded target must not play a second, duplicate
+      // move on top of it.
+      expect(container.read(gameSessionProvider).revision, revAfterE4 + 1);
+      expect(container.read(gameSessionProvider).lastMove,
+          NormalMove.fromUci('e7e5'));
       expect(container.read(gameSessionProvider).position.turn, Side.white);
     });
 
@@ -317,8 +274,9 @@ void main() {
       );
     });
 
-    test('Play on Screen (skipPhysicalWaiting) clears LEDs and enables human turn',
-        () async {
+    test(
+        'Play on Screen (skipPhysicalWaiting) stops waiting on the motor and '
+        'enables human turn', () async {
       await connectAndSyncBoard();
 
       fakeEngine.nextBestmove = 'e7e5';
@@ -330,13 +288,15 @@ void main() {
           .read(gameSessionProvider.notifier)
           .playMove(NormalMove.fromUci('e2e4'));
 
+      // Caught mid-motion: the engine's move has been sent to the motor but
+      // hasn't stabilized on the target yet (< the 350ms completion window).
       await Future<void>.delayed(const Duration(milliseconds: 50));
       expect(container.read(computerOpponentProvider).phase,
           ComputerGamePhase.awaitingPhysicalMove);
 
       fakeBoard.receivedCommands.clear();
 
-      // Human clicks "Play on Screen"
+      // Human clicks "Play on Screen" instead of waiting for the board.
       opponent.skipPhysicalWaiting();
 
       final oppState = container.read(computerOpponentProvider);

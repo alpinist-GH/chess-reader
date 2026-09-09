@@ -177,11 +177,15 @@ class ComputerGameBar extends ConsumerWidget {
       case ComputerGamePhase.awaitingPhysicalMove:
         statusContent = Row(
           children: [
-            Icon(Icons.lightbulb, color: colorScheme.primary, size: 20),
-            const SizedBox(width: 8),
+            const SizedBox(
+              width: 18,
+              height: 18,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            ),
+            const SizedBox(width: 10),
             const Expanded(
               child: Text(
-                'Play computer move on board (LEDs lit)',
+                'Moving computer\'s piece on the board...',
                 overflow: TextOverflow.ellipsis,
               ),
             ),
