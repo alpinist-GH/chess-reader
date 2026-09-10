@@ -123,7 +123,7 @@ install(FILES "${AOT_LIBRARY}" DESTINATION "${INSTALL_BUNDLE_DATA_DIR}"
 # tool/fetch_stockfish.ps1, not committed: ~110 MB). The app looks it up at
 # data/engines/stockfish.exe relative to the executable.
 set(STOCKFISH_EXE
-  "${CMAKE_CURRENT_SOURCE_DIR}/../assets/engines/stockfish-windows-x86-64-avx2.exe")
+  "${CMAKE_CURRENT_SOURCE_DIR}/../assets/engines/stockfish-windows-x86-64.exe")
 if(EXISTS ${STOCKFISH_EXE})
   install(FILES "${STOCKFISH_EXE}"
     DESTINATION "${INSTALL_BUNDLE_DATA_DIR}/engines"

@@ -20,7 +20,7 @@ $dist = "dist"
 
 # Stockfish is bundled by the Windows build (windows/CMakeLists.txt); fetch the
 # 110 MB binary once if it isn't present.
-if (-not (Test-Path "assets\engines\stockfish-windows-x86-64-avx2.exe")) {
+if (-not (Test-Path "assets\engines\stockfish-windows-x86-64.exe")) {
     Write-Host "Fetching Stockfish..."
     & (Join-Path $PSScriptRoot "fetch_stockfish.ps1")
 }
