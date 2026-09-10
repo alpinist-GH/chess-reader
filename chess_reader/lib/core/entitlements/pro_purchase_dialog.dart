@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:in_app_purchase/in_app_purchase.dart';
 
 import 'pro_entitlement.dart';
 import 'pro_trial.dart';
@@ -209,13 +208,10 @@ class _ProPurchaseDialogState extends ConsumerState<_ProPurchaseDialog> {
                     height: 16,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                : Text(_buyLabel(flow.product)),
+                : const Text('Buy Pro'),
           ),
         ],
       ],
     );
   }
-
-  String _buyLabel(ProductDetails? product) =>
-      product == null ? 'Buy Pro' : 'Buy Pro — ${product.price}';
 }
