@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
@@ -63,8 +64,40 @@ class _RealProStoreGateway implements ProStoreGateway {
       InAppPurchase.instance.completePurchase(purchase);
 }
 
-final proStoreGatewayProvider =
-    Provider<ProStoreGateway>((ref) => _RealProStoreGateway());
+/// Stands in for [_RealProStoreGateway] on platforms `in_app_purchase` does
+/// not support (Windows, Linux) — the plugin never registers a platform
+/// implementation there, so touching `InAppPurchase.instance` throws a
+/// `LateInitializationError` the moment it's accessed. That exception poisons
+/// [proPurchasedProvider] permanently (Riverpod caches provider failures),
+/// which cascades into every widget that reads [proEntitlementProvider] and
+/// blanks the whole app. Reporting the store as simply unavailable instead
+/// keeps Pro gated behind the free-trial credits on these platforms.
+class _UnavailableProStoreGateway implements ProStoreGateway {
+  @override
+  Stream<List<PurchaseDetails>> get purchaseStream => const Stream.empty();
+
+  @override
+  Future<bool> isAvailable() async => false;
+
+  @override
+  Future<ProductDetailsResponse> queryProductDetails(Set<String> ids) async =>
+      ProductDetailsResponse(productDetails: const [], notFoundIDs: ids.toList());
+
+  @override
+  Future<void> buyNonConsumable(ProductDetails product) async {}
+
+  @override
+  Future<void> restorePurchases() async {}
+
+  @override
+  void completePurchase(PurchaseDetails purchase) {}
+}
+
+bool get _storeUnsupported => Platform.isWindows || Platform.isLinux;
+
+final proStoreGatewayProvider = Provider<ProStoreGateway>(
+  (ref) => _storeUnsupported ? _UnavailableProStoreGateway() : _RealProStoreGateway(),
+);
 
 /// Whether the user owns the Pro Unlock. This is the persisted source of
 /// truth for [proEntitlementProvider][../entitlements/pro_entitlement.dart] —
