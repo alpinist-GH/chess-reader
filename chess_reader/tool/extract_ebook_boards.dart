@@ -19,10 +19,13 @@ Future<void> main(List<String> args) async {
     const BookSpec('middle_game', '../ebook/the-art-of-the-middle-game_compress.pdf'),
     const BookSpec('march_ideas', '../ebook/the-march-of-chess-ideas_compress.pdf'),
     const BookSpec('kotov', '../ebook/think-like-a-grandmaster-9781849940535-1849940533_compress.pdf'),
+    const BookSpec('art_of_attack', '../ebook/the-art-of-attack-in-chess.pdf'),
   ];
 
   final outRoot = args.isNotEmpty ? args[0] : 'tool/ebook_boards';
   final targetBook = args.length > 1 ? args[1] : null;
+  final pageStart = args.length > 2 ? int.parse(args[2]) : 1;
+  final pageEnd = args.length > 3 ? int.parse(args[3]) : null;
 
   await pdfrxInitialize();
   const locator = ConnectedComponentBoardLocator();
@@ -51,12 +54,13 @@ Future<void> main(List<String> args) async {
     allManifest.removeWhere((m) => m['book'] == b.slug);
     final doc = await PdfDocument.openFile(b.path);
     final numPages = doc.pages.length;
+    final lastPage = pageEnd ?? numPages;
     var totalBoardsInBook = 0;
     final stopwatch = Stopwatch()..start();
 
-    for (var pageNum = 1; pageNum <= numPages; pageNum++) {
+    for (var pageNum = pageStart; pageNum <= lastPage; pageNum++) {
       final page = doc.pages[pageNum - 1];
-      const scale = 200.0 / 72.0;
+      const scale = 350.0 / 72.0;
       final pdfImage = await page.render(
         fullWidth: page.width * scale,
         fullHeight: page.height * scale,

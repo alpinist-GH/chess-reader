@@ -18,11 +18,12 @@ HOLDOUT = {
     'fischer_p20_b0',
     'kotov_p23_b0',
     'middle_game_p28_b0',
-    'march_ideas_p43_b0'
+    'march_ideas_p43_b0',
+    'art_of_attack_p15_b0'
 }
 
 def _parse_bid(bid):
-    for prefix in ['middle_game_', 'march_ideas_', 'fischer_', 'kotov_']:
+    for prefix in ['middle_game_', 'march_ideas_', 'art_of_attack_', 'fischer_', 'kotov_']:
         if bid.startswith(prefix):
             book = prefix[:-1]
             rest = bid[len(prefix):]

@@ -11,11 +11,11 @@
   "fischer_p25_b0": "4br2/2p1n1k1/1p1p3p/p2P1p1R/2P2P2/PP1BN1P1/6K1/8",
   "kotov_p16_b0": "1brr2k1/1b3pp1/pp2pqnp/4N2Q/3P4/1B4R1/PP1B1PPP/4R1K1",
   "kotov_p18_b0": "r1bqrbk1/1pp2n1p/6p1/3Pp3/1pP1Pp2/1N4PP/N1Q2PBK/1R3R2",
-  "kotov_p20_b0": "r1r3k1/p4ppp/bpq1Nn2/4R3/1PBR4/2Q1PP2/6PP/6K1",
+  "kotov_p20_b0": "r1r3k1/p4ppp/bpq1Nn2/4R3/1PBr4/2Q1PP2/6PP/6K1",
   "kotov_p21_b0": "3b1kn1/6p1/3q1p2/4pPP1/pP1pP1N1/3P1Nq1/1rr5/5RRK",
   "kotov_p23_b0": "2r2b1k/4P1pp/8/ppq5/2p5/P1q1R1P1/1B3K1P/3r4",
   "middle_game_p15_b0": "r1b1r1k1/pp1n1pbn/1q1p2pp/2pP4/2B1PP1B/P1N2N2/1P1Q2PP/4RRK1",
-  "middle_game_p20_b0": "r1b2qk1/1pp4p/3ppn2/pN3nb1/2PP4/BP1N2PP/P3Q1B1/R5K1",
+  "middle_game_p20_b0": "r1b2qk1/1pp4p/3ppn2/pN3np1/2PP4/BP1N2PP/P3Q1B1/R5K1",
   "middle_game_p24_b0": "5rk1/6pp/8/pp2R1b1/3B4/P5PP/1Pr5/3R2K1",
   "middle_game_p28_b0": "r4rk1/pp2ppbp/n5p1/q2Nn3/8/6QP/BP3PP1/R1B2RK1",
   "middle_game_p34_b0": "r2q1rk1/1ppb1pbp/3p1np1/p7/2P4P/1PN1PP2/PB1QBP2/2KR3R",
@@ -24,5 +24,10 @@
   "march_ideas_p35_b0": "rnbqkb1r/1p2pppp/p4n2/3P4/3N4/8/PP2PPPP/RNBQKB1R",
   "march_ideas_p40_b0": "6k1/1pnqrppp/p1p4r/3p4/PP1P4/4P2P/2Q2PP1/1R2RNK1",
   "march_ideas_p43_b0": "q4rk1/4b1pp/ppb1Pp2/2p5/P1B1p1Q1/1P2P3/1B3PPP/3R2K1",
-  "march_ideas_p48_b0": "r1b5/pp4kp/2p1p3/3nN3/3PNr1p/3R4/PP2RPP1/6K1"
+  "march_ideas_p48_b0": "r1b5/pp4kp/2p1p3/3nN3/3PNr1p/3R4/PP2RPP1/6K1",
+  "art_of_attack_p7_b0": "r1bq1rk1/p2n1ppp/4p3/2pp4/8/PPB1PN2/3P1PPP/R2Q1RK1",
+  "art_of_attack_p8_b0": "r2qr1k1/1b1n1ppp/p1p1p3/1p6/3P4/2P2N2/PPQB1PPP/R3R1K1",
+  "art_of_attack_p9_b0": "8/1K1Q4/6pb/4kB2/3b1n1P/5p2/8/8",
+  "art_of_attack_p11_b0": "8/p5K1/1p2p3/4kp2/1Q6/2PpbP2/1R2n1B1/q7",
+  "art_of_attack_p15_b0": "r3k2r/p1p1qppp/b1p2n2/8/1bPp4/1PNQ2P1/P2PP1BP/R1B1K2R"
 }

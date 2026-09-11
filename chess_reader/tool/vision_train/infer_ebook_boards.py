@@ -19,6 +19,7 @@ CELL = 32
 SEG_SIZE = 192
 sys.path.insert(0, _HERE)
 from model import CLASSES
+from board_repair import repair_to_legal
 _EMPTY_STD = 0.08
 _EMPTY_CENTRAL_MASS = 0.05
 _DARK_NORM = -0.14
@@ -86,12 +87,13 @@ def main():
 
     results = []
     num_plausible = 0
+    num_plausible_raw = 0
     per_book_counts = {}
 
     for item in manifest:
         bid = item['id']
         book = item['book']
-        per_book_counts.setdefault(book, {'total': 0, 'legal': 0})
+        per_book_counts.setdefault(book, {'total': 0, 'legal': 0, 'legal_raw': 0})
         per_book_counts[book]['total'] += 1
 
         b_dir = os.path.join(_CR_ROOT, item['dir'])
@@ -122,21 +124,28 @@ def main():
         logits = _CLS2.run(None, {'cells': cells})[0]
         labels = []
         confs = []
+        probs = []
         for i in range(64):
             row = logits[i].astype(np.float64)
             soft = np.exp(row - row.max())
             soft /= soft.sum()
+            probs.append(soft)
             std = float(cells[i, 0].std())
             empty = std < _EMPTY_STD
             c = '' if empty else CLASSES[int(row.argmax())]
             labels.append(c)
             confs.append(float(soft[0]) if empty else float(soft.max()))
 
-        fen = to_fen(labels)
-        is_legal, reason = check_chess_validity(labels)
+        raw_is_legal, raw_reason = check_chess_validity(labels)
+        repaired = repair_to_legal(labels, probs)
+        fen = to_fen(repaired)
+        is_legal, reason = check_chess_validity(repaired)
         if is_legal:
             num_plausible += 1
             per_book_counts[book]['legal'] += 1
+        if raw_is_legal:
+            num_plausible_raw += 1
+            per_book_counts[book]['legal_raw'] += 1
 
         results.append({
             'id': bid,
@@ -144,10 +153,13 @@ def main():
             'page': item['page'],
             'boardIndex': item['boardIndex'],
             'predicted_fen': fen,
+            'raw_fen': to_fen(labels),
             'mean_conf': float(np.mean(confs)),
             'min_conf': float(np.min(confs)),
             'is_structurally_legal': is_legal,
             'validity_reason': reason,
+            'raw_is_structurally_legal': raw_is_legal,
+            'raw_validity_reason': raw_reason,
             'board_png': board_path,
             'inner_png': inner_path
         })
@@ -156,11 +168,13 @@ def main():
         json.dump(results, f, indent=2)
 
     print(f"Total processed: {len(results)}")
-    print(f"Structurally legal without repair: {num_plausible}/{len(results)} ({num_plausible/len(results)*100:.1f}%)")
+    print(f"Structurally legal, raw (no repair): {num_plausible_raw}/{len(results)} ({num_plausible_raw/len(results)*100:.1f}%)")
+    print(f"Structurally legal, after board_repair (what the app ships): {num_plausible}/{len(results)} ({num_plausible/len(results)*100:.1f}%)")
     for book, stat in per_book_counts.items():
         tot = stat['total']
         leg = stat['legal']
-        print(f"  {book}: {leg}/{tot} ({leg/tot*100:.1f}%) cleanly legal positions on model")
+        leg_raw = stat['legal_raw']
+        print(f"  {book}: raw {leg_raw}/{tot} ({leg_raw/tot*100:.1f}%) -> repaired {leg}/{tot} ({leg/tot*100:.1f}%)")
 
 if __name__ == '__main__':
     main()
