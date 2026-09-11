@@ -34,5 +34,10 @@
   "reassess_i00150_b0": "rnb1k1nr/1p1pppbp/1p4p1/8/2P1P3/8/PP3KPP/R2Q1BNR",
   "reassess_i00250_b0": "1r6/r4pp1/p1pp3b/P6p/RpBpPk2/3P1P1P/1PP2P2/4RK2",
   "reassess_i00400_b0": "5r1k/r4qpp/p1p5/1p1pPpB1/3P1P1Q/b1P4R/P1Bn1P1P/6RK",
-  "reassess_i00550_b0": "r2qnrk1/p4ppp/1p1pp3/n7/3PP3/P1PQBP2/4N1PP/R3K2R"
+  "reassess_i00550_b0": "r2qnrk1/p4ppp/1p1pp3/n7/3PP3/P1PQBP2/4N1PP/R3K2R",
+  "tal_p48_b0": "1rbqr1k1/p1n2pbp/1p1p1np1/1NpP4/P3P3/8/1PQNBPPP/R1B1r1K1",
+  "tal_p155_b0": "8/8/8/2k3P1/5K2/2n5/p1N2PP1/8",
+  "tal_p170_b0": "8/6pp/p7/8/2k5/1N6/4K1PP/8",
+  "tal_p171_b0": "8/6p1/7p/p1N5/6P1/2k5/8/3K4",
+  "tal_p346_b0": "8/p4p2/1p2p3/2p2pkp/2P1P3/5KP1/PP3P1P/8"
 }

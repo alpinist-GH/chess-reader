@@ -15348,5 +15348,2865 @@
     "top": 0,
     "size": 500,
     "dir": "tool/ebook_boards/reassess/i00643_b0"
+  },
+  {
+    "id": "tal_p20_b0",
+    "book": "tal",
+    "page": 20,
+    "boardIndex": 0,
+    "left": 322,
+    "top": 1942,
+    "size": 629,
+    "dir": "tool/ebook_boards/tal/p20_b0"
+  },
+  {
+    "id": "tal_p21_b0",
+    "book": "tal",
+    "page": 21,
+    "boardIndex": 0,
+    "left": 1120,
+    "top": 1320,
+    "size": 624,
+    "dir": "tool/ebook_boards/tal/p21_b0"
+  },
+  {
+    "id": "tal_p24_b0",
+    "book": "tal",
+    "page": 24,
+    "boardIndex": 0,
+    "left": 316,
+    "top": 893,
+    "size": 630,
+    "dir": "tool/ebook_boards/tal/p24_b0"
+  },
+  {
+    "id": "tal_p31_b0",
+    "book": "tal",
+    "page": 31,
+    "boardIndex": 0,
+    "left": 1114,
+    "top": 370,
+    "size": 629,
+    "dir": "tool/ebook_boards/tal/p31_b0"
+  },
+  {
+    "id": "tal_p33_b0",
+    "book": "tal",
+    "page": 33,
+    "boardIndex": 0,
+    "left": 1120,
+    "top": 1243,
+    "size": 631,
+    "dir": "tool/ebook_boards/tal/p33_b0"
+  },
+  {
+    "id": "tal_p34_b0",
+    "book": "tal",
+    "page": 34,
+    "boardIndex": 0,
+    "left": 327,
+    "top": 1943,
+    "size": 630,
+    "dir": "tool/ebook_boards/tal/p34_b0"
+  },
+  {
+    "id": "tal_p35_b0",
+    "book": "tal",
+    "page": 35,
+    "boardIndex": 0,
+    "left": 1120,
+    "top": 1709,
+    "size": 633,
+    "dir": "tool/ebook_boards/tal/p35_b0"
+  },
+  {
+    "id": "tal_p37_b0",
+    "book": "tal",
+    "page": 37,
+    "boardIndex": 0,
+    "left": 1115,
+    "top": 372,
+    "size": 630,
+    "dir": "tool/ebook_boards/tal/p37_b0"
+  },
+  {
+    "id": "tal_p41_b0",
+    "book": "tal",
+    "page": 41,
+    "boardIndex": 0,
+    "left": 1122,
+    "top": 370,
+    "size": 632,
+    "dir": "tool/ebook_boards/tal/p41_b0"
+  },
+  {
+    "id": "tal_p44_b0",
+    "book": "tal",
+    "page": 44,
+    "boardIndex": 0,
+    "left": 1117,
+    "top": 1359,
+    "size": 629,
+    "dir": "tool/ebook_boards/tal/p44_b0"
+  },
+  {
+    "id": "tal_p46_b0",
+    "book": "tal",
+    "page": 46,
+    "boardIndex": 0,
+    "left": 317,
+    "top": 1246,
+    "size": 630,
+    "dir": "tool/ebook_boards/tal/p46_b0"
+  },
+  {
+    "id": "tal_p48_b0",
+    "book": "tal",
+    "page": 48,
+    "boardIndex": 0,
+    "left": 1129,
+    "top": 2032,
+    "size": 632,
+    "dir": "tool/ebook_boards/tal/p48_b0"
+  },
+  {
+    "id": "tal_p52_b0",
+    "book": "tal",
+    "page": 52,
+    "boardIndex": 0,
+    "left": 1112,
+    "top": 370,
+    "size": 630,
+    "dir": "tool/ebook_boards/tal/p52_b0"
+  },
+  {
+    "id": "tal_p53_b0",
+    "book": "tal",
+    "page": 53,
+    "boardIndex": 0,
+    "left": 1117,
+    "top": 1127,
+    "size": 631,
+    "dir": "tool/ebook_boards/tal/p53_b0"
+  },
+  {
+    "id": "tal_p54_b0",
+    "book": "tal",
+    "page": 54,
+    "boardIndex": 0,
+    "left": 317,
+    "top": 1016,
+    "size": 629,
+    "dir": "tool/ebook_boards/tal/p54_b0"
+  },
+  {
+    "id": "tal_p55_b0",
+    "book": "tal",
+    "page": 55,
+    "boardIndex": 0,
+    "left": 317,
+    "top": 953,
+    "size": 632,
+    "dir": "tool/ebook_boards/tal/p55_b0"
+  },
+  {
+    "id": "tal_p57_b0",
+    "book": "tal",
+    "page": 57,
+    "boardIndex": 0,
+    "left": 315,
+    "top": 955,
+    "size": 630,
+    "dir": "tool/ebook_boards/tal/p57_b0"
+  },
+  {
+    "id": "tal_p59_b0",
+    "book": "tal",
+    "page": 59,
+    "boardIndex": 0,
+    "left": 1118,
+    "top": 1010,
+    "size": 630,
+    "dir": "tool/ebook_boards/tal/p59_b0"
+  },
+  {
+    "id": "tal_p60_b0",
+    "book": "tal",
+    "page": 60,
+    "boardIndex": 0,
+    "left": 1118,
+    "top": 1360,
+    "size": 630,
+    "dir": "tool/ebook_boards/tal/p60_b0"
+  },
+  {
+    "id": "tal_p63_b0",
+    "book": "tal",
+    "page": 63,
+    "boardIndex": 0,
+    "left": 1115,
+    "top": 895,
+    "size": 631,
+    "dir": "tool/ebook_boards/tal/p63_b0"
+  },
+  {
+    "id": "tal_p65_b0",
+    "book": "tal",
+    "page": 65,
+    "boardIndex": 0,
+    "left": 1120,
+    "top": 1071,
+    "size": 629,
+    "dir": "tool/ebook_boards/tal/p65_b0"
+  },
+  {
+    "id": "tal_p77_b0",
+    "book": "tal",
+    "page": 77,
+    "boardIndex": 0,
+    "left": 1115,
+    "top": 486,
+    "size": 634,
+    "dir": "tool/ebook_boards/tal/p77_b0"
+  },
+  {
+    "id": "tal_p79_b0",
+    "book": "tal",
+    "page": 79,
+    "boardIndex": 0,
+    "left": 375,
+    "top": 469,
+    "size": 557,
+    "dir": "tool/ebook_boards/tal/p79_b0"
+  },
+  {
+    "id": "tal_p83_b0",
+    "book": "tal",
+    "page": 83,
+    "boardIndex": 0,
+    "left": 1120,
+    "top": 1302,
+    "size": 630,
+    "dir": "tool/ebook_boards/tal/p83_b0"
+  },
+  {
+    "id": "tal_p86_b0",
+    "book": "tal",
+    "page": 86,
+    "boardIndex": 0,
+    "left": 319,
+    "top": 1765,
+    "size": 632,
+    "dir": "tool/ebook_boards/tal/p86_b0"
+  },
+  {
+    "id": "tal_p87_b0",
+    "book": "tal",
+    "page": 87,
+    "boardIndex": 0,
+    "left": 1115,
+    "top": 370,
+    "size": 630,
+    "dir": "tool/ebook_boards/tal/p87_b0"
+  },
+  {
+    "id": "tal_p88_b0",
+    "book": "tal",
+    "page": 88,
+    "boardIndex": 0,
+    "left": 315,
+    "top": 1309,
+    "size": 625,
+    "dir": "tool/ebook_boards/tal/p88_b0"
+  },
+  {
+    "id": "tal_p89_b0",
+    "book": "tal",
+    "page": 89,
+    "boardIndex": 0,
+    "left": 1123,
+    "top": 372,
+    "size": 632,
+    "dir": "tool/ebook_boards/tal/p89_b0"
+  },
+  {
+    "id": "tal_p90_b0",
+    "book": "tal",
+    "page": 90,
+    "boardIndex": 0,
+    "left": 315,
+    "top": 836,
+    "size": 630,
+    "dir": "tool/ebook_boards/tal/p90_b0"
+  },
+  {
+    "id": "tal_p91_b0",
+    "book": "tal",
+    "page": 91,
+    "boardIndex": 0,
+    "left": 322,
+    "top": 2003,
+    "size": 629,
+    "dir": "tool/ebook_boards/tal/p91_b0"
+  },
+  {
+    "id": "tal_p92_b0",
+    "book": "tal",
+    "page": 92,
+    "boardIndex": 0,
+    "left": 310,
+    "top": 837,
+    "size": 433,
+    "dir": "tool/ebook_boards/tal/p92_b0"
+  },
+  {
+    "id": "tal_p93_b0",
+    "book": "tal",
+    "page": 93,
+    "boardIndex": 0,
+    "left": 1117,
+    "top": 1299,
+    "size": 632,
+    "dir": "tool/ebook_boards/tal/p93_b0"
+  },
+  {
+    "id": "tal_p94_b0",
+    "book": "tal",
+    "page": 94,
+    "boardIndex": 0,
+    "left": 1122,
+    "top": 720,
+    "size": 630,
+    "dir": "tool/ebook_boards/tal/p94_b0"
+  },
+  {
+    "id": "tal_p97_b0",
+    "book": "tal",
+    "page": 97,
+    "boardIndex": 0,
+    "left": 315,
+    "top": 586,
+    "size": 632,
+    "dir": "tool/ebook_boards/tal/p97_b0"
+  },
+  {
+    "id": "tal_p97_b1",
+    "book": "tal",
+    "page": 97,
+    "boardIndex": 1,
+    "left": 1126,
+    "top": 703,
+    "size": 630,
+    "dir": "tool/ebook_boards/tal/p97_b1"
+  },
+  {
+    "id": "tal_p100_b0",
+    "book": "tal",
+    "page": 100,
+    "boardIndex": 0,
+    "left": 1114,
+    "top": 372,
+    "size": 632,
+    "dir": "tool/ebook_boards/tal/p100_b0"
+  },
+  {
+    "id": "tal_p104_b0",
+    "book": "tal",
+    "page": 104,
+    "boardIndex": 0,
+    "left": 1116,
+    "top": 2004,
+    "size": 631,
+    "dir": "tool/ebook_boards/tal/p104_b0"
+  },
+  {
+    "id": "tal_p105_b0",
+    "book": "tal",
+    "page": 105,
+    "boardIndex": 0,
+    "left": 322,
+    "top": 1009,
+    "size": 632,
+    "dir": "tool/ebook_boards/tal/p105_b0"
+  },
+  {
+    "id": "tal_p117_b0",
+    "book": "tal",
+    "page": 117,
+    "boardIndex": 0,
+    "left": 1122,
+    "top": 772,
+    "size": 633,
+    "dir": "tool/ebook_boards/tal/p117_b0"
+  },
+  {
+    "id": "tal_p118_b0",
+    "book": "tal",
+    "page": 118,
+    "boardIndex": 0,
+    "left": 322,
+    "top": 715,
+    "size": 630,
+    "dir": "tool/ebook_boards/tal/p118_b0"
+  },
+  {
+    "id": "tal_p120_b0",
+    "book": "tal",
+    "page": 120,
+    "boardIndex": 0,
+    "left": 321,
+    "top": 892,
+    "size": 632,
+    "dir": "tool/ebook_boards/tal/p120_b0"
+  },
+  {
+    "id": "tal_p121_b0",
+    "book": "tal",
+    "page": 121,
+    "boardIndex": 0,
+    "left": 1119,
+    "top": 1188,
+    "size": 630,
+    "dir": "tool/ebook_boards/tal/p121_b0"
+  },
+  {
+    "id": "tal_p122_b0",
+    "book": "tal",
+    "page": 122,
+    "boardIndex": 0,
+    "left": 318,
+    "top": 366,
+    "size": 630,
+    "dir": "tool/ebook_boards/tal/p122_b0"
+  },
+  {
+    "id": "tal_p125_b0",
+    "book": "tal",
+    "page": 125,
+    "boardIndex": 0,
+    "left": 1113,
+    "top": 537,
+    "size": 632,
+    "dir": "tool/ebook_boards/tal/p125_b0"
+  },
+  {
+    "id": "tal_p128_b0",
+    "book": "tal",
+    "page": 128,
+    "boardIndex": 0,
+    "left": 1121,
+    "top": 370,
+    "size": 631,
+    "dir": "tool/ebook_boards/tal/p128_b0"
+  },
+  {
+    "id": "tal_p129_b0",
+    "book": "tal",
+    "page": 129,
+    "boardIndex": 0,
+    "left": 325,
+    "top": 1536,
+    "size": 630,
+    "dir": "tool/ebook_boards/tal/p129_b0"
+  },
+  {
+    "id": "tal_p130_b0",
+    "book": "tal",
+    "page": 130,
+    "boardIndex": 0,
+    "left": 1123,
+    "top": 371,
+    "size": 632,
+    "dir": "tool/ebook_boards/tal/p130_b0"
+  },
+  {
+    "id": "tal_p131_b0",
+    "book": "tal",
+    "page": 131,
+    "boardIndex": 0,
+    "left": 1120,
+    "top": 1709,
+    "size": 630,
+    "dir": "tool/ebook_boards/tal/p131_b0"
+  },
+  {
+    "id": "tal_p132_b0",
+    "book": "tal",
+    "page": 132,
+    "boardIndex": 0,
+    "left": 325,
+    "top": 1769,
+    "size": 632,
+    "dir": "tool/ebook_boards/tal/p132_b0"
+  },
+  {
+    "id": "tal_p133_b0",
+    "book": "tal",
+    "page": 133,
+    "boardIndex": 0,
+    "left": 316,
+    "top": 605,
+    "size": 631,
+    "dir": "tool/ebook_boards/tal/p133_b0"
+  },
+  {
+    "id": "tal_p135_b0",
+    "book": "tal",
+    "page": 135,
+    "boardIndex": 0,
+    "left": 320,
+    "top": 1475,
+    "size": 628,
+    "dir": "tool/ebook_boards/tal/p135_b0"
+  },
+  {
+    "id": "tal_p138_b0",
+    "book": "tal",
+    "page": 138,
+    "boardIndex": 0,
+    "left": 315,
+    "top": 776,
+    "size": 627,
+    "dir": "tool/ebook_boards/tal/p138_b0"
+  },
+  {
+    "id": "tal_p140_b0",
+    "book": "tal",
+    "page": 140,
+    "boardIndex": 0,
+    "left": 1120,
+    "top": 370,
+    "size": 632,
+    "dir": "tool/ebook_boards/tal/p140_b0"
+  },
+  {
+    "id": "tal_p141_b0",
+    "book": "tal",
+    "page": 141,
+    "boardIndex": 0,
+    "left": 317,
+    "top": 1364,
+    "size": 630,
+    "dir": "tool/ebook_boards/tal/p141_b0"
+  },
+  {
+    "id": "tal_p143_b0",
+    "book": "tal",
+    "page": 143,
+    "boardIndex": 0,
+    "left": 315,
+    "top": 780,
+    "size": 631,
+    "dir": "tool/ebook_boards/tal/p143_b0"
+  },
+  {
+    "id": "tal_p144_b0",
+    "book": "tal",
+    "page": 144,
+    "boardIndex": 0,
+    "left": 315,
+    "top": 1537,
+    "size": 630,
+    "dir": "tool/ebook_boards/tal/p144_b0"
+  },
+  {
+    "id": "tal_p145_b0",
+    "book": "tal",
+    "page": 145,
+    "boardIndex": 0,
+    "left": 1120,
+    "top": 1596,
+    "size": 629,
+    "dir": "tool/ebook_boards/tal/p145_b0"
+  },
+  {
+    "id": "tal_p146_b0",
+    "book": "tal",
+    "page": 146,
+    "boardIndex": 0,
+    "left": 1119,
+    "top": 1538,
+    "size": 630,
+    "dir": "tool/ebook_boards/tal/p146_b0"
+  },
+  {
+    "id": "tal_p148_b0",
+    "book": "tal",
+    "page": 148,
+    "boardIndex": 0,
+    "left": 322,
+    "top": 1770,
+    "size": 630,
+    "dir": "tool/ebook_boards/tal/p148_b0"
+  },
+  {
+    "id": "tal_p150_b0",
+    "book": "tal",
+    "page": 150,
+    "boardIndex": 0,
+    "left": 322,
+    "top": 721,
+    "size": 631,
+    "dir": "tool/ebook_boards/tal/p150_b0"
+  },
+  {
+    "id": "tal_p151_b0",
+    "book": "tal",
+    "page": 151,
+    "boardIndex": 0,
+    "left": 1117,
+    "top": 1303,
+    "size": 631,
+    "dir": "tool/ebook_boards/tal/p151_b0"
+  },
+  {
+    "id": "tal_p152_b0",
+    "book": "tal",
+    "page": 152,
+    "boardIndex": 0,
+    "left": 317,
+    "top": 940,
+    "size": 629,
+    "dir": "tool/ebook_boards/tal/p152_b0"
+  },
+  {
+    "id": "tal_p153_b0",
+    "book": "tal",
+    "page": 153,
+    "boardIndex": 0,
+    "left": 1117,
+    "top": 953,
+    "size": 631,
+    "dir": "tool/ebook_boards/tal/p153_b0"
+  },
+  {
+    "id": "tal_p154_b0",
+    "book": "tal",
+    "page": 154,
+    "boardIndex": 0,
+    "left": 248,
+    "top": 1811,
+    "size": 704,
+    "dir": "tool/ebook_boards/tal/p154_b0"
+  },
+  {
+    "id": "tal_p155_b0",
+    "book": "tal",
+    "page": 155,
+    "boardIndex": 0,
+    "left": 1125,
+    "top": 1883,
+    "size": 631,
+    "dir": "tool/ebook_boards/tal/p155_b0"
+  },
+  {
+    "id": "tal_p157_b0",
+    "book": "tal",
+    "page": 157,
+    "boardIndex": 0,
+    "left": 1123,
+    "top": 1127,
+    "size": 632,
+    "dir": "tool/ebook_boards/tal/p157_b0"
+  },
+  {
+    "id": "tal_p158_b0",
+    "book": "tal",
+    "page": 158,
+    "boardIndex": 0,
+    "left": 1132,
+    "top": 1886,
+    "size": 629,
+    "dir": "tool/ebook_boards/tal/p158_b0"
+  },
+  {
+    "id": "tal_p159_b0",
+    "book": "tal",
+    "page": 159,
+    "boardIndex": 0,
+    "left": 1119,
+    "top": 1070,
+    "size": 631,
+    "dir": "tool/ebook_boards/tal/p159_b0"
+  },
+  {
+    "id": "tal_p160_b0",
+    "book": "tal",
+    "page": 160,
+    "boardIndex": 0,
+    "left": 325,
+    "top": 1942,
+    "size": 631,
+    "dir": "tool/ebook_boards/tal/p160_b0"
+  },
+  {
+    "id": "tal_p161_b0",
+    "book": "tal",
+    "page": 161,
+    "boardIndex": 0,
+    "left": 1115,
+    "top": 370,
+    "size": 632,
+    "dir": "tool/ebook_boards/tal/p161_b0"
+  },
+  {
+    "id": "tal_p164_b0",
+    "book": "tal",
+    "page": 164,
+    "boardIndex": 0,
+    "left": 320,
+    "top": 365,
+    "size": 633,
+    "dir": "tool/ebook_boards/tal/p164_b0"
+  },
+  {
+    "id": "tal_p165_b0",
+    "book": "tal",
+    "page": 165,
+    "boardIndex": 0,
+    "left": 1121,
+    "top": 1771,
+    "size": 632,
+    "dir": "tool/ebook_boards/tal/p165_b0"
+  },
+  {
+    "id": "tal_p166_b0",
+    "book": "tal",
+    "page": 166,
+    "boardIndex": 0,
+    "left": 315,
+    "top": 660,
+    "size": 633,
+    "dir": "tool/ebook_boards/tal/p166_b0"
+  },
+  {
+    "id": "tal_p167_b0",
+    "book": "tal",
+    "page": 167,
+    "boardIndex": 0,
+    "left": 1125,
+    "top": 1246,
+    "size": 632,
+    "dir": "tool/ebook_boards/tal/p167_b0"
+  },
+  {
+    "id": "tal_p170_b0",
+    "book": "tal",
+    "page": 170,
+    "boardIndex": 0,
+    "left": 322,
+    "top": 2003,
+    "size": 630,
+    "dir": "tool/ebook_boards/tal/p170_b0"
+  },
+  {
+    "id": "tal_p171_b0",
+    "book": "tal",
+    "page": 171,
+    "boardIndex": 0,
+    "left": 1120,
+    "top": 720,
+    "size": 634,
+    "dir": "tool/ebook_boards/tal/p171_b0"
+  },
+  {
+    "id": "tal_p175_b0",
+    "book": "tal",
+    "page": 175,
+    "boardIndex": 0,
+    "left": 1118,
+    "top": 718,
+    "size": 631,
+    "dir": "tool/ebook_boards/tal/p175_b0"
+  },
+  {
+    "id": "tal_p179_b0",
+    "book": "tal",
+    "page": 179,
+    "boardIndex": 0,
+    "left": 1114,
+    "top": 371,
+    "size": 630,
+    "dir": "tool/ebook_boards/tal/p179_b0"
+  },
+  {
+    "id": "tal_p183_b0",
+    "book": "tal",
+    "page": 183,
+    "boardIndex": 0,
+    "left": 317,
+    "top": 1360,
+    "size": 632,
+    "dir": "tool/ebook_boards/tal/p183_b0"
+  },
+  {
+    "id": "tal_p184_b0",
+    "book": "tal",
+    "page": 184,
+    "boardIndex": 0,
+    "left": 1119,
+    "top": 1479,
+    "size": 630,
+    "dir": "tool/ebook_boards/tal/p184_b0"
+  },
+  {
+    "id": "tal_p185_b0",
+    "book": "tal",
+    "page": 185,
+    "boardIndex": 0,
+    "left": 1125,
+    "top": 373,
+    "size": 628,
+    "dir": "tool/ebook_boards/tal/p185_b0"
+  },
+  {
+    "id": "tal_p186_b0",
+    "book": "tal",
+    "page": 186,
+    "boardIndex": 0,
+    "left": 324,
+    "top": 1768,
+    "size": 632,
+    "dir": "tool/ebook_boards/tal/p186_b0"
+  },
+  {
+    "id": "tal_p189_b0",
+    "book": "tal",
+    "page": 189,
+    "boardIndex": 0,
+    "left": 322,
+    "top": 898,
+    "size": 631,
+    "dir": "tool/ebook_boards/tal/p189_b0"
+  },
+  {
+    "id": "tal_p192_b0",
+    "book": "tal",
+    "page": 192,
+    "boardIndex": 0,
+    "left": 1120,
+    "top": 1826,
+    "size": 632,
+    "dir": "tool/ebook_boards/tal/p192_b0"
+  },
+  {
+    "id": "tal_p193_b0",
+    "book": "tal",
+    "page": 193,
+    "boardIndex": 0,
+    "left": 1127,
+    "top": 1538,
+    "size": 629,
+    "dir": "tool/ebook_boards/tal/p193_b0"
+  },
+  {
+    "id": "tal_p194_b0",
+    "book": "tal",
+    "page": 194,
+    "boardIndex": 0,
+    "left": 315,
+    "top": 1707,
+    "size": 630,
+    "dir": "tool/ebook_boards/tal/p194_b0"
+  },
+  {
+    "id": "tal_p195_b0",
+    "book": "tal",
+    "page": 195,
+    "boardIndex": 0,
+    "left": 1120,
+    "top": 373,
+    "size": 629,
+    "dir": "tool/ebook_boards/tal/p195_b0"
+  },
+  {
+    "id": "tal_p196_b0",
+    "book": "tal",
+    "page": 196,
+    "boardIndex": 0,
+    "left": 1119,
+    "top": 370,
+    "size": 632,
+    "dir": "tool/ebook_boards/tal/p196_b0"
+  },
+  {
+    "id": "tal_p197_b0",
+    "book": "tal",
+    "page": 197,
+    "boardIndex": 0,
+    "left": 322,
+    "top": 1421,
+    "size": 632,
+    "dir": "tool/ebook_boards/tal/p197_b0"
+  },
+  {
+    "id": "tal_p198_b0",
+    "book": "tal",
+    "page": 198,
+    "boardIndex": 0,
+    "left": 1123,
+    "top": 1069,
+    "size": 630,
+    "dir": "tool/ebook_boards/tal/p198_b0"
+  },
+  {
+    "id": "tal_p200_b0",
+    "book": "tal",
+    "page": 200,
+    "boardIndex": 0,
+    "left": 1122,
+    "top": 721,
+    "size": 631,
+    "dir": "tool/ebook_boards/tal/p200_b0"
+  },
+  {
+    "id": "tal_p203_b0",
+    "book": "tal",
+    "page": 203,
+    "boardIndex": 0,
+    "left": 1115,
+    "top": 1126,
+    "size": 634,
+    "dir": "tool/ebook_boards/tal/p203_b0"
+  },
+  {
+    "id": "tal_p204_b0",
+    "book": "tal",
+    "page": 204,
+    "boardIndex": 0,
+    "left": 315,
+    "top": 898,
+    "size": 630,
+    "dir": "tool/ebook_boards/tal/p204_b0"
+  },
+  {
+    "id": "tal_p205_b0",
+    "book": "tal",
+    "page": 205,
+    "boardIndex": 0,
+    "left": 320,
+    "top": 486,
+    "size": 630,
+    "dir": "tool/ebook_boards/tal/p205_b0"
+  },
+  {
+    "id": "tal_p207_b0",
+    "book": "tal",
+    "page": 207,
+    "boardIndex": 0,
+    "left": 317,
+    "top": 1360,
+    "size": 631,
+    "dir": "tool/ebook_boards/tal/p207_b0"
+  },
+  {
+    "id": "tal_p210_b0",
+    "book": "tal",
+    "page": 210,
+    "boardIndex": 0,
+    "left": 323,
+    "top": 2035,
+    "size": 629,
+    "dir": "tool/ebook_boards/tal/p210_b0"
+  },
+  {
+    "id": "tal_p211_b0",
+    "book": "tal",
+    "page": 211,
+    "boardIndex": 0,
+    "left": 310,
+    "top": 779,
+    "size": 632,
+    "dir": "tool/ebook_boards/tal/p211_b0"
+  },
+  {
+    "id": "tal_p212_b0",
+    "book": "tal",
+    "page": 212,
+    "boardIndex": 0,
+    "left": 1120,
+    "top": 1244,
+    "size": 630,
+    "dir": "tool/ebook_boards/tal/p212_b0"
+  },
+  {
+    "id": "tal_p213_b0",
+    "book": "tal",
+    "page": 213,
+    "boardIndex": 0,
+    "left": 1120,
+    "top": 1643,
+    "size": 609,
+    "dir": "tool/ebook_boards/tal/p213_b0"
+  },
+  {
+    "id": "tal_p215_b0",
+    "book": "tal",
+    "page": 215,
+    "boardIndex": 0,
+    "left": 1117,
+    "top": 1476,
+    "size": 632,
+    "dir": "tool/ebook_boards/tal/p215_b0"
+  },
+  {
+    "id": "tal_p216_b0",
+    "book": "tal",
+    "page": 216,
+    "boardIndex": 0,
+    "left": 1118,
+    "top": 1015,
+    "size": 630,
+    "dir": "tool/ebook_boards/tal/p216_b0"
+  },
+  {
+    "id": "tal_p218_b0",
+    "book": "tal",
+    "page": 218,
+    "boardIndex": 0,
+    "left": 316,
+    "top": 370,
+    "size": 629,
+    "dir": "tool/ebook_boards/tal/p218_b0"
+  },
+  {
+    "id": "tal_p219_b0",
+    "book": "tal",
+    "page": 219,
+    "boardIndex": 0,
+    "left": 322,
+    "top": 1228,
+    "size": 630,
+    "dir": "tool/ebook_boards/tal/p219_b0"
+  },
+  {
+    "id": "tal_p223_b0",
+    "book": "tal",
+    "page": 223,
+    "boardIndex": 0,
+    "left": 321,
+    "top": 1889,
+    "size": 628,
+    "dir": "tool/ebook_boards/tal/p223_b0"
+  },
+  {
+    "id": "tal_p225_b0",
+    "book": "tal",
+    "page": 225,
+    "boardIndex": 0,
+    "left": 1123,
+    "top": 1886,
+    "size": 629,
+    "dir": "tool/ebook_boards/tal/p225_b0"
+  },
+  {
+    "id": "tal_p226_b0",
+    "book": "tal",
+    "page": 226,
+    "boardIndex": 0,
+    "left": 1115,
+    "top": 720,
+    "size": 633,
+    "dir": "tool/ebook_boards/tal/p226_b0"
+  },
+  {
+    "id": "tal_p227_b0",
+    "book": "tal",
+    "page": 227,
+    "boardIndex": 0,
+    "left": 324,
+    "top": 1126,
+    "size": 1382,
+    "dir": "tool/ebook_boards/tal/p227_b0"
+  },
+  {
+    "id": "tal_p228_b0",
+    "book": "tal",
+    "page": 228,
+    "boardIndex": 0,
+    "left": 319,
+    "top": 1476,
+    "size": 633,
+    "dir": "tool/ebook_boards/tal/p228_b0"
+  },
+  {
+    "id": "tal_p229_b0",
+    "book": "tal",
+    "page": 229,
+    "boardIndex": 0,
+    "left": 1120,
+    "top": 1712,
+    "size": 631,
+    "dir": "tool/ebook_boards/tal/p229_b0"
+  },
+  {
+    "id": "tal_p230_b0",
+    "book": "tal",
+    "page": 230,
+    "boardIndex": 0,
+    "left": 327,
+    "top": 1352,
+    "size": 628,
+    "dir": "tool/ebook_boards/tal/p230_b0"
+  },
+  {
+    "id": "tal_p233_b0",
+    "book": "tal",
+    "page": 233,
+    "boardIndex": 0,
+    "left": 1125,
+    "top": 1593,
+    "size": 634,
+    "dir": "tool/ebook_boards/tal/p233_b0"
+  },
+  {
+    "id": "tal_p236_b0",
+    "book": "tal",
+    "page": 236,
+    "boardIndex": 0,
+    "left": 311,
+    "top": 370,
+    "size": 632,
+    "dir": "tool/ebook_boards/tal/p236_b0"
+  },
+  {
+    "id": "tal_p239_b0",
+    "book": "tal",
+    "page": 239,
+    "boardIndex": 0,
+    "left": 1112,
+    "top": 371,
+    "size": 630,
+    "dir": "tool/ebook_boards/tal/p239_b0"
+  },
+  {
+    "id": "tal_p246_b0",
+    "book": "tal",
+    "page": 246,
+    "boardIndex": 0,
+    "left": 317,
+    "top": 1588,
+    "size": 632,
+    "dir": "tool/ebook_boards/tal/p246_b0"
+  },
+  {
+    "id": "tal_p248_b0",
+    "book": "tal",
+    "page": 248,
+    "boardIndex": 0,
+    "left": 315,
+    "top": 771,
+    "size": 634,
+    "dir": "tool/ebook_boards/tal/p248_b0"
+  },
+  {
+    "id": "tal_p249_b0",
+    "book": "tal",
+    "page": 249,
+    "boardIndex": 0,
+    "left": 1123,
+    "top": 2035,
+    "size": 631,
+    "dir": "tool/ebook_boards/tal/p249_b0"
+  },
+  {
+    "id": "tal_p252_b0",
+    "book": "tal",
+    "page": 252,
+    "boardIndex": 0,
+    "left": 254,
+    "top": 1172,
+    "size": 1426,
+    "dir": "tool/ebook_boards/tal/p252_b0"
+  },
+  {
+    "id": "tal_p254_b0",
+    "book": "tal",
+    "page": 254,
+    "boardIndex": 0,
+    "left": 1120,
+    "top": 1361,
+    "size": 630,
+    "dir": "tool/ebook_boards/tal/p254_b0"
+  },
+  {
+    "id": "tal_p255_b0",
+    "book": "tal",
+    "page": 255,
+    "boardIndex": 0,
+    "left": 315,
+    "top": 824,
+    "size": 630,
+    "dir": "tool/ebook_boards/tal/p255_b0"
+  },
+  {
+    "id": "tal_p256_b0",
+    "book": "tal",
+    "page": 256,
+    "boardIndex": 0,
+    "left": 1120,
+    "top": 1477,
+    "size": 631,
+    "dir": "tool/ebook_boards/tal/p256_b0"
+  },
+  {
+    "id": "tal_p257_b0",
+    "book": "tal",
+    "page": 257,
+    "boardIndex": 0,
+    "left": 1115,
+    "top": 487,
+    "size": 631,
+    "dir": "tool/ebook_boards/tal/p257_b0"
+  },
+  {
+    "id": "tal_p261_b0",
+    "book": "tal",
+    "page": 261,
+    "boardIndex": 0,
+    "left": 315,
+    "top": 1360,
+    "size": 632,
+    "dir": "tool/ebook_boards/tal/p261_b0"
+  },
+  {
+    "id": "tal_p262_b0",
+    "book": "tal",
+    "page": 262,
+    "boardIndex": 0,
+    "left": 316,
+    "top": 1364,
+    "size": 629,
+    "dir": "tool/ebook_boards/tal/p262_b0"
+  },
+  {
+    "id": "tal_p263_b0",
+    "book": "tal",
+    "page": 263,
+    "boardIndex": 0,
+    "left": 321,
+    "top": 1537,
+    "size": 629,
+    "dir": "tool/ebook_boards/tal/p263_b0"
+  },
+  {
+    "id": "tal_p264_b0",
+    "book": "tal",
+    "page": 264,
+    "boardIndex": 0,
+    "left": 317,
+    "top": 1651,
+    "size": 630,
+    "dir": "tool/ebook_boards/tal/p264_b0"
+  },
+  {
+    "id": "tal_p267_b0",
+    "book": "tal",
+    "page": 267,
+    "boardIndex": 0,
+    "left": 325,
+    "top": 1421,
+    "size": 629,
+    "dir": "tool/ebook_boards/tal/p267_b0"
+  },
+  {
+    "id": "tal_p268_b0",
+    "book": "tal",
+    "page": 268,
+    "boardIndex": 0,
+    "left": 317,
+    "top": 1478,
+    "size": 630,
+    "dir": "tool/ebook_boards/tal/p268_b0"
+  },
+  {
+    "id": "tal_p269_b0",
+    "book": "tal",
+    "page": 269,
+    "boardIndex": 0,
+    "left": 1129,
+    "top": 1719,
+    "size": 626,
+    "dir": "tool/ebook_boards/tal/p269_b0"
+  },
+  {
+    "id": "tal_p270_b0",
+    "book": "tal",
+    "page": 270,
+    "boardIndex": 0,
+    "left": 1115,
+    "top": 370,
+    "size": 632,
+    "dir": "tool/ebook_boards/tal/p270_b0"
+  },
+  {
+    "id": "tal_p271_b0",
+    "book": "tal",
+    "page": 271,
+    "boardIndex": 0,
+    "left": 325,
+    "top": 1481,
+    "size": 631,
+    "dir": "tool/ebook_boards/tal/p271_b0"
+  },
+  {
+    "id": "tal_p272_b0",
+    "book": "tal",
+    "page": 272,
+    "boardIndex": 0,
+    "left": 318,
+    "top": 1423,
+    "size": 630,
+    "dir": "tool/ebook_boards/tal/p272_b0"
+  },
+  {
+    "id": "tal_p273_b0",
+    "book": "tal",
+    "page": 273,
+    "boardIndex": 0,
+    "left": 1115,
+    "top": 365,
+    "size": 631,
+    "dir": "tool/ebook_boards/tal/p273_b0"
+  },
+  {
+    "id": "tal_p274_b0",
+    "book": "tal",
+    "page": 274,
+    "boardIndex": 0,
+    "left": 1120,
+    "top": 1420,
+    "size": 632,
+    "dir": "tool/ebook_boards/tal/p274_b0"
+  },
+  {
+    "id": "tal_p275_b0",
+    "book": "tal",
+    "page": 275,
+    "boardIndex": 0,
+    "left": 315,
+    "top": 1250,
+    "size": 630,
+    "dir": "tool/ebook_boards/tal/p275_b0"
+  },
+  {
+    "id": "tal_p276_b0",
+    "book": "tal",
+    "page": 276,
+    "boardIndex": 0,
+    "left": 1125,
+    "top": 1593,
+    "size": 632,
+    "dir": "tool/ebook_boards/tal/p276_b0"
+  },
+  {
+    "id": "tal_p279_b0",
+    "book": "tal",
+    "page": 279,
+    "boardIndex": 0,
+    "left": 325,
+    "top": 1187,
+    "size": 629,
+    "dir": "tool/ebook_boards/tal/p279_b0"
+  },
+  {
+    "id": "tal_p280_b0",
+    "book": "tal",
+    "page": 280,
+    "boardIndex": 0,
+    "left": 1117,
+    "top": 1012,
+    "size": 631,
+    "dir": "tool/ebook_boards/tal/p280_b0"
+  },
+  {
+    "id": "tal_p281_b0",
+    "book": "tal",
+    "page": 281,
+    "boardIndex": 0,
+    "left": 315,
+    "top": 707,
+    "size": 631,
+    "dir": "tool/ebook_boards/tal/p281_b0"
+  },
+  {
+    "id": "tal_p284_b0",
+    "book": "tal",
+    "page": 284,
+    "boardIndex": 0,
+    "left": 1122,
+    "top": 1827,
+    "size": 631,
+    "dir": "tool/ebook_boards/tal/p284_b0"
+  },
+  {
+    "id": "tal_p285_b0",
+    "book": "tal",
+    "page": 285,
+    "boardIndex": 0,
+    "left": 1116,
+    "top": 370,
+    "size": 632,
+    "dir": "tool/ebook_boards/tal/p285_b0"
+  },
+  {
+    "id": "tal_p286_b0",
+    "book": "tal",
+    "page": 286,
+    "boardIndex": 0,
+    "left": 1117,
+    "top": 1593,
+    "size": 631,
+    "dir": "tool/ebook_boards/tal/p286_b0"
+  },
+  {
+    "id": "tal_p287_b0",
+    "book": "tal",
+    "page": 287,
+    "boardIndex": 0,
+    "left": 1122,
+    "top": 1070,
+    "size": 633,
+    "dir": "tool/ebook_boards/tal/p287_b0"
+  },
+  {
+    "id": "tal_p288_b0",
+    "book": "tal",
+    "page": 288,
+    "boardIndex": 0,
+    "left": 1115,
+    "top": 487,
+    "size": 633,
+    "dir": "tool/ebook_boards/tal/p288_b0"
+  },
+  {
+    "id": "tal_p289_b0",
+    "book": "tal",
+    "page": 289,
+    "boardIndex": 0,
+    "left": 313,
+    "top": 781,
+    "size": 611,
+    "dir": "tool/ebook_boards/tal/p289_b0"
+  },
+  {
+    "id": "tal_p292_b0",
+    "book": "tal",
+    "page": 292,
+    "boardIndex": 0,
+    "left": 1121,
+    "top": 371,
+    "size": 632,
+    "dir": "tool/ebook_boards/tal/p292_b0"
+  },
+  {
+    "id": "tal_p293_b0",
+    "book": "tal",
+    "page": 293,
+    "boardIndex": 0,
+    "left": 317,
+    "top": 1070,
+    "size": 630,
+    "dir": "tool/ebook_boards/tal/p293_b0"
+  },
+  {
+    "id": "tal_p295_b0",
+    "book": "tal",
+    "page": 295,
+    "boardIndex": 0,
+    "left": 1115,
+    "top": 1303,
+    "size": 632,
+    "dir": "tool/ebook_boards/tal/p295_b0"
+  },
+  {
+    "id": "tal_p296_b0",
+    "book": "tal",
+    "page": 296,
+    "boardIndex": 0,
+    "left": 327,
+    "top": 896,
+    "size": 629,
+    "dir": "tool/ebook_boards/tal/p296_b0"
+  },
+  {
+    "id": "tal_p297_b0",
+    "book": "tal",
+    "page": 297,
+    "boardIndex": 0,
+    "left": 284,
+    "top": 956,
+    "size": 632,
+    "dir": "tool/ebook_boards/tal/p297_b0"
+  },
+  {
+    "id": "tal_p299_b0",
+    "book": "tal",
+    "page": 299,
+    "boardIndex": 0,
+    "left": 1116,
+    "top": 370,
+    "size": 631,
+    "dir": "tool/ebook_boards/tal/p299_b0"
+  },
+  {
+    "id": "tal_p309_b0",
+    "book": "tal",
+    "page": 309,
+    "boardIndex": 0,
+    "left": 327,
+    "top": 1825,
+    "size": 629,
+    "dir": "tool/ebook_boards/tal/p309_b0"
+  },
+  {
+    "id": "tal_p310_b0",
+    "book": "tal",
+    "page": 310,
+    "boardIndex": 0,
+    "left": 319,
+    "top": 1709,
+    "size": 631,
+    "dir": "tool/ebook_boards/tal/p310_b0"
+  },
+  {
+    "id": "tal_p311_b0",
+    "book": "tal",
+    "page": 311,
+    "boardIndex": 0,
+    "left": 327,
+    "top": 1480,
+    "size": 630,
+    "dir": "tool/ebook_boards/tal/p311_b0"
+  },
+  {
+    "id": "tal_p312_b0",
+    "book": "tal",
+    "page": 312,
+    "boardIndex": 0,
+    "left": 327,
+    "top": 1131,
+    "size": 629,
+    "dir": "tool/ebook_boards/tal/p312_b0"
+  },
+  {
+    "id": "tal_p313_b0",
+    "book": "tal",
+    "page": 313,
+    "boardIndex": 0,
+    "left": 1125,
+    "top": 1302,
+    "size": 630,
+    "dir": "tool/ebook_boards/tal/p313_b0"
+  },
+  {
+    "id": "tal_p314_b0",
+    "book": "tal",
+    "page": 314,
+    "boardIndex": 0,
+    "left": 316,
+    "top": 1073,
+    "size": 629,
+    "dir": "tool/ebook_boards/tal/p314_b0"
+  },
+  {
+    "id": "tal_p316_b0",
+    "book": "tal",
+    "page": 316,
+    "boardIndex": 0,
+    "left": 320,
+    "top": 2003,
+    "size": 630,
+    "dir": "tool/ebook_boards/tal/p316_b0"
+  },
+  {
+    "id": "tal_p317_b0",
+    "book": "tal",
+    "page": 317,
+    "boardIndex": 0,
+    "left": 317,
+    "top": 1657,
+    "size": 631,
+    "dir": "tool/ebook_boards/tal/p317_b0"
+  },
+  {
+    "id": "tal_p318_b0",
+    "book": "tal",
+    "page": 318,
+    "boardIndex": 0,
+    "left": 319,
+    "top": 1769,
+    "size": 632,
+    "dir": "tool/ebook_boards/tal/p318_b0"
+  },
+  {
+    "id": "tal_p320_b0",
+    "book": "tal",
+    "page": 320,
+    "boardIndex": 0,
+    "left": 1119,
+    "top": 822,
+    "size": 630,
+    "dir": "tool/ebook_boards/tal/p320_b0"
+  },
+  {
+    "id": "tal_p322_b0",
+    "book": "tal",
+    "page": 322,
+    "boardIndex": 0,
+    "left": 1118,
+    "top": 1071,
+    "size": 633,
+    "dir": "tool/ebook_boards/tal/p322_b0"
+  },
+  {
+    "id": "tal_p323_b0",
+    "book": "tal",
+    "page": 323,
+    "boardIndex": 0,
+    "left": 1114,
+    "top": 370,
+    "size": 630,
+    "dir": "tool/ebook_boards/tal/p323_b0"
+  },
+  {
+    "id": "tal_p324_b0",
+    "book": "tal",
+    "page": 324,
+    "boardIndex": 0,
+    "left": 1118,
+    "top": 1770,
+    "size": 630,
+    "dir": "tool/ebook_boards/tal/p324_b0"
+  },
+  {
+    "id": "tal_p325_b0",
+    "book": "tal",
+    "page": 325,
+    "boardIndex": 0,
+    "left": 317,
+    "top": 1113,
+    "size": 629,
+    "dir": "tool/ebook_boards/tal/p325_b0"
+  },
+  {
+    "id": "tal_p326_b0",
+    "book": "tal",
+    "page": 326,
+    "boardIndex": 0,
+    "left": 316,
+    "top": 956,
+    "size": 629,
+    "dir": "tool/ebook_boards/tal/p326_b0"
+  },
+  {
+    "id": "tal_p327_b0",
+    "book": "tal",
+    "page": 327,
+    "boardIndex": 0,
+    "left": 279,
+    "top": 1002,
+    "size": 1526,
+    "dir": "tool/ebook_boards/tal/p327_b0"
+  },
+  {
+    "id": "tal_p328_b0",
+    "book": "tal",
+    "page": 328,
+    "boardIndex": 0,
+    "left": 1115,
+    "top": 840,
+    "size": 632,
+    "dir": "tool/ebook_boards/tal/p328_b0"
+  },
+  {
+    "id": "tal_p329_b0",
+    "book": "tal",
+    "page": 329,
+    "boardIndex": 0,
+    "left": 1120,
+    "top": 1885,
+    "size": 630,
+    "dir": "tool/ebook_boards/tal/p329_b0"
+  },
+  {
+    "id": "tal_p331_b0",
+    "book": "tal",
+    "page": 331,
+    "boardIndex": 0,
+    "left": 330,
+    "top": 1768,
+    "size": 631,
+    "dir": "tool/ebook_boards/tal/p331_b0"
+  },
+  {
+    "id": "tal_p337_b0",
+    "book": "tal",
+    "page": 337,
+    "boardIndex": 0,
+    "left": 1112,
+    "top": 370,
+    "size": 634,
+    "dir": "tool/ebook_boards/tal/p337_b0"
+  },
+  {
+    "id": "tal_p338_b0",
+    "book": "tal",
+    "page": 338,
+    "boardIndex": 0,
+    "left": 324,
+    "top": 1819,
+    "size": 632,
+    "dir": "tool/ebook_boards/tal/p338_b0"
+  },
+  {
+    "id": "tal_p339_b0",
+    "book": "tal",
+    "page": 339,
+    "boardIndex": 0,
+    "left": 1118,
+    "top": 1826,
+    "size": 628,
+    "dir": "tool/ebook_boards/tal/p339_b0"
+  },
+  {
+    "id": "tal_p340_b0",
+    "book": "tal",
+    "page": 340,
+    "boardIndex": 0,
+    "left": 322,
+    "top": 594,
+    "size": 632,
+    "dir": "tool/ebook_boards/tal/p340_b0"
+  },
+  {
+    "id": "tal_p341_b0",
+    "book": "tal",
+    "page": 341,
+    "boardIndex": 0,
+    "left": 1118,
+    "top": 893,
+    "size": 632,
+    "dir": "tool/ebook_boards/tal/p341_b0"
+  },
+  {
+    "id": "tal_p342_b0",
+    "book": "tal",
+    "page": 342,
+    "boardIndex": 0,
+    "left": 317,
+    "top": 1650,
+    "size": 631,
+    "dir": "tool/ebook_boards/tal/p342_b0"
+  },
+  {
+    "id": "tal_p345_b0",
+    "book": "tal",
+    "page": 345,
+    "boardIndex": 0,
+    "left": 1114,
+    "top": 370,
+    "size": 634,
+    "dir": "tool/ebook_boards/tal/p345_b0"
+  },
+  {
+    "id": "tal_p346_b0",
+    "book": "tal",
+    "page": 346,
+    "boardIndex": 0,
+    "left": 316,
+    "top": 598,
+    "size": 629,
+    "dir": "tool/ebook_boards/tal/p346_b0"
+  },
+  {
+    "id": "tal_p349_b0",
+    "book": "tal",
+    "page": 349,
+    "boardIndex": 0,
+    "left": 1117,
+    "top": 1064,
+    "size": 630,
+    "dir": "tool/ebook_boards/tal/p349_b0"
+  },
+  {
+    "id": "tal_p350_b0",
+    "book": "tal",
+    "page": 350,
+    "boardIndex": 0,
+    "left": 317,
+    "top": 888,
+    "size": 633,
+    "dir": "tool/ebook_boards/tal/p350_b0"
+  },
+  {
+    "id": "tal_p351_b0",
+    "book": "tal",
+    "page": 351,
+    "boardIndex": 0,
+    "left": 1122,
+    "top": 1822,
+    "size": 630,
+    "dir": "tool/ebook_boards/tal/p351_b0"
+  },
+  {
+    "id": "tal_p354_b0",
+    "book": "tal",
+    "page": 354,
+    "boardIndex": 0,
+    "left": 1118,
+    "top": 1943,
+    "size": 632,
+    "dir": "tool/ebook_boards/tal/p354_b0"
+  },
+  {
+    "id": "tal_p355_b0",
+    "book": "tal",
+    "page": 355,
+    "boardIndex": 0,
+    "left": 1128,
+    "top": 1760,
+    "size": 628,
+    "dir": "tool/ebook_boards/tal/p355_b0"
+  },
+  {
+    "id": "tal_p356_b0",
+    "book": "tal",
+    "page": 356,
+    "boardIndex": 0,
+    "left": 1119,
+    "top": 1816,
+    "size": 629,
+    "dir": "tool/ebook_boards/tal/p356_b0"
+  },
+  {
+    "id": "tal_p358_b0",
+    "book": "tal",
+    "page": 358,
+    "boardIndex": 0,
+    "left": 318,
+    "top": 1189,
+    "size": 627,
+    "dir": "tool/ebook_boards/tal/p358_b0"
+  },
+  {
+    "id": "tal_p359_b0",
+    "book": "tal",
+    "page": 359,
+    "boardIndex": 0,
+    "left": 1125,
+    "top": 1010,
+    "size": 630,
+    "dir": "tool/ebook_boards/tal/p359_b0"
+  },
+  {
+    "id": "tal_p360_b0",
+    "book": "tal",
+    "page": 360,
+    "boardIndex": 0,
+    "left": 324,
+    "top": 1247,
+    "size": 630,
+    "dir": "tool/ebook_boards/tal/p360_b0"
+  },
+  {
+    "id": "tal_p362_b0",
+    "book": "tal",
+    "page": 362,
+    "boardIndex": 0,
+    "left": 1122,
+    "top": 841,
+    "size": 630,
+    "dir": "tool/ebook_boards/tal/p362_b0"
+  },
+  {
+    "id": "tal_p363_b0",
+    "book": "tal",
+    "page": 363,
+    "boardIndex": 0,
+    "left": 1117,
+    "top": 1593,
+    "size": 633,
+    "dir": "tool/ebook_boards/tal/p363_b0"
+  },
+  {
+    "id": "tal_p365_b0",
+    "book": "tal",
+    "page": 365,
+    "boardIndex": 0,
+    "left": 321,
+    "top": 660,
+    "size": 631,
+    "dir": "tool/ebook_boards/tal/p365_b0"
+  },
+  {
+    "id": "tal_p366_b0",
+    "book": "tal",
+    "page": 366,
+    "boardIndex": 0,
+    "left": 1115,
+    "top": 839,
+    "size": 631,
+    "dir": "tool/ebook_boards/tal/p366_b0"
+  },
+  {
+    "id": "tal_p368_b0",
+    "book": "tal",
+    "page": 368,
+    "boardIndex": 0,
+    "left": 1126,
+    "top": 1886,
+    "size": 629,
+    "dir": "tool/ebook_boards/tal/p368_b0"
+  },
+  {
+    "id": "tal_p369_b0",
+    "book": "tal",
+    "page": 369,
+    "boardIndex": 0,
+    "left": 324,
+    "top": 1420,
+    "size": 633,
+    "dir": "tool/ebook_boards/tal/p369_b0"
+  },
+  {
+    "id": "tal_p370_b0",
+    "book": "tal",
+    "page": 370,
+    "boardIndex": 0,
+    "left": 1119,
+    "top": 371,
+    "size": 634,
+    "dir": "tool/ebook_boards/tal/p370_b0"
+  },
+  {
+    "id": "tal_p371_b0",
+    "book": "tal",
+    "page": 371,
+    "boardIndex": 0,
+    "left": 313,
+    "top": 902,
+    "size": 628,
+    "dir": "tool/ebook_boards/tal/p371_b0"
+  },
+  {
+    "id": "tal_p373_b0",
+    "book": "tal",
+    "page": 373,
+    "boardIndex": 0,
+    "left": 375,
+    "top": 1362,
+    "size": 606,
+    "dir": "tool/ebook_boards/tal/p373_b0"
+  },
+  {
+    "id": "tal_p374_b0",
+    "book": "tal",
+    "page": 374,
+    "boardIndex": 0,
+    "left": 324,
+    "top": 1306,
+    "size": 629,
+    "dir": "tool/ebook_boards/tal/p374_b0"
+  },
+  {
+    "id": "tal_p375_b0",
+    "book": "tal",
+    "page": 375,
+    "boardIndex": 0,
+    "left": 1122,
+    "top": 1886,
+    "size": 631,
+    "dir": "tool/ebook_boards/tal/p375_b0"
+  },
+  {
+    "id": "tal_p376_b0",
+    "book": "tal",
+    "page": 376,
+    "boardIndex": 0,
+    "left": 1122,
+    "top": 721,
+    "size": 631,
+    "dir": "tool/ebook_boards/tal/p376_b0"
+  },
+  {
+    "id": "tal_p377_b0",
+    "book": "tal",
+    "page": 377,
+    "boardIndex": 0,
+    "left": 1115,
+    "top": 1421,
+    "size": 632,
+    "dir": "tool/ebook_boards/tal/p377_b0"
+  },
+  {
+    "id": "tal_p378_b0",
+    "book": "tal",
+    "page": 378,
+    "boardIndex": 0,
+    "left": 1113,
+    "top": 369,
+    "size": 631,
+    "dir": "tool/ebook_boards/tal/p378_b0"
+  },
+  {
+    "id": "tal_p379_b0",
+    "book": "tal",
+    "page": 379,
+    "boardIndex": 0,
+    "left": 1116,
+    "top": 370,
+    "size": 632,
+    "dir": "tool/ebook_boards/tal/p379_b0"
+  },
+  {
+    "id": "tal_p380_b0",
+    "book": "tal",
+    "page": 380,
+    "boardIndex": 0,
+    "left": 323,
+    "top": 1947,
+    "size": 629,
+    "dir": "tool/ebook_boards/tal/p380_b0"
+  },
+  {
+    "id": "tal_p381_b0",
+    "book": "tal",
+    "page": 381,
+    "boardIndex": 0,
+    "left": 318,
+    "top": 1596,
+    "size": 631,
+    "dir": "tool/ebook_boards/tal/p381_b0"
+  },
+  {
+    "id": "tal_p382_b0",
+    "book": "tal",
+    "page": 382,
+    "boardIndex": 0,
+    "left": 1120,
+    "top": 1945,
+    "size": 631,
+    "dir": "tool/ebook_boards/tal/p382_b0"
+  },
+  {
+    "id": "tal_p383_b0",
+    "book": "tal",
+    "page": 383,
+    "boardIndex": 0,
+    "left": 1127,
+    "top": 1362,
+    "size": 632,
+    "dir": "tool/ebook_boards/tal/p383_b0"
+  },
+  {
+    "id": "tal_p385_b0",
+    "book": "tal",
+    "page": 385,
+    "boardIndex": 0,
+    "left": 1120,
+    "top": 1420,
+    "size": 633,
+    "dir": "tool/ebook_boards/tal/p385_b0"
+  },
+  {
+    "id": "tal_p386_b0",
+    "book": "tal",
+    "page": 386,
+    "boardIndex": 0,
+    "left": 1118,
+    "top": 1653,
+    "size": 632,
+    "dir": "tool/ebook_boards/tal/p386_b0"
+  },
+  {
+    "id": "tal_p387_b0",
+    "book": "tal",
+    "page": 387,
+    "boardIndex": 0,
+    "left": 1118,
+    "top": 1186,
+    "size": 629,
+    "dir": "tool/ebook_boards/tal/p387_b0"
+  },
+  {
+    "id": "tal_p388_b0",
+    "book": "tal",
+    "page": 388,
+    "boardIndex": 0,
+    "left": 1119,
+    "top": 836,
+    "size": 631,
+    "dir": "tool/ebook_boards/tal/p388_b0"
+  },
+  {
+    "id": "tal_p389_b0",
+    "book": "tal",
+    "page": 389,
+    "boardIndex": 0,
+    "left": 1118,
+    "top": 863,
+    "size": 615,
+    "dir": "tool/ebook_boards/tal/p389_b0"
+  },
+  {
+    "id": "tal_p391_b0",
+    "book": "tal",
+    "page": 391,
+    "boardIndex": 0,
+    "left": 1123,
+    "top": 1769,
+    "size": 632,
+    "dir": "tool/ebook_boards/tal/p391_b0"
+  },
+  {
+    "id": "tal_p392_b0",
+    "book": "tal",
+    "page": 392,
+    "boardIndex": 0,
+    "left": 1118,
+    "top": 1191,
+    "size": 631,
+    "dir": "tool/ebook_boards/tal/p392_b0"
+  },
+  {
+    "id": "tal_p394_b0",
+    "book": "tal",
+    "page": 394,
+    "boardIndex": 0,
+    "left": 1139,
+    "top": 371,
+    "size": 632,
+    "dir": "tool/ebook_boards/tal/p394_b0"
+  },
+  {
+    "id": "tal_p395_b0",
+    "book": "tal",
+    "page": 395,
+    "boardIndex": 0,
+    "left": 1120,
+    "top": 1780,
+    "size": 631,
+    "dir": "tool/ebook_boards/tal/p395_b0"
+  },
+  {
+    "id": "tal_p399_b0",
+    "book": "tal",
+    "page": 399,
+    "boardIndex": 0,
+    "left": 1114,
+    "top": 371,
+    "size": 633,
+    "dir": "tool/ebook_boards/tal/p399_b0"
+  },
+  {
+    "id": "tal_p400_b0",
+    "book": "tal",
+    "page": 400,
+    "boardIndex": 0,
+    "left": 322,
+    "top": 1710,
+    "size": 631,
+    "dir": "tool/ebook_boards/tal/p400_b0"
+  },
+  {
+    "id": "tal_p406_b0",
+    "book": "tal",
+    "page": 406,
+    "boardIndex": 0,
+    "left": 314,
+    "top": 481,
+    "size": 629,
+    "dir": "tool/ebook_boards/tal/p406_b0"
+  },
+  {
+    "id": "tal_p407_b0",
+    "book": "tal",
+    "page": 407,
+    "boardIndex": 0,
+    "left": 1125,
+    "top": 1537,
+    "size": 631,
+    "dir": "tool/ebook_boards/tal/p407_b0"
+  },
+  {
+    "id": "tal_p409_b0",
+    "book": "tal",
+    "page": 409,
+    "boardIndex": 0,
+    "left": 1118,
+    "top": 1127,
+    "size": 630,
+    "dir": "tool/ebook_boards/tal/p409_b0"
+  },
+  {
+    "id": "tal_p410_b0",
+    "book": "tal",
+    "page": 410,
+    "boardIndex": 0,
+    "left": 316,
+    "top": 892,
+    "size": 630,
+    "dir": "tool/ebook_boards/tal/p410_b0"
+  },
+  {
+    "id": "tal_p412_b0",
+    "book": "tal",
+    "page": 412,
+    "boardIndex": 0,
+    "left": 317,
+    "top": 1064,
+    "size": 631,
+    "dir": "tool/ebook_boards/tal/p412_b0"
+  },
+  {
+    "id": "tal_p415_b0",
+    "book": "tal",
+    "page": 415,
+    "boardIndex": 0,
+    "left": 1118,
+    "top": 897,
+    "size": 629,
+    "dir": "tool/ebook_boards/tal/p415_b0"
+  },
+  {
+    "id": "tal_p417_b0",
+    "book": "tal",
+    "page": 417,
+    "boardIndex": 0,
+    "left": 1115,
+    "top": 371,
+    "size": 633,
+    "dir": "tool/ebook_boards/tal/p417_b0"
+  },
+  {
+    "id": "tal_p418_b0",
+    "book": "tal",
+    "page": 418,
+    "boardIndex": 0,
+    "left": 1112,
+    "top": 371,
+    "size": 633,
+    "dir": "tool/ebook_boards/tal/p418_b0"
+  },
+  {
+    "id": "tal_p419_b0",
+    "book": "tal",
+    "page": 419,
+    "boardIndex": 0,
+    "left": 317,
+    "top": 1304,
+    "size": 631,
+    "dir": "tool/ebook_boards/tal/p419_b0"
+  },
+  {
+    "id": "tal_p420_b0",
+    "book": "tal",
+    "page": 420,
+    "boardIndex": 0,
+    "left": 1122,
+    "top": 1243,
+    "size": 633,
+    "dir": "tool/ebook_boards/tal/p420_b0"
+  },
+  {
+    "id": "tal_p421_b0",
+    "book": "tal",
+    "page": 421,
+    "boardIndex": 0,
+    "left": 316,
+    "top": 956,
+    "size": 628,
+    "dir": "tool/ebook_boards/tal/p421_b0"
+  },
+  {
+    "id": "tal_p422_b0",
+    "book": "tal",
+    "page": 422,
+    "boardIndex": 0,
+    "left": 1115,
+    "top": 394,
+    "size": 622,
+    "dir": "tool/ebook_boards/tal/p422_b0"
+  },
+  {
+    "id": "tal_p423_b0",
+    "book": "tal",
+    "page": 423,
+    "boardIndex": 0,
+    "left": 1126,
+    "top": 1364,
+    "size": 631,
+    "dir": "tool/ebook_boards/tal/p423_b0"
+  },
+  {
+    "id": "tal_p424_b0",
+    "book": "tal",
+    "page": 424,
+    "boardIndex": 0,
+    "left": 1118,
+    "top": 839,
+    "size": 630,
+    "dir": "tool/ebook_boards/tal/p424_b0"
+  },
+  {
+    "id": "tal_p425_b0",
+    "book": "tal",
+    "page": 425,
+    "boardIndex": 0,
+    "left": 1119,
+    "top": 1478,
+    "size": 630,
+    "dir": "tool/ebook_boards/tal/p425_b0"
+  },
+  {
+    "id": "tal_p426_b0",
+    "book": "tal",
+    "page": 426,
+    "boardIndex": 0,
+    "left": 1112,
+    "top": 490,
+    "size": 632,
+    "dir": "tool/ebook_boards/tal/p426_b0"
+  },
+  {
+    "id": "tal_p428_b0",
+    "book": "tal",
+    "page": 428,
+    "boardIndex": 0,
+    "left": 325,
+    "top": 1770,
+    "size": 631,
+    "dir": "tool/ebook_boards/tal/p428_b0"
+  },
+  {
+    "id": "tal_p429_b0",
+    "book": "tal",
+    "page": 429,
+    "boardIndex": 0,
+    "left": 1118,
+    "top": 1477,
+    "size": 630,
+    "dir": "tool/ebook_boards/tal/p429_b0"
+  },
+  {
+    "id": "tal_p430_b0",
+    "book": "tal",
+    "page": 430,
+    "boardIndex": 0,
+    "left": 317,
+    "top": 1770,
+    "size": 631,
+    "dir": "tool/ebook_boards/tal/p430_b0"
+  },
+  {
+    "id": "tal_p431_b0",
+    "book": "tal",
+    "page": 431,
+    "boardIndex": 0,
+    "left": 324,
+    "top": 1478,
+    "size": 630,
+    "dir": "tool/ebook_boards/tal/p431_b0"
+  },
+  {
+    "id": "tal_p432_b0",
+    "book": "tal",
+    "page": 432,
+    "boardIndex": 0,
+    "left": 327,
+    "top": 1650,
+    "size": 630,
+    "dir": "tool/ebook_boards/tal/p432_b0"
+  },
+  {
+    "id": "tal_p433_b0",
+    "book": "tal",
+    "page": 433,
+    "boardIndex": 0,
+    "left": 317,
+    "top": 1360,
+    "size": 632,
+    "dir": "tool/ebook_boards/tal/p433_b0"
+  },
+  {
+    "id": "tal_p434_b0",
+    "book": "tal",
+    "page": 434,
+    "boardIndex": 0,
+    "left": 317,
+    "top": 1479,
+    "size": 629,
+    "dir": "tool/ebook_boards/tal/p434_b0"
+  },
+  {
+    "id": "tal_p436_b0",
+    "book": "tal",
+    "page": 436,
+    "boardIndex": 0,
+    "left": 1115,
+    "top": 776,
+    "size": 632,
+    "dir": "tool/ebook_boards/tal/p436_b0"
+  },
+  {
+    "id": "tal_p439_b0",
+    "book": "tal",
+    "page": 439,
+    "boardIndex": 0,
+    "left": 1126,
+    "top": 1597,
+    "size": 630,
+    "dir": "tool/ebook_boards/tal/p439_b0"
+  },
+  {
+    "id": "tal_p441_b0",
+    "book": "tal",
+    "page": 441,
+    "boardIndex": 0,
+    "left": 1118,
+    "top": 1246,
+    "size": 630,
+    "dir": "tool/ebook_boards/tal/p441_b0"
+  },
+  {
+    "id": "tal_p442_b0",
+    "book": "tal",
+    "page": 442,
+    "boardIndex": 0,
+    "left": 1116,
+    "top": 836,
+    "size": 631,
+    "dir": "tool/ebook_boards/tal/p442_b0"
+  },
+  {
+    "id": "tal_p443_b0",
+    "book": "tal",
+    "page": 443,
+    "boardIndex": 0,
+    "left": 1122,
+    "top": 371,
+    "size": 634,
+    "dir": "tool/ebook_boards/tal/p443_b0"
+  },
+  {
+    "id": "tal_p444_b0",
+    "book": "tal",
+    "page": 444,
+    "boardIndex": 0,
+    "left": 315,
+    "top": 953,
+    "size": 629,
+    "dir": "tool/ebook_boards/tal/p444_b0"
+  },
+  {
+    "id": "tal_p445_b0",
+    "book": "tal",
+    "page": 445,
+    "boardIndex": 0,
+    "left": 1118,
+    "top": 779,
+    "size": 632,
+    "dir": "tool/ebook_boards/tal/p445_b0"
+  },
+  {
+    "id": "tal_p446_b0",
+    "book": "tal",
+    "page": 446,
+    "boardIndex": 0,
+    "left": 317,
+    "top": 1886,
+    "size": 630,
+    "dir": "tool/ebook_boards/tal/p446_b0"
+  },
+  {
+    "id": "tal_p447_b0",
+    "book": "tal",
+    "page": 447,
+    "boardIndex": 0,
+    "left": 315,
+    "top": 954,
+    "size": 631,
+    "dir": "tool/ebook_boards/tal/p447_b0"
+  },
+  {
+    "id": "tal_p448_b0",
+    "book": "tal",
+    "page": 448,
+    "boardIndex": 0,
+    "left": 316,
+    "top": 1247,
+    "size": 629,
+    "dir": "tool/ebook_boards/tal/p448_b0"
+  },
+  {
+    "id": "tal_p450_b0",
+    "book": "tal",
+    "page": 450,
+    "boardIndex": 0,
+    "left": 1119,
+    "top": 1480,
+    "size": 631,
+    "dir": "tool/ebook_boards/tal/p450_b0"
+  },
+  {
+    "id": "tal_p450_b1",
+    "book": "tal",
+    "page": 450,
+    "boardIndex": 1,
+    "left": 317,
+    "top": 1655,
+    "size": 628,
+    "dir": "tool/ebook_boards/tal/p450_b1"
+  },
+  {
+    "id": "tal_p452_b0",
+    "book": "tal",
+    "page": 452,
+    "boardIndex": 0,
+    "left": 1120,
+    "top": 1653,
+    "size": 631,
+    "dir": "tool/ebook_boards/tal/p452_b0"
+  },
+  {
+    "id": "tal_p453_b0",
+    "book": "tal",
+    "page": 453,
+    "boardIndex": 0,
+    "left": 1118,
+    "top": 1070,
+    "size": 632,
+    "dir": "tool/ebook_boards/tal/p453_b0"
+  },
+  {
+    "id": "tal_p454_b0",
+    "book": "tal",
+    "page": 454,
+    "boardIndex": 0,
+    "left": 1125,
+    "top": 1361,
+    "size": 630,
+    "dir": "tool/ebook_boards/tal/p454_b0"
+  },
+  {
+    "id": "tal_p455_b0",
+    "book": "tal",
+    "page": 455,
+    "boardIndex": 0,
+    "left": 1123,
+    "top": 603,
+    "size": 633,
+    "dir": "tool/ebook_boards/tal/p455_b0"
+  },
+  {
+    "id": "tal_p456_b0",
+    "book": "tal",
+    "page": 456,
+    "boardIndex": 0,
+    "left": 322,
+    "top": 1071,
+    "size": 631,
+    "dir": "tool/ebook_boards/tal/p456_b0"
+  },
+  {
+    "id": "tal_p457_b0",
+    "book": "tal",
+    "page": 457,
+    "boardIndex": 0,
+    "left": 1120,
+    "top": 371,
+    "size": 631,
+    "dir": "tool/ebook_boards/tal/p457_b0"
+  },
+  {
+    "id": "tal_p458_b0",
+    "book": "tal",
+    "page": 458,
+    "boardIndex": 0,
+    "left": 1122,
+    "top": 896,
+    "size": 632,
+    "dir": "tool/ebook_boards/tal/p458_b0"
+  },
+  {
+    "id": "tal_p459_b0",
+    "book": "tal",
+    "page": 459,
+    "boardIndex": 0,
+    "left": 1117,
+    "top": 1243,
+    "size": 634,
+    "dir": "tool/ebook_boards/tal/p459_b0"
+  },
+  {
+    "id": "tal_p460_b0",
+    "book": "tal",
+    "page": 460,
+    "boardIndex": 0,
+    "left": 1115,
+    "top": 836,
+    "size": 632,
+    "dir": "tool/ebook_boards/tal/p460_b0"
+  },
+  {
+    "id": "tal_p462_b0",
+    "book": "tal",
+    "page": 462,
+    "boardIndex": 0,
+    "left": 1122,
+    "top": 1012,
+    "size": 632,
+    "dir": "tool/ebook_boards/tal/p462_b0"
+  },
+  {
+    "id": "tal_p463_b0",
+    "book": "tal",
+    "page": 463,
+    "boardIndex": 0,
+    "left": 1127,
+    "top": 1709,
+    "size": 631,
+    "dir": "tool/ebook_boards/tal/p463_b0"
+  },
+  {
+    "id": "tal_p464_b0",
+    "book": "tal",
+    "page": 464,
+    "boardIndex": 0,
+    "left": 1119,
+    "top": 1014,
+    "size": 630,
+    "dir": "tool/ebook_boards/tal/p464_b0"
+  },
+  {
+    "id": "tal_p466_b0",
+    "book": "tal",
+    "page": 466,
+    "boardIndex": 0,
+    "left": 323,
+    "top": 1127,
+    "size": 628,
+    "dir": "tool/ebook_boards/tal/p466_b0"
+  },
+  {
+    "id": "tal_p467_b0",
+    "book": "tal",
+    "page": 467,
+    "boardIndex": 0,
+    "left": 1120,
+    "top": 997,
+    "size": 608,
+    "dir": "tool/ebook_boards/tal/p467_b0"
+  },
+  {
+    "id": "tal_p468_b0",
+    "book": "tal",
+    "page": 468,
+    "boardIndex": 0,
+    "left": 322,
+    "top": 1238,
+    "size": 633,
+    "dir": "tool/ebook_boards/tal/p468_b0"
+  },
+  {
+    "id": "tal_p469_b0",
+    "book": "tal",
+    "page": 469,
+    "boardIndex": 0,
+    "left": 1127,
+    "top": 662,
+    "size": 628,
+    "dir": "tool/ebook_boards/tal/p469_b0"
+  },
+  {
+    "id": "tal_p471_b0",
+    "book": "tal",
+    "page": 471,
+    "boardIndex": 0,
+    "left": 1126,
+    "top": 1477,
+    "size": 631,
+    "dir": "tool/ebook_boards/tal/p471_b0"
+  },
+  {
+    "id": "tal_p475_b0",
+    "book": "tal",
+    "page": 475,
+    "boardIndex": 0,
+    "left": 1120,
+    "top": 1770,
+    "size": 631,
+    "dir": "tool/ebook_boards/tal/p475_b0"
+  },
+  {
+    "id": "tal_p476_b0",
+    "book": "tal",
+    "page": 476,
+    "boardIndex": 0,
+    "left": 315,
+    "top": 1416,
+    "size": 630,
+    "dir": "tool/ebook_boards/tal/p476_b0"
+  },
+  {
+    "id": "tal_p477_b0",
+    "book": "tal",
+    "page": 477,
+    "boardIndex": 0,
+    "left": 1120,
+    "top": 1528,
+    "size": 631,
+    "dir": "tool/ebook_boards/tal/p477_b0"
+  },
+  {
+    "id": "tal_p480_b0",
+    "book": "tal",
+    "page": 480,
+    "boardIndex": 0,
+    "left": 319,
+    "top": 1942,
+    "size": 631,
+    "dir": "tool/ebook_boards/tal/p480_b0"
+  },
+  {
+    "id": "tal_p481_b0",
+    "book": "tal",
+    "page": 481,
+    "boardIndex": 0,
+    "left": 1122,
+    "top": 720,
+    "size": 632,
+    "dir": "tool/ebook_boards/tal/p481_b0"
+  },
+  {
+    "id": "tal_p483_b0",
+    "book": "tal",
+    "page": 483,
+    "boardIndex": 0,
+    "left": 1119,
+    "top": 1418,
+    "size": 630,
+    "dir": "tool/ebook_boards/tal/p483_b0"
+  },
+  {
+    "id": "tal_p484_b0",
+    "book": "tal",
+    "page": 484,
+    "boardIndex": 0,
+    "left": 1115,
+    "top": 370,
+    "size": 634,
+    "dir": "tool/ebook_boards/tal/p484_b0"
+  },
+  {
+    "id": "tal_p485_b0",
+    "book": "tal",
+    "page": 485,
+    "boardIndex": 0,
+    "left": 310,
+    "top": 365,
+    "size": 633,
+    "dir": "tool/ebook_boards/tal/p485_b0"
+  },
+  {
+    "id": "tal_p486_b0",
+    "book": "tal",
+    "page": 486,
+    "boardIndex": 0,
+    "left": 1126,
+    "top": 1012,
+    "size": 629,
+    "dir": "tool/ebook_boards/tal/p486_b0"
+  },
+  {
+    "id": "tal_p487_b0",
+    "book": "tal",
+    "page": 487,
+    "boardIndex": 0,
+    "left": 1125,
+    "top": 660,
+    "size": 633,
+    "dir": "tool/ebook_boards/tal/p487_b0"
+  },
+  {
+    "id": "tal_p488_b0",
+    "book": "tal",
+    "page": 488,
+    "boardIndex": 0,
+    "left": 315,
+    "top": 1186,
+    "size": 631,
+    "dir": "tool/ebook_boards/tal/p488_b0"
+  },
+  {
+    "id": "tal_p489_b0",
+    "book": "tal",
+    "page": 489,
+    "boardIndex": 0,
+    "left": 310,
+    "top": 365,
+    "size": 598,
+    "dir": "tool/ebook_boards/tal/p489_b0"
+  },
+  {
+    "id": "tal_p489_b1",
+    "book": "tal",
+    "page": 489,
+    "boardIndex": 1,
+    "left": 317,
+    "top": 2164,
+    "size": 407,
+    "dir": "tool/ebook_boards/tal/p489_b1"
+  },
+  {
+    "id": "tal_p490_b0",
+    "book": "tal",
+    "page": 490,
+    "boardIndex": 0,
+    "left": 1125,
+    "top": 486,
+    "size": 632,
+    "dir": "tool/ebook_boards/tal/p490_b0"
+  },
+  {
+    "id": "tal_p491_b0",
+    "book": "tal",
+    "page": 491,
+    "boardIndex": 0,
+    "left": 1126,
+    "top": 1769,
+    "size": 632,
+    "dir": "tool/ebook_boards/tal/p491_b0"
+  },
+  {
+    "id": "tal_p492_b0",
+    "book": "tal",
+    "page": 492,
+    "boardIndex": 0,
+    "left": 1126,
+    "top": 1187,
+    "size": 631,
+    "dir": "tool/ebook_boards/tal/p492_b0"
+  },
+  {
+    "id": "tal_p493_b0",
+    "book": "tal",
+    "page": 493,
+    "boardIndex": 0,
+    "left": 1122,
+    "top": 1887,
+    "size": 629,
+    "dir": "tool/ebook_boards/tal/p493_b0"
+  },
+  {
+    "id": "tal_p494_b0",
+    "book": "tal",
+    "page": 494,
+    "boardIndex": 0,
+    "left": 320,
+    "top": 1186,
+    "size": 630,
+    "dir": "tool/ebook_boards/tal/p494_b0"
   }
 ]

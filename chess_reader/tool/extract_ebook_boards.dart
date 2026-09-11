@@ -20,6 +20,7 @@ Future<void> main(List<String> args) async {
     const BookSpec('march_ideas', '../ebook/the-march-of-chess-ideas_compress.pdf'),
     const BookSpec('kotov', '../ebook/think-like-a-grandmaster-9781849940535-1849940533_compress.pdf'),
     const BookSpec('art_of_attack', '../ebook/the-art-of-attack-in-chess.pdf'),
+    const BookSpec('tal', '../ebook/Life and Games of Mikhail Tal.pdf'),
   ];
 
   final outRoot = args.isNotEmpty ? args[0] : 'tool/ebook_boards';
