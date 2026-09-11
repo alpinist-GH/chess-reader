@@ -7,10 +7,16 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../settings/app_settings.dart' show sharedPrefsProvider;
 
-/// Product id for the one-time Pro Unlock, as configured in App Store
-/// Connect (covers iOS + macOS via Universal Purchase) and Google Play
-/// Console (Android). Must match exactly on both.
-const kProProductId = 'pro_unlock';
+/// Product id for the one-time Pro Unlock. Google Play (Android) uses
+/// `pro_unlock`, already live/Active in the Play Console. App Store
+/// Connect (iOS + macOS via Universal Purchase) uses `pro_unlock_v2`
+/// instead: the original `pro_unlock` IAP there got stuck in a
+/// "Developer Rejected" state that App Store Connect's "Add for Review"
+/// can't resubmit (a known ASC bug) — recreating under a new id is the
+/// documented workaround. Must match exactly whatever is configured in
+/// each store's console.
+String get kProProductId =>
+    (Platform.isIOS || Platform.isMacOS) ? 'pro_unlock_v2' : 'pro_unlock';
 
 const _kPurchasedPrefKey = 'proPurchased';
 
