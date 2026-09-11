@@ -29,5 +29,10 @@
   "art_of_attack_p8_b0": "r2qr1k1/1b1n1ppp/p1p1p3/1p6/3P4/2P2N2/PPQB1PPP/R3R1K1",
   "art_of_attack_p9_b0": "8/1K1Q4/6pb/4kB2/3b1n1P/5p2/8/8",
   "art_of_attack_p11_b0": "8/p5K1/1p2p3/4kp2/1Q6/2PpbP2/1R2n1B1/q7",
-  "art_of_attack_p15_b0": "r3k2r/p1p1qppp/b1p2n2/8/1bPp4/1PNQ2P1/P2PP1BP/R1B1K2R"
+  "art_of_attack_p15_b0": "r3k2r/p1p1qppp/b1p2n2/8/1bPp4/1PNQ2P1/P2PP1BP/R1B1K2R",
+  "reassess_i00050_b0": "r1bq1rk1/pp1nbppp/2pp1n2/4p3/P1BPP3/2N2N2/1PP2PPP/R1BQR1K1",
+  "reassess_i00150_b0": "rnb1k1nr/1p1pppbp/1p4p1/8/2P1P3/8/PP3KPP/R2Q1BNR",
+  "reassess_i00250_b0": "1r6/r4pp1/p1pp3b/P6p/RpBpPk2/3P1P1P/1PP2P2/4RK2",
+  "reassess_i00400_b0": "5r1k/r4qpp/p1p5/1p1pPpB1/3P1P1Q/b1P4R/P1Bn1P1P/6RK",
+  "reassess_i00550_b0": "r2qnrk1/p4ppp/1p1pp3/n7/3PP3/P1PQBP2/4N1PP/R3K2R"
 }
