@@ -4,8 +4,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../settings/settings_screen.dart';
 import '../model/chessnut_state.dart';
 import '../state/chessnut_controller.dart';
+import 'chessnut_icon.dart';
+import 'chessnut_quick_settings_screen.dart';
 
 /// Compact board-panel status indicator and controls for Chessnut Move board.
+///
+/// Renders nothing until a device has been connected or remembered at least
+/// once — the initial connect entry point is [ChessnutConnectIconButton],
+/// shown instead in the board panel's icon row so there's only one "connect"
+/// control (the toolbar's is the other) rather than two competing ones.
 class ChessnutStatusWidget extends ConsumerWidget {
   const ChessnutStatusWidget({super.key});
 
@@ -15,26 +22,9 @@ class ChessnutStatusWidget extends ConsumerWidget {
     final controller = ref.read(chessnutControllerProvider.notifier);
     if (!controller.isSupported) return const SizedBox.shrink();
 
-    // If completely disconnected and no device remembered, show minimal connect button
     if (state.connectionState == ChessnutConnectionState.disconnected &&
         state.connectedDeviceId == null) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextButton.icon(
-              icon: const Icon(Icons.bluetooth, size: 18),
-              label: const Text('Connect Chessnut'),
-              onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const SettingsScreen()),
-                );
-              },
-            ),
-          ],
-        ),
-      );
+      return const SizedBox.shrink();
     }
 
     return Card(
@@ -376,6 +366,32 @@ class ChessnutStatusWidget extends ConsumerWidget {
           ],
         ),
       ],
+    );
+  }
+}
+
+/// Icon-only entry point into the Chessnut connect flow, meant to sit among
+/// the board panel's other icon-row controls (undo, flip, FEN, ...) before a
+/// device is connected or remembered. Once one is, [ChessnutStatusWidget]'s
+/// status card takes over and this renders nothing.
+class ChessnutConnectIconButton extends ConsumerWidget {
+  const ChessnutConnectIconButton({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(chessnutControllerProvider);
+    final controller = ref.read(chessnutControllerProvider.notifier);
+    if (!controller.isSupported) return const SizedBox.shrink();
+    if (state.connectionState != ChessnutConnectionState.disconnected ||
+        state.connectedDeviceId != null) {
+      return const SizedBox.shrink();
+    }
+    return IconButton(
+      tooltip: 'Connect Chessnut board',
+      icon: const ChessnutIcon(),
+      onPressed: () => Navigator.of(context).push(
+        MaterialPageRoute(builder: (_) => const ChessnutQuickSettingsScreen()),
+      ),
     );
   }
 }

@@ -34,6 +34,18 @@ import 'reader_drawer.dart';
 
 bool _isEpub(String path) => path.toLowerCase().endsWith('.epub');
 
+/// Whether there's room for the book/library and board side by side: always
+/// true past 900 logical px (desktop, tablet landscape), and — between the
+/// phone-landscape and that width — only on tablet-class devices (shortest
+/// side ≥ 600dp, the standard Material tablet breakpoint), so a tablet in
+/// portrait still gets the split while a phone in landscape keeps the
+/// collapsible bottom panel.
+bool _isWideLayout(BuildContext context, BoxConstraints constraints) {
+  if (constraints.maxWidth >= 900) return true;
+  if (constraints.maxWidth < 600) return false;
+  return MediaQuery.sizeOf(context).shortestSide >= 600;
+}
+
 /// Compact connection/sync summary for the toolbar tooltip.
 String _chessnutTooltip(ChessnutState state) {
   if (!state.isConnected) return state.statusMessage ?? 'Not connected';
@@ -448,10 +460,6 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
       body: LayoutBuilder(
         builder: (context, constraints) {
           final bookPane = _BookPane(path: bookPath);
-
-          // No book open: full-width library home (no board chrome).
-          if (bookPath == null) return bookPane;
-
           final boardPane = Column(
             children: const [
               Expanded(child: BoardPanel()),
@@ -461,11 +469,24 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
 
           final placement =
               ref.watch(settingsProvider.select((s) => s.boardPlacement));
+          final isWide = _isWideLayout(context, constraints);
+
+          // No book open: show the free-play board alongside the library on
+          // wide screens (desktop/tablet) so there's something to play with
+          // right away, no need to open a book first. Phones stay full-width
+          // library — no room for both.
+          if (bookPath == null) {
+            if (!isWide) return bookPane;
+            final noBookPlacement = placement == BoardPlacement.auto
+                ? BoardPlacement.left
+                : placement;
+            return _split(constraints, noBookPlacement, bookPane, boardPane);
+          }
 
           // Auto: side-by-side on wide screens, collapsible bottom panel on
           // phones. Explicit placements force their arrangement everywhere.
           if (placement == BoardPlacement.auto) {
-            return constraints.maxWidth >= 900
+            return isWide
                 ? _split(constraints, BoardPlacement.right, bookPane, boardPane)
                 : _narrowCollapsible(constraints, bookPane, boardPane);
           }

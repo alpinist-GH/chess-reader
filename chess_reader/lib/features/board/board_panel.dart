@@ -191,6 +191,7 @@ class _BoardPanelState extends ConsumerState<BoardPanel> {
           alignment: WrapAlignment.center,
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
+            const ChessnutConnectIconButton(),
             IconButton(
               tooltip: 'Undo move',
               icon: const Icon(Icons.undo),
