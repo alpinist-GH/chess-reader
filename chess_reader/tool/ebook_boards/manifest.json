@@ -1,0 +1,5862 @@
+[
+  {
+    "id": "kotov_p16_b0",
+    "book": "kotov",
+    "page": 16,
+    "boardIndex": 0,
+    "left": 564,
+    "top": 123,
+    "size": 327,
+    "dir": "tool/ebook_boards/kotov/p16_b0"
+  },
+  {
+    "id": "kotov_p18_b0",
+    "book": "kotov",
+    "page": 18,
+    "boardIndex": 0,
+    "left": 567,
+    "top": 127,
+    "size": 327,
+    "dir": "tool/ebook_boards/kotov/p18_b0"
+  },
+  {
+    "id": "kotov_p20_b0",
+    "book": "kotov",
+    "page": 20,
+    "boardIndex": 0,
+    "left": 568,
+    "top": 127,
+    "size": 331,
+    "dir": "tool/ebook_boards/kotov/p20_b0"
+  },
+  {
+    "id": "kotov_p21_b0",
+    "book": "kotov",
+    "page": 21,
+    "boardIndex": 0,
+    "left": 567,
+    "top": 391,
+    "size": 333,
+    "dir": "tool/ebook_boards/kotov/p21_b0"
+  },
+  {
+    "id": "kotov_p23_b0",
+    "book": "kotov",
+    "page": 23,
+    "boardIndex": 0,
+    "left": 93,
+    "top": 122,
+    "size": 325,
+    "dir": "tool/ebook_boards/kotov/p23_b0"
+  },
+  {
+    "id": "kotov_p24_b0",
+    "book": "kotov",
+    "page": 24,
+    "boardIndex": 0,
+    "left": 566,
+    "top": 255,
+    "size": 331,
+    "dir": "tool/ebook_boards/kotov/p24_b0"
+  },
+  {
+    "id": "kotov_p28_b0",
+    "book": "kotov",
+    "page": 28,
+    "boardIndex": 0,
+    "left": 77,
+    "top": 493,
+    "size": 337,
+    "dir": "tool/ebook_boards/kotov/p28_b0"
+  },
+  {
+    "id": "kotov_p31_b0",
+    "book": "kotov",
+    "page": 31,
+    "boardIndex": 0,
+    "left": 84,
+    "top": 225,
+    "size": 337,
+    "dir": "tool/ebook_boards/kotov/p31_b0"
+  },
+  {
+    "id": "kotov_p31_b1",
+    "book": "kotov",
+    "page": 31,
+    "boardIndex": 1,
+    "left": 568,
+    "top": 872,
+    "size": 335,
+    "dir": "tool/ebook_boards/kotov/p31_b1"
+  },
+  {
+    "id": "kotov_p32_b0",
+    "book": "kotov",
+    "page": 32,
+    "boardIndex": 0,
+    "left": 568,
+    "top": 290,
+    "size": 334,
+    "dir": "tool/ebook_boards/kotov/p32_b0"
+  },
+  {
+    "id": "kotov_p33_b0",
+    "book": "kotov",
+    "page": 33,
+    "boardIndex": 0,
+    "left": 569,
+    "top": 123,
+    "size": 330,
+    "dir": "tool/ebook_boards/kotov/p33_b0"
+  },
+  {
+    "id": "kotov_p34_b0",
+    "book": "kotov",
+    "page": 34,
+    "boardIndex": 0,
+    "left": 568,
+    "top": 124,
+    "size": 339,
+    "dir": "tool/ebook_boards/kotov/p34_b0"
+  },
+  {
+    "id": "kotov_p35_b0",
+    "book": "kotov",
+    "page": 35,
+    "boardIndex": 0,
+    "left": 84,
+    "top": 129,
+    "size": 336,
+    "dir": "tool/ebook_boards/kotov/p35_b0"
+  },
+  {
+    "id": "kotov_p36_b0",
+    "book": "kotov",
+    "page": 36,
+    "boardIndex": 0,
+    "left": 566,
+    "top": 126,
+    "size": 340,
+    "dir": "tool/ebook_boards/kotov/p36_b0"
+  },
+  {
+    "id": "kotov_p37_b0",
+    "book": "kotov",
+    "page": 37,
+    "boardIndex": 0,
+    "left": 568,
+    "top": 228,
+    "size": 339,
+    "dir": "tool/ebook_boards/kotov/p37_b0"
+  },
+  {
+    "id": "kotov_p38_b0",
+    "book": "kotov",
+    "page": 38,
+    "boardIndex": 0,
+    "left": 83,
+    "top": 874,
+    "size": 338,
+    "dir": "tool/ebook_boards/kotov/p38_b0"
+  },
+  {
+    "id": "kotov_p39_b0",
+    "book": "kotov",
+    "page": 39,
+    "boardIndex": 0,
+    "left": 82,
+    "top": 122,
+    "size": 337,
+    "dir": "tool/ebook_boards/kotov/p39_b0"
+  },
+  {
+    "id": "kotov_p39_b1",
+    "book": "kotov",
+    "page": 39,
+    "boardIndex": 1,
+    "left": 567,
+    "top": 124,
+    "size": 334,
+    "dir": "tool/ebook_boards/kotov/p39_b1"
+  },
+  {
+    "id": "kotov_p40_b0",
+    "book": "kotov",
+    "page": 40,
+    "boardIndex": 0,
+    "left": 567,
+    "top": 553,
+    "size": 330,
+    "dir": "tool/ebook_boards/kotov/p40_b0"
+  },
+  {
+    "id": "kotov_p43_b0",
+    "book": "kotov",
+    "page": 43,
+    "boardIndex": 0,
+    "left": 568,
+    "top": 626,
+    "size": 333,
+    "dir": "tool/ebook_boards/kotov/p43_b0"
+  },
+  {
+    "id": "kotov_p44_b0",
+    "book": "kotov",
+    "page": 44,
+    "boardIndex": 0,
+    "left": 80,
+    "top": 794,
+    "size": 336,
+    "dir": "tool/ebook_boards/kotov/p44_b0"
+  },
+  {
+    "id": "kotov_p46_b0",
+    "book": "kotov",
+    "page": 46,
+    "boardIndex": 0,
+    "left": 85,
+    "top": 123,
+    "size": 328,
+    "dir": "tool/ebook_boards/kotov/p46_b0"
+  },
+  {
+    "id": "kotov_p47_b0",
+    "book": "kotov",
+    "page": 47,
+    "boardIndex": 0,
+    "left": 567,
+    "top": 124,
+    "size": 325,
+    "dir": "tool/ebook_boards/kotov/p47_b0"
+  },
+  {
+    "id": "kotov_p50_b0",
+    "book": "kotov",
+    "page": 50,
+    "boardIndex": 0,
+    "left": 557,
+    "top": 386,
+    "size": 332,
+    "dir": "tool/ebook_boards/kotov/p50_b0"
+  },
+  {
+    "id": "kotov_p51_b0",
+    "book": "kotov",
+    "page": 51,
+    "boardIndex": 0,
+    "left": 93,
+    "top": 122,
+    "size": 329,
+    "dir": "tool/ebook_boards/kotov/p51_b0"
+  },
+  {
+    "id": "kotov_p51_b1",
+    "book": "kotov",
+    "page": 51,
+    "boardIndex": 1,
+    "left": 93,
+    "top": 618,
+    "size": 329,
+    "dir": "tool/ebook_boards/kotov/p51_b1"
+  },
+  {
+    "id": "kotov_p52_b0",
+    "book": "kotov",
+    "page": 52,
+    "boardIndex": 0,
+    "left": 95,
+    "top": 683,
+    "size": 330,
+    "dir": "tool/ebook_boards/kotov/p52_b0"
+  },
+  {
+    "id": "kotov_p53_b0",
+    "book": "kotov",
+    "page": 53,
+    "boardIndex": 0,
+    "left": 94,
+    "top": 122,
+    "size": 328,
+    "dir": "tool/ebook_boards/kotov/p53_b0"
+  },
+  {
+    "id": "kotov_p53_b1",
+    "book": "kotov",
+    "page": 53,
+    "boardIndex": 1,
+    "left": 566,
+    "top": 122,
+    "size": 326,
+    "dir": "tool/ebook_boards/kotov/p53_b1"
+  },
+  {
+    "id": "kotov_p53_b2",
+    "book": "kotov",
+    "page": 53,
+    "boardIndex": 2,
+    "left": 568,
+    "top": 1017,
+    "size": 326,
+    "dir": "tool/ebook_boards/kotov/p53_b2"
+  },
+  {
+    "id": "kotov_p55_b0",
+    "book": "kotov",
+    "page": 55,
+    "boardIndex": 0,
+    "left": 566,
+    "top": 1004,
+    "size": 325,
+    "dir": "tool/ebook_boards/kotov/p55_b0"
+  },
+  {
+    "id": "kotov_p55_b1",
+    "book": "kotov",
+    "page": 55,
+    "boardIndex": 1,
+    "left": 99,
+    "top": 775,
+    "size": 324,
+    "dir": "tool/ebook_boards/kotov/p55_b1"
+  },
+  {
+    "id": "kotov_p57_b0",
+    "book": "kotov",
+    "page": 57,
+    "boardIndex": 0,
+    "left": 95,
+    "top": 120,
+    "size": 322,
+    "dir": "tool/ebook_boards/kotov/p57_b0"
+  },
+  {
+    "id": "kotov_p58_b0",
+    "book": "kotov",
+    "page": 58,
+    "boardIndex": 0,
+    "left": 91,
+    "top": 252,
+    "size": 327,
+    "dir": "tool/ebook_boards/kotov/p58_b0"
+  },
+  {
+    "id": "kotov_p59_b0",
+    "book": "kotov",
+    "page": 59,
+    "boardIndex": 0,
+    "left": 566,
+    "top": 974,
+    "size": 324,
+    "dir": "tool/ebook_boards/kotov/p59_b0"
+  },
+  {
+    "id": "kotov_p60_b0",
+    "book": "kotov",
+    "page": 60,
+    "boardIndex": 0,
+    "left": 568,
+    "top": 968,
+    "size": 323,
+    "dir": "tool/ebook_boards/kotov/p60_b0"
+  },
+  {
+    "id": "kotov_p61_b0",
+    "book": "kotov",
+    "page": 61,
+    "boardIndex": 0,
+    "left": 98,
+    "top": 1097,
+    "size": 324,
+    "dir": "tool/ebook_boards/kotov/p61_b0"
+  },
+  {
+    "id": "kotov_p62_b0",
+    "book": "kotov",
+    "page": 62,
+    "boardIndex": 0,
+    "left": 563,
+    "top": 682,
+    "size": 329,
+    "dir": "tool/ebook_boards/kotov/p62_b0"
+  },
+  {
+    "id": "kotov_p62_b1",
+    "book": "kotov",
+    "page": 62,
+    "boardIndex": 1,
+    "left": 564,
+    "top": 123,
+    "size": 325,
+    "dir": "tool/ebook_boards/kotov/p62_b1"
+  },
+  {
+    "id": "kotov_p62_b2",
+    "book": "kotov",
+    "page": 62,
+    "boardIndex": 2,
+    "left": 98,
+    "top": 123,
+    "size": 321,
+    "dir": "tool/ebook_boards/kotov/p62_b2"
+  },
+  {
+    "id": "kotov_p64_b0",
+    "book": "kotov",
+    "page": 64,
+    "boardIndex": 0,
+    "left": 566,
+    "top": 686,
+    "size": 331,
+    "dir": "tool/ebook_boards/kotov/p64_b0"
+  },
+  {
+    "id": "kotov_p64_b1",
+    "book": "kotov",
+    "page": 64,
+    "boardIndex": 1,
+    "left": 89,
+    "top": 321,
+    "size": 329,
+    "dir": "tool/ebook_boards/kotov/p64_b1"
+  },
+  {
+    "id": "kotov_p65_b0",
+    "book": "kotov",
+    "page": 65,
+    "boardIndex": 0,
+    "left": 90,
+    "top": 854,
+    "size": 330,
+    "dir": "tool/ebook_boards/kotov/p65_b0"
+  },
+  {
+    "id": "kotov_p66_b0",
+    "book": "kotov",
+    "page": 66,
+    "boardIndex": 0,
+    "left": 563,
+    "top": 1008,
+    "size": 327,
+    "dir": "tool/ebook_boards/kotov/p66_b0"
+  },
+  {
+    "id": "kotov_p66_b1",
+    "book": "kotov",
+    "page": 66,
+    "boardIndex": 1,
+    "left": 95,
+    "top": 1008,
+    "size": 326,
+    "dir": "tool/ebook_boards/kotov/p66_b1"
+  },
+  {
+    "id": "kotov_p67_b0",
+    "book": "kotov",
+    "page": 67,
+    "boardIndex": 0,
+    "left": 99,
+    "top": 809,
+    "size": 326,
+    "dir": "tool/ebook_boards/kotov/p67_b0"
+  },
+  {
+    "id": "kotov_p67_b1",
+    "book": "kotov",
+    "page": 67,
+    "boardIndex": 1,
+    "left": 566,
+    "top": 122,
+    "size": 321,
+    "dir": "tool/ebook_boards/kotov/p67_b1"
+  },
+  {
+    "id": "kotov_p69_b0",
+    "book": "kotov",
+    "page": 69,
+    "boardIndex": 0,
+    "left": 564,
+    "top": 122,
+    "size": 327,
+    "dir": "tool/ebook_boards/kotov/p69_b0"
+  },
+  {
+    "id": "kotov_p71_b0",
+    "book": "kotov",
+    "page": 71,
+    "boardIndex": 0,
+    "left": 566,
+    "top": 123,
+    "size": 325,
+    "dir": "tool/ebook_boards/kotov/p71_b0"
+  },
+  {
+    "id": "kotov_p73_b0",
+    "book": "kotov",
+    "page": 73,
+    "boardIndex": 0,
+    "left": 102,
+    "top": 715,
+    "size": 329,
+    "dir": "tool/ebook_boards/kotov/p73_b0"
+  },
+  {
+    "id": "kotov_p73_b1",
+    "book": "kotov",
+    "page": 73,
+    "boardIndex": 1,
+    "left": 572,
+    "top": 221,
+    "size": 324,
+    "dir": "tool/ebook_boards/kotov/p73_b1"
+  },
+  {
+    "id": "kotov_p74_b0",
+    "book": "kotov",
+    "page": 74,
+    "boardIndex": 0,
+    "left": 566,
+    "top": 850,
+    "size": 330,
+    "dir": "tool/ebook_boards/kotov/p74_b0"
+  },
+  {
+    "id": "kotov_p74_b1",
+    "book": "kotov",
+    "page": 74,
+    "boardIndex": 1,
+    "left": 92,
+    "top": 253,
+    "size": 329,
+    "dir": "tool/ebook_boards/kotov/p74_b1"
+  },
+  {
+    "id": "kotov_p79_b0",
+    "book": "kotov",
+    "page": 79,
+    "boardIndex": 0,
+    "left": 98,
+    "top": 883,
+    "size": 326,
+    "dir": "tool/ebook_boards/kotov/p79_b0"
+  },
+  {
+    "id": "kotov_p79_b1",
+    "book": "kotov",
+    "page": 79,
+    "boardIndex": 1,
+    "left": 567,
+    "top": 324,
+    "size": 325,
+    "dir": "tool/ebook_boards/kotov/p79_b1"
+  },
+  {
+    "id": "kotov_p79_b2",
+    "book": "kotov",
+    "page": 79,
+    "boardIndex": 2,
+    "left": 568,
+    "top": 883,
+    "size": 325,
+    "dir": "tool/ebook_boards/kotov/p79_b2"
+  },
+  {
+    "id": "kotov_p80_b0",
+    "book": "kotov",
+    "page": 80,
+    "boardIndex": 0,
+    "left": 91,
+    "top": 665,
+    "size": 332,
+    "dir": "tool/ebook_boards/kotov/p80_b0"
+  },
+  {
+    "id": "kotov_p80_b1",
+    "book": "kotov",
+    "page": 80,
+    "boardIndex": 1,
+    "left": 568,
+    "top": 665,
+    "size": 330,
+    "dir": "tool/ebook_boards/kotov/p80_b1"
+  },
+  {
+    "id": "kotov_p80_b2",
+    "book": "kotov",
+    "page": 80,
+    "boardIndex": 2,
+    "left": 91,
+    "top": 132,
+    "size": 329,
+    "dir": "tool/ebook_boards/kotov/p80_b2"
+  },
+  {
+    "id": "kotov_p80_b3",
+    "book": "kotov",
+    "page": 80,
+    "boardIndex": 3,
+    "left": 568,
+    "top": 135,
+    "size": 328,
+    "dir": "tool/ebook_boards/kotov/p80_b3"
+  },
+  {
+    "id": "kotov_p81_b0",
+    "book": "kotov",
+    "page": 81,
+    "boardIndex": 0,
+    "left": 91,
+    "top": 1034,
+    "size": 332,
+    "dir": "tool/ebook_boards/kotov/p81_b0"
+  },
+  {
+    "id": "kotov_p81_b1",
+    "book": "kotov",
+    "page": 81,
+    "boardIndex": 1,
+    "left": 91,
+    "top": 598,
+    "size": 331,
+    "dir": "tool/ebook_boards/kotov/p81_b1"
+  },
+  {
+    "id": "kotov_p81_b2",
+    "book": "kotov",
+    "page": 81,
+    "boardIndex": 2,
+    "left": 90,
+    "top": 128,
+    "size": 330,
+    "dir": "tool/ebook_boards/kotov/p81_b2"
+  },
+  {
+    "id": "kotov_p81_b3",
+    "book": "kotov",
+    "page": 81,
+    "boardIndex": 3,
+    "left": 567,
+    "top": 130,
+    "size": 330,
+    "dir": "tool/ebook_boards/kotov/p81_b3"
+  },
+  {
+    "id": "kotov_p81_b4",
+    "book": "kotov",
+    "page": 81,
+    "boardIndex": 4,
+    "left": 568,
+    "top": 598,
+    "size": 328,
+    "dir": "tool/ebook_boards/kotov/p81_b4"
+  },
+  {
+    "id": "kotov_p84_b0",
+    "book": "kotov",
+    "page": 84,
+    "boardIndex": 0,
+    "left": 566,
+    "top": 455,
+    "size": 329,
+    "dir": "tool/ebook_boards/kotov/p84_b0"
+  },
+  {
+    "id": "kotov_p85_b0",
+    "book": "kotov",
+    "page": 85,
+    "boardIndex": 0,
+    "left": 569,
+    "top": 1022,
+    "size": 329,
+    "dir": "tool/ebook_boards/kotov/p85_b0"
+  },
+  {
+    "id": "kotov_p85_b1",
+    "book": "kotov",
+    "page": 85,
+    "boardIndex": 1,
+    "left": 567,
+    "top": 123,
+    "size": 326,
+    "dir": "tool/ebook_boards/kotov/p85_b1"
+  },
+  {
+    "id": "kotov_p86_b0",
+    "book": "kotov",
+    "page": 86,
+    "boardIndex": 0,
+    "left": 83,
+    "top": 497,
+    "size": 339,
+    "dir": "tool/ebook_boards/kotov/p86_b0"
+  },
+  {
+    "id": "kotov_p86_b1",
+    "book": "kotov",
+    "page": 86,
+    "boardIndex": 1,
+    "left": 569,
+    "top": 429,
+    "size": 337,
+    "dir": "tool/ebook_boards/kotov/p86_b1"
+  },
+  {
+    "id": "kotov_p87_b0",
+    "book": "kotov",
+    "page": 87,
+    "boardIndex": 0,
+    "left": 83,
+    "top": 838,
+    "size": 335,
+    "dir": "tool/ebook_boards/kotov/p87_b0"
+  },
+  {
+    "id": "kotov_p88_b0",
+    "book": "kotov",
+    "page": 88,
+    "boardIndex": 0,
+    "left": 83,
+    "top": 124,
+    "size": 334,
+    "dir": "tool/ebook_boards/kotov/p88_b0"
+  },
+  {
+    "id": "kotov_p88_b1",
+    "book": "kotov",
+    "page": 88,
+    "boardIndex": 1,
+    "left": 568,
+    "top": 429,
+    "size": 334,
+    "dir": "tool/ebook_boards/kotov/p88_b1"
+  },
+  {
+    "id": "kotov_p89_b0",
+    "book": "kotov",
+    "page": 89,
+    "boardIndex": 0,
+    "left": 568,
+    "top": 258,
+    "size": 332,
+    "dir": "tool/ebook_boards/kotov/p89_b0"
+  },
+  {
+    "id": "kotov_p90_b0",
+    "book": "kotov",
+    "page": 90,
+    "boardIndex": 0,
+    "left": 568,
+    "top": 968,
+    "size": 334,
+    "dir": "tool/ebook_boards/kotov/p90_b0"
+  },
+  {
+    "id": "kotov_p91_b0",
+    "book": "kotov",
+    "page": 91,
+    "boardIndex": 0,
+    "left": 566,
+    "top": 358,
+    "size": 332,
+    "dir": "tool/ebook_boards/kotov/p91_b0"
+  },
+  {
+    "id": "kotov_p92_b0",
+    "book": "kotov",
+    "page": 92,
+    "boardIndex": 0,
+    "left": 561,
+    "top": 126,
+    "size": 333,
+    "dir": "tool/ebook_boards/kotov/p92_b0"
+  },
+  {
+    "id": "kotov_p93_b0",
+    "book": "kotov",
+    "page": 93,
+    "boardIndex": 0,
+    "left": 567,
+    "top": 355,
+    "size": 331,
+    "dir": "tool/ebook_boards/kotov/p93_b0"
+  },
+  {
+    "id": "kotov_p93_b1",
+    "book": "kotov",
+    "page": 93,
+    "boardIndex": 1,
+    "left": 87,
+    "top": 125,
+    "size": 328,
+    "dir": "tool/ebook_boards/kotov/p93_b1"
+  },
+  {
+    "id": "kotov_p94_b0",
+    "book": "kotov",
+    "page": 94,
+    "boardIndex": 0,
+    "left": 564,
+    "top": 125,
+    "size": 329,
+    "dir": "tool/ebook_boards/kotov/p94_b0"
+  },
+  {
+    "id": "kotov_p95_b0",
+    "book": "kotov",
+    "page": 95,
+    "boardIndex": 0,
+    "left": 91,
+    "top": 422,
+    "size": 331,
+    "dir": "tool/ebook_boards/kotov/p95_b0"
+  },
+  {
+    "id": "kotov_p96_b0",
+    "book": "kotov",
+    "page": 96,
+    "boardIndex": 0,
+    "left": 567,
+    "top": 124,
+    "size": 330,
+    "dir": "tool/ebook_boards/kotov/p96_b0"
+  },
+  {
+    "id": "kotov_p97_b0",
+    "book": "kotov",
+    "page": 97,
+    "boardIndex": 0,
+    "left": 87,
+    "top": 896,
+    "size": 333,
+    "dir": "tool/ebook_boards/kotov/p97_b0"
+  },
+  {
+    "id": "kotov_p98_b0",
+    "book": "kotov",
+    "page": 98,
+    "boardIndex": 0,
+    "left": 83,
+    "top": 808,
+    "size": 337,
+    "dir": "tool/ebook_boards/kotov/p98_b0"
+  },
+  {
+    "id": "kotov_p99_b0",
+    "book": "kotov",
+    "page": 99,
+    "boardIndex": 0,
+    "left": 84,
+    "top": 430,
+    "size": 338,
+    "dir": "tool/ebook_boards/kotov/p99_b0"
+  },
+  {
+    "id": "kotov_p99_b1",
+    "book": "kotov",
+    "page": 99,
+    "boardIndex": 1,
+    "left": 570,
+    "top": 129,
+    "size": 334,
+    "dir": "tool/ebook_boards/kotov/p99_b1"
+  },
+  {
+    "id": "kotov_p100_b0",
+    "book": "kotov",
+    "page": 100,
+    "boardIndex": 0,
+    "left": 80,
+    "top": 665,
+    "size": 336,
+    "dir": "tool/ebook_boards/kotov/p100_b0"
+  },
+  {
+    "id": "kotov_p101_b0",
+    "book": "kotov",
+    "page": 101,
+    "boardIndex": 0,
+    "left": 570,
+    "top": 1106,
+    "size": 334,
+    "dir": "tool/ebook_boards/kotov/p101_b0"
+  },
+  {
+    "id": "kotov_p101_b1",
+    "book": "kotov",
+    "page": 101,
+    "boardIndex": 1,
+    "left": 567,
+    "top": 123,
+    "size": 332,
+    "dir": "tool/ebook_boards/kotov/p101_b1"
+  },
+  {
+    "id": "kotov_p102_b0",
+    "book": "kotov",
+    "page": 102,
+    "boardIndex": 0,
+    "left": 562,
+    "top": 123,
+    "size": 339,
+    "dir": "tool/ebook_boards/kotov/p102_b0"
+  },
+  {
+    "id": "kotov_p103_b0",
+    "book": "kotov",
+    "page": 103,
+    "boardIndex": 0,
+    "left": 88,
+    "top": 122,
+    "size": 333,
+    "dir": "tool/ebook_boards/kotov/p103_b0"
+  },
+  {
+    "id": "kotov_p103_b1",
+    "book": "kotov",
+    "page": 103,
+    "boardIndex": 1,
+    "left": 568,
+    "top": 124,
+    "size": 331,
+    "dir": "tool/ebook_boards/kotov/p103_b1"
+  },
+  {
+    "id": "kotov_p104_b0",
+    "book": "kotov",
+    "page": 104,
+    "boardIndex": 0,
+    "left": 92,
+    "top": 715,
+    "size": 330,
+    "dir": "tool/ebook_boards/kotov/p104_b0"
+  },
+  {
+    "id": "kotov_p106_b0",
+    "book": "kotov",
+    "page": 106,
+    "boardIndex": 0,
+    "left": 92,
+    "top": 1018,
+    "size": 327,
+    "dir": "tool/ebook_boards/kotov/p106_b0"
+  },
+  {
+    "id": "kotov_p107_b0",
+    "book": "kotov",
+    "page": 107,
+    "boardIndex": 0,
+    "left": 98,
+    "top": 124,
+    "size": 324,
+    "dir": "tool/ebook_boards/kotov/p107_b0"
+  },
+  {
+    "id": "kotov_p107_b1",
+    "book": "kotov",
+    "page": 107,
+    "boardIndex": 1,
+    "left": 568,
+    "top": 123,
+    "size": 323,
+    "dir": "tool/ebook_boards/kotov/p107_b1"
+  },
+  {
+    "id": "kotov_p108_b0",
+    "book": "kotov",
+    "page": 108,
+    "boardIndex": 0,
+    "left": 564,
+    "top": 255,
+    "size": 328,
+    "dir": "tool/ebook_boards/kotov/p108_b0"
+  },
+  {
+    "id": "kotov_p109_b0",
+    "book": "kotov",
+    "page": 109,
+    "boardIndex": 0,
+    "left": 566,
+    "top": 387,
+    "size": 329,
+    "dir": "tool/ebook_boards/kotov/p109_b0"
+  },
+  {
+    "id": "kotov_p110_b0",
+    "book": "kotov",
+    "page": 110,
+    "boardIndex": 0,
+    "left": 86,
+    "top": 916,
+    "size": 328,
+    "dir": "tool/ebook_boards/kotov/p110_b0"
+  },
+  {
+    "id": "kotov_p111_b0",
+    "book": "kotov",
+    "page": 111,
+    "boardIndex": 0,
+    "left": 567,
+    "top": 551,
+    "size": 325,
+    "dir": "tool/ebook_boards/kotov/p111_b0"
+  },
+  {
+    "id": "kotov_p112_b0",
+    "book": "kotov",
+    "page": 112,
+    "boardIndex": 0,
+    "left": 562,
+    "top": 127,
+    "size": 330,
+    "dir": "tool/ebook_boards/kotov/p112_b0"
+  },
+  {
+    "id": "kotov_p113_b0",
+    "book": "kotov",
+    "page": 113,
+    "boardIndex": 0,
+    "left": 570,
+    "top": 1064,
+    "size": 330,
+    "dir": "tool/ebook_boards/kotov/p113_b0"
+  },
+  {
+    "id": "kotov_p114_b0",
+    "book": "kotov",
+    "page": 114,
+    "boardIndex": 0,
+    "left": 559,
+    "top": 121,
+    "size": 334,
+    "dir": "tool/ebook_boards/kotov/p114_b0"
+  },
+  {
+    "id": "kotov_p115_b0",
+    "book": "kotov",
+    "page": 115,
+    "boardIndex": 0,
+    "left": 93,
+    "top": 124,
+    "size": 329,
+    "dir": "tool/ebook_boards/kotov/p115_b0"
+  },
+  {
+    "id": "kotov_p116_b0",
+    "book": "kotov",
+    "page": 116,
+    "boardIndex": 0,
+    "left": 562,
+    "top": 390,
+    "size": 332,
+    "dir": "tool/ebook_boards/kotov/p116_b0"
+  },
+  {
+    "id": "kotov_p116_b1",
+    "book": "kotov",
+    "page": 116,
+    "boardIndex": 1,
+    "left": 88,
+    "top": 122,
+    "size": 331,
+    "dir": "tool/ebook_boards/kotov/p116_b1"
+  },
+  {
+    "id": "kotov_p117_b0",
+    "book": "kotov",
+    "page": 117,
+    "boardIndex": 0,
+    "left": 91,
+    "top": 724,
+    "size": 334,
+    "dir": "tool/ebook_boards/kotov/p117_b0"
+  },
+  {
+    "id": "kotov_p118_b0",
+    "book": "kotov",
+    "page": 118,
+    "boardIndex": 0,
+    "left": 86,
+    "top": 922,
+    "size": 331,
+    "dir": "tool/ebook_boards/kotov/p118_b0"
+  },
+  {
+    "id": "kotov_p118_b1",
+    "book": "kotov",
+    "page": 118,
+    "boardIndex": 1,
+    "left": 84,
+    "top": 122,
+    "size": 329,
+    "dir": "tool/ebook_boards/kotov/p118_b1"
+  },
+  {
+    "id": "kotov_p119_b0",
+    "book": "kotov",
+    "page": 119,
+    "boardIndex": 0,
+    "left": 93,
+    "top": 586,
+    "size": 331,
+    "dir": "tool/ebook_boards/kotov/p119_b0"
+  },
+  {
+    "id": "kotov_p121_b0",
+    "book": "kotov",
+    "page": 121,
+    "boardIndex": 0,
+    "left": 90,
+    "top": 318,
+    "size": 330,
+    "dir": "tool/ebook_boards/kotov/p121_b0"
+  },
+  {
+    "id": "kotov_p121_b1",
+    "book": "kotov",
+    "page": 121,
+    "boardIndex": 1,
+    "left": 567,
+    "top": 123,
+    "size": 325,
+    "dir": "tool/ebook_boards/kotov/p121_b1"
+  },
+  {
+    "id": "kotov_p122_b0",
+    "book": "kotov",
+    "page": 122,
+    "boardIndex": 0,
+    "left": 89,
+    "top": 823,
+    "size": 332,
+    "dir": "tool/ebook_boards/kotov/p122_b0"
+  },
+  {
+    "id": "kotov_p122_b1",
+    "book": "kotov",
+    "page": 122,
+    "boardIndex": 1,
+    "left": 86,
+    "top": 122,
+    "size": 328,
+    "dir": "tool/ebook_boards/kotov/p122_b1"
+  },
+  {
+    "id": "kotov_p123_b0",
+    "book": "kotov",
+    "page": 123,
+    "boardIndex": 0,
+    "left": 91,
+    "top": 554,
+    "size": 331,
+    "dir": "tool/ebook_boards/kotov/p123_b0"
+  },
+  {
+    "id": "kotov_p123_b1",
+    "book": "kotov",
+    "page": 123,
+    "boardIndex": 1,
+    "left": 568,
+    "top": 755,
+    "size": 327,
+    "dir": "tool/ebook_boards/kotov/p123_b1"
+  },
+  {
+    "id": "kotov_p124_b0",
+    "book": "kotov",
+    "page": 124,
+    "boardIndex": 0,
+    "left": 564,
+    "top": 256,
+    "size": 328,
+    "dir": "tool/ebook_boards/kotov/p124_b0"
+  },
+  {
+    "id": "kotov_p124_b1",
+    "book": "kotov",
+    "page": 124,
+    "boardIndex": 1,
+    "left": 97,
+    "top": 784,
+    "size": 327,
+    "dir": "tool/ebook_boards/kotov/p124_b1"
+  },
+  {
+    "id": "kotov_p124_b2",
+    "book": "kotov",
+    "page": 124,
+    "boardIndex": 2,
+    "left": 566,
+    "top": 784,
+    "size": 327,
+    "dir": "tool/ebook_boards/kotov/p124_b2"
+  },
+  {
+    "id": "kotov_p124_b3",
+    "book": "kotov",
+    "page": 124,
+    "boardIndex": 3,
+    "left": 95,
+    "top": 258,
+    "size": 326,
+    "dir": "tool/ebook_boards/kotov/p124_b3"
+  },
+  {
+    "id": "kotov_p125_b0",
+    "book": "kotov",
+    "page": 125,
+    "boardIndex": 0,
+    "left": 564,
+    "top": 128,
+    "size": 324,
+    "dir": "tool/ebook_boards/kotov/p125_b0"
+  },
+  {
+    "id": "kotov_p125_b1",
+    "book": "kotov",
+    "page": 125,
+    "boardIndex": 1,
+    "left": 95,
+    "top": 128,
+    "size": 323,
+    "dir": "tool/ebook_boards/kotov/p125_b1"
+  },
+  {
+    "id": "kotov_p131_b0",
+    "book": "kotov",
+    "page": 131,
+    "boardIndex": 0,
+    "left": 567,
+    "top": 955,
+    "size": 328,
+    "dir": "tool/ebook_boards/kotov/p131_b0"
+  },
+  {
+    "id": "kotov_p132_b0",
+    "book": "kotov",
+    "page": 132,
+    "boardIndex": 0,
+    "left": 569,
+    "top": 896,
+    "size": 334,
+    "dir": "tool/ebook_boards/kotov/p132_b0"
+  },
+  {
+    "id": "kotov_p132_b1",
+    "book": "kotov",
+    "page": 132,
+    "boardIndex": 1,
+    "left": 86,
+    "top": 525,
+    "size": 332,
+    "dir": "tool/ebook_boards/kotov/p132_b1"
+  },
+  {
+    "id": "kotov_p132_b2",
+    "book": "kotov",
+    "page": 132,
+    "boardIndex": 2,
+    "left": 566,
+    "top": 123,
+    "size": 331,
+    "dir": "tool/ebook_boards/kotov/p132_b2"
+  },
+  {
+    "id": "kotov_p133_b0",
+    "book": "kotov",
+    "page": 133,
+    "boardIndex": 0,
+    "left": 87,
+    "top": 390,
+    "size": 334,
+    "dir": "tool/ebook_boards/kotov/p133_b0"
+  },
+  {
+    "id": "kotov_p133_b1",
+    "book": "kotov",
+    "page": 133,
+    "boardIndex": 1,
+    "left": 566,
+    "top": 493,
+    "size": 330,
+    "dir": "tool/ebook_boards/kotov/p133_b1"
+  },
+  {
+    "id": "kotov_p134_b0",
+    "book": "kotov",
+    "page": 134,
+    "boardIndex": 0,
+    "left": 93,
+    "top": 287,
+    "size": 328,
+    "dir": "tool/ebook_boards/kotov/p134_b0"
+  },
+  {
+    "id": "kotov_p137_b0",
+    "book": "kotov",
+    "page": 137,
+    "boardIndex": 0,
+    "left": 97,
+    "top": 520,
+    "size": 325,
+    "dir": "tool/ebook_boards/kotov/p137_b0"
+  },
+  {
+    "id": "kotov_p140_b0",
+    "book": "kotov",
+    "page": 140,
+    "boardIndex": 0,
+    "left": 560,
+    "top": 123,
+    "size": 333,
+    "dir": "tool/ebook_boards/kotov/p140_b0"
+  },
+  {
+    "id": "kotov_p141_b0",
+    "book": "kotov",
+    "page": 141,
+    "boardIndex": 0,
+    "left": 88,
+    "top": 527,
+    "size": 333,
+    "dir": "tool/ebook_boards/kotov/p141_b0"
+  },
+  {
+    "id": "kotov_p141_b1",
+    "book": "kotov",
+    "page": 141,
+    "boardIndex": 1,
+    "left": 568,
+    "top": 863,
+    "size": 332,
+    "dir": "tool/ebook_boards/kotov/p141_b1"
+  },
+  {
+    "id": "kotov_p142_b0",
+    "book": "kotov",
+    "page": 142,
+    "boardIndex": 0,
+    "left": 563,
+    "top": 818,
+    "size": 331,
+    "dir": "tool/ebook_boards/kotov/p142_b0"
+  },
+  {
+    "id": "kotov_p144_b0",
+    "book": "kotov",
+    "page": 144,
+    "boardIndex": 0,
+    "left": 565,
+    "top": 916,
+    "size": 329,
+    "dir": "tool/ebook_boards/kotov/p144_b0"
+  },
+  {
+    "id": "kotov_p144_b1",
+    "book": "kotov",
+    "page": 144,
+    "boardIndex": 1,
+    "left": 93,
+    "top": 352,
+    "size": 327,
+    "dir": "tool/ebook_boards/kotov/p144_b1"
+  },
+  {
+    "id": "kotov_p145_b0",
+    "book": "kotov",
+    "page": 145,
+    "boardIndex": 0,
+    "left": 566,
+    "top": 320,
+    "size": 326,
+    "dir": "tool/ebook_boards/kotov/p145_b0"
+  },
+  {
+    "id": "kotov_p146_b0",
+    "book": "kotov",
+    "page": 146,
+    "boardIndex": 0,
+    "left": 561,
+    "top": 122,
+    "size": 335,
+    "dir": "tool/ebook_boards/kotov/p146_b0"
+  },
+  {
+    "id": "kotov_p148_b0",
+    "book": "kotov",
+    "page": 148,
+    "boardIndex": 0,
+    "left": 568,
+    "top": 322,
+    "size": 332,
+    "dir": "tool/ebook_boards/kotov/p148_b0"
+  },
+  {
+    "id": "kotov_p149_b0",
+    "book": "kotov",
+    "page": 149,
+    "boardIndex": 0,
+    "left": 92,
+    "top": 556,
+    "size": 332,
+    "dir": "tool/ebook_boards/kotov/p149_b0"
+  },
+  {
+    "id": "kotov_p150_b0",
+    "book": "kotov",
+    "page": 150,
+    "boardIndex": 0,
+    "left": 85,
+    "top": 121,
+    "size": 331,
+    "dir": "tool/ebook_boards/kotov/p150_b0"
+  },
+  {
+    "id": "kotov_p150_b1",
+    "book": "kotov",
+    "page": 150,
+    "boardIndex": 1,
+    "left": 88,
+    "top": 1023,
+    "size": 328,
+    "dir": "tool/ebook_boards/kotov/p150_b1"
+  },
+  {
+    "id": "kotov_p151_b0",
+    "book": "kotov",
+    "page": 151,
+    "boardIndex": 0,
+    "left": 93,
+    "top": 889,
+    "size": 328,
+    "dir": "tool/ebook_boards/kotov/p151_b0"
+  },
+  {
+    "id": "kotov_p152_b0",
+    "book": "kotov",
+    "page": 152,
+    "boardIndex": 0,
+    "left": 564,
+    "top": 121,
+    "size": 333,
+    "dir": "tool/ebook_boards/kotov/p152_b0"
+  },
+  {
+    "id": "kotov_p153_b0",
+    "book": "kotov",
+    "page": 153,
+    "boardIndex": 0,
+    "left": 566,
+    "top": 221,
+    "size": 327,
+    "dir": "tool/ebook_boards/kotov/p153_b0"
+  },
+  {
+    "id": "kotov_p154_b0",
+    "book": "kotov",
+    "page": 154,
+    "boardIndex": 0,
+    "left": 562,
+    "top": 701,
+    "size": 339,
+    "dir": "tool/ebook_boards/kotov/p154_b0"
+  },
+  {
+    "id": "kotov_p154_b1",
+    "book": "kotov",
+    "page": 154,
+    "boardIndex": 1,
+    "left": 82,
+    "top": 701,
+    "size": 335,
+    "dir": "tool/ebook_boards/kotov/p154_b1"
+  },
+  {
+    "id": "kotov_p155_b0",
+    "book": "kotov",
+    "page": 155,
+    "boardIndex": 0,
+    "left": 90,
+    "top": 133,
+    "size": 330,
+    "dir": "tool/ebook_boards/kotov/p155_b0"
+  },
+  {
+    "id": "kotov_p157_b0",
+    "book": "kotov",
+    "page": 157,
+    "boardIndex": 0,
+    "left": 566,
+    "top": 124,
+    "size": 324,
+    "dir": "tool/ebook_boards/kotov/p157_b0"
+  },
+  {
+    "id": "kotov_p159_b0",
+    "book": "kotov",
+    "page": 159,
+    "boardIndex": 0,
+    "left": 567,
+    "top": 923,
+    "size": 332,
+    "dir": "tool/ebook_boards/kotov/p159_b0"
+  },
+  {
+    "id": "kotov_p160_b0",
+    "book": "kotov",
+    "page": 160,
+    "boardIndex": 0,
+    "left": 570,
+    "top": 946,
+    "size": 328,
+    "dir": "tool/ebook_boards/kotov/p160_b0"
+  },
+  {
+    "id": "kotov_p161_b0",
+    "book": "kotov",
+    "page": 161,
+    "boardIndex": 0,
+    "left": 91,
+    "top": 914,
+    "size": 328,
+    "dir": "tool/ebook_boards/kotov/p161_b0"
+  },
+  {
+    "id": "kotov_p162_b0",
+    "book": "kotov",
+    "page": 162,
+    "boardIndex": 0,
+    "left": 92,
+    "top": 717,
+    "size": 331,
+    "dir": "tool/ebook_boards/kotov/p162_b0"
+  },
+  {
+    "id": "kotov_p162_b1",
+    "book": "kotov",
+    "page": 162,
+    "boardIndex": 1,
+    "left": 566,
+    "top": 451,
+    "size": 329,
+    "dir": "tool/ebook_boards/kotov/p162_b1"
+  },
+  {
+    "id": "kotov_p163_b0",
+    "book": "kotov",
+    "page": 163,
+    "boardIndex": 0,
+    "left": 566,
+    "top": 553,
+    "size": 327,
+    "dir": "tool/ebook_boards/kotov/p163_b0"
+  },
+  {
+    "id": "kotov_p163_b1",
+    "book": "kotov",
+    "page": 163,
+    "boardIndex": 1,
+    "left": 94,
+    "top": 1118,
+    "size": 327,
+    "dir": "tool/ebook_boards/kotov/p163_b1"
+  },
+  {
+    "id": "kotov_p168_b0",
+    "book": "kotov",
+    "page": 168,
+    "boardIndex": 0,
+    "left": 563,
+    "top": 121,
+    "size": 325,
+    "dir": "tool/ebook_boards/kotov/p168_b0"
+  },
+  {
+    "id": "kotov_p168_b1",
+    "book": "kotov",
+    "page": 168,
+    "boardIndex": 1,
+    "left": 93,
+    "top": 122,
+    "size": 325,
+    "dir": "tool/ebook_boards/kotov/p168_b1"
+  },
+  {
+    "id": "kotov_p169_b0",
+    "book": "kotov",
+    "page": 169,
+    "boardIndex": 0,
+    "left": 568,
+    "top": 1017,
+    "size": 326,
+    "dir": "tool/ebook_boards/kotov/p169_b0"
+  },
+  {
+    "id": "kotov_p171_b0",
+    "book": "kotov",
+    "page": 171,
+    "boardIndex": 0,
+    "left": 98,
+    "top": 1003,
+    "size": 326,
+    "dir": "tool/ebook_boards/kotov/p171_b0"
+  },
+  {
+    "id": "kotov_p174_b0",
+    "book": "kotov",
+    "page": 174,
+    "boardIndex": 0,
+    "left": 564,
+    "top": 873,
+    "size": 328,
+    "dir": "tool/ebook_boards/kotov/p174_b0"
+  },
+  {
+    "id": "kotov_p174_b1",
+    "book": "kotov",
+    "page": 174,
+    "boardIndex": 1,
+    "left": 565,
+    "top": 121,
+    "size": 326,
+    "dir": "tool/ebook_boards/kotov/p174_b1"
+  },
+  {
+    "id": "kotov_p179_b0",
+    "book": "kotov",
+    "page": 179,
+    "boardIndex": 0,
+    "left": 96,
+    "top": 1008,
+    "size": 325,
+    "dir": "tool/ebook_boards/kotov/p179_b0"
+  },
+  {
+    "id": "middle_game_p15_b0",
+    "book": "middle_game",
+    "page": 15,
+    "boardIndex": 0,
+    "left": 931,
+    "top": 538,
+    "size": 981,
+    "dir": "tool/ebook_boards/middle_game/p15_b0"
+  },
+  {
+    "id": "middle_game_p20_b0",
+    "book": "middle_game",
+    "page": 20,
+    "boardIndex": 0,
+    "left": 869,
+    "top": 2204,
+    "size": 986,
+    "dir": "tool/ebook_boards/middle_game/p20_b0"
+  },
+  {
+    "id": "middle_game_p24_b0",
+    "book": "middle_game",
+    "page": 24,
+    "boardIndex": 0,
+    "left": 886,
+    "top": 1940,
+    "size": 984,
+    "dir": "tool/ebook_boards/middle_game/p24_b0"
+  },
+  {
+    "id": "middle_game_p28_b0",
+    "book": "middle_game",
+    "page": 28,
+    "boardIndex": 0,
+    "left": 868,
+    "top": 2965,
+    "size": 986,
+    "dir": "tool/ebook_boards/middle_game/p28_b0"
+  },
+  {
+    "id": "middle_game_p34_b0",
+    "book": "middle_game",
+    "page": 34,
+    "boardIndex": 0,
+    "left": 955,
+    "top": 1087,
+    "size": 979,
+    "dir": "tool/ebook_boards/middle_game/p34_b0"
+  },
+  {
+    "id": "middle_game_p35_b0",
+    "book": "middle_game",
+    "page": 35,
+    "boardIndex": 0,
+    "left": 940,
+    "top": 2766,
+    "size": 972,
+    "dir": "tool/ebook_boards/middle_game/p35_b0"
+  },
+  {
+    "id": "middle_game_p38_b0",
+    "book": "middle_game",
+    "page": 38,
+    "boardIndex": 0,
+    "left": 942,
+    "top": 1257,
+    "size": 979,
+    "dir": "tool/ebook_boards/middle_game/p38_b0"
+  },
+  {
+    "id": "middle_game_p39_b0",
+    "book": "middle_game",
+    "page": 39,
+    "boardIndex": 0,
+    "left": 889,
+    "top": 2395,
+    "size": 980,
+    "dir": "tool/ebook_boards/middle_game/p39_b0"
+  },
+  {
+    "id": "middle_game_p41_b0",
+    "book": "middle_game",
+    "page": 41,
+    "boardIndex": 0,
+    "left": 934,
+    "top": 1348,
+    "size": 981,
+    "dir": "tool/ebook_boards/middle_game/p41_b0"
+  },
+  {
+    "id": "middle_game_p43_b0",
+    "book": "middle_game",
+    "page": 43,
+    "boardIndex": 0,
+    "left": 941,
+    "top": 557,
+    "size": 983,
+    "dir": "tool/ebook_boards/middle_game/p43_b0"
+  },
+  {
+    "id": "middle_game_p44_b0",
+    "book": "middle_game",
+    "page": 44,
+    "boardIndex": 0,
+    "left": 906,
+    "top": 548,
+    "size": 982,
+    "dir": "tool/ebook_boards/middle_game/p44_b0"
+  },
+  {
+    "id": "middle_game_p46_b0",
+    "book": "middle_game",
+    "page": 46,
+    "boardIndex": 0,
+    "left": 917,
+    "top": 1137,
+    "size": 969,
+    "dir": "tool/ebook_boards/middle_game/p46_b0"
+  },
+  {
+    "id": "middle_game_p47_b0",
+    "book": "middle_game",
+    "page": 47,
+    "boardIndex": 0,
+    "left": 855,
+    "top": 2956,
+    "size": 983,
+    "dir": "tool/ebook_boards/middle_game/p47_b0"
+  },
+  {
+    "id": "middle_game_p49_b0",
+    "book": "middle_game",
+    "page": 49,
+    "boardIndex": 0,
+    "left": 868,
+    "top": 550,
+    "size": 980,
+    "dir": "tool/ebook_boards/middle_game/p49_b0"
+  },
+  {
+    "id": "middle_game_p51_b0",
+    "book": "middle_game",
+    "page": 51,
+    "boardIndex": 0,
+    "left": 929,
+    "top": 574,
+    "size": 982,
+    "dir": "tool/ebook_boards/middle_game/p51_b0"
+  },
+  {
+    "id": "middle_game_p54_b0",
+    "book": "middle_game",
+    "page": 54,
+    "boardIndex": 0,
+    "left": 1022,
+    "top": 587,
+    "size": 965,
+    "dir": "tool/ebook_boards/middle_game/p54_b0"
+  },
+  {
+    "id": "middle_game_p55_b0",
+    "book": "middle_game",
+    "page": 55,
+    "boardIndex": 0,
+    "left": 890,
+    "top": 2998,
+    "size": 979,
+    "dir": "tool/ebook_boards/middle_game/p55_b0"
+  },
+  {
+    "id": "middle_game_p56_b0",
+    "book": "middle_game",
+    "page": 56,
+    "boardIndex": 0,
+    "left": 950,
+    "top": 2976,
+    "size": 980,
+    "dir": "tool/ebook_boards/middle_game/p56_b0"
+  },
+  {
+    "id": "middle_game_p58_b0",
+    "book": "middle_game",
+    "page": 58,
+    "boardIndex": 0,
+    "left": 948,
+    "top": 1058,
+    "size": 981,
+    "dir": "tool/ebook_boards/middle_game/p58_b0"
+  },
+  {
+    "id": "middle_game_p60_b0",
+    "book": "middle_game",
+    "page": 60,
+    "boardIndex": 0,
+    "left": 962,
+    "top": 2209,
+    "size": 985,
+    "dir": "tool/ebook_boards/middle_game/p60_b0"
+  },
+  {
+    "id": "middle_game_p61_b0",
+    "book": "middle_game",
+    "page": 61,
+    "boardIndex": 0,
+    "left": 909,
+    "top": 2798,
+    "size": 989,
+    "dir": "tool/ebook_boards/middle_game/p61_b0"
+  },
+  {
+    "id": "middle_game_p63_b0",
+    "book": "middle_game",
+    "page": 63,
+    "boardIndex": 0,
+    "left": 936,
+    "top": 1904,
+    "size": 984,
+    "dir": "tool/ebook_boards/middle_game/p63_b0"
+  },
+  {
+    "id": "middle_game_p64_b0",
+    "book": "middle_game",
+    "page": 64,
+    "boardIndex": 0,
+    "left": 966,
+    "top": 2954,
+    "size": 979,
+    "dir": "tool/ebook_boards/middle_game/p64_b0"
+  },
+  {
+    "id": "middle_game_p66_b0",
+    "book": "middle_game",
+    "page": 66,
+    "boardIndex": 0,
+    "left": 960,
+    "top": 2651,
+    "size": 984,
+    "dir": "tool/ebook_boards/middle_game/p66_b0"
+  },
+  {
+    "id": "middle_game_p68_b0",
+    "book": "middle_game",
+    "page": 68,
+    "boardIndex": 0,
+    "left": 961,
+    "top": 2274,
+    "size": 985,
+    "dir": "tool/ebook_boards/middle_game/p68_b0"
+  },
+  {
+    "id": "middle_game_p69_b0",
+    "book": "middle_game",
+    "page": 69,
+    "boardIndex": 0,
+    "left": 962,
+    "top": 2508,
+    "size": 982,
+    "dir": "tool/ebook_boards/middle_game/p69_b0"
+  },
+  {
+    "id": "middle_game_p70_b0",
+    "book": "middle_game",
+    "page": 70,
+    "boardIndex": 0,
+    "left": 1046,
+    "top": 2983,
+    "size": 968,
+    "dir": "tool/ebook_boards/middle_game/p70_b0"
+  },
+  {
+    "id": "middle_game_p72_b0",
+    "book": "middle_game",
+    "page": 72,
+    "boardIndex": 0,
+    "left": 1017,
+    "top": 1358,
+    "size": 985,
+    "dir": "tool/ebook_boards/middle_game/p72_b0"
+  },
+  {
+    "id": "middle_game_p73_b0",
+    "book": "middle_game",
+    "page": 73,
+    "boardIndex": 0,
+    "left": 932,
+    "top": 2772,
+    "size": 980,
+    "dir": "tool/ebook_boards/middle_game/p73_b0"
+  },
+  {
+    "id": "middle_game_p75_b0",
+    "book": "middle_game",
+    "page": 75,
+    "boardIndex": 0,
+    "left": 916,
+    "top": 1044,
+    "size": 980,
+    "dir": "tool/ebook_boards/middle_game/p75_b0"
+  },
+  {
+    "id": "middle_game_p76_b0",
+    "book": "middle_game",
+    "page": 76,
+    "boardIndex": 0,
+    "left": 1029,
+    "top": 2969,
+    "size": 982,
+    "dir": "tool/ebook_boards/middle_game/p76_b0"
+  },
+  {
+    "id": "middle_game_p78_b0",
+    "book": "middle_game",
+    "page": 78,
+    "boardIndex": 0,
+    "left": 988,
+    "top": 2094,
+    "size": 971,
+    "dir": "tool/ebook_boards/middle_game/p78_b0"
+  },
+  {
+    "id": "middle_game_p82_b0",
+    "book": "middle_game",
+    "page": 82,
+    "boardIndex": 0,
+    "left": 981,
+    "top": 537,
+    "size": 988,
+    "dir": "tool/ebook_boards/middle_game/p82_b0"
+  },
+  {
+    "id": "middle_game_p85_b0",
+    "book": "middle_game",
+    "page": 85,
+    "boardIndex": 0,
+    "left": 949,
+    "top": 555,
+    "size": 971,
+    "dir": "tool/ebook_boards/middle_game/p85_b0"
+  },
+  {
+    "id": "middle_game_p86_b0",
+    "book": "middle_game",
+    "page": 86,
+    "boardIndex": 0,
+    "left": 917,
+    "top": 935,
+    "size": 987,
+    "dir": "tool/ebook_boards/middle_game/p86_b0"
+  },
+  {
+    "id": "middle_game_p88_b0",
+    "book": "middle_game",
+    "page": 88,
+    "boardIndex": 0,
+    "left": 909,
+    "top": 2389,
+    "size": 987,
+    "dir": "tool/ebook_boards/middle_game/p88_b0"
+  },
+  {
+    "id": "middle_game_p92_b0",
+    "book": "middle_game",
+    "page": 92,
+    "boardIndex": 0,
+    "left": 933,
+    "top": 1318,
+    "size": 985,
+    "dir": "tool/ebook_boards/middle_game/p92_b0"
+  },
+  {
+    "id": "middle_game_p94_b0",
+    "book": "middle_game",
+    "page": 94,
+    "boardIndex": 0,
+    "left": 889,
+    "top": 549,
+    "size": 987,
+    "dir": "tool/ebook_boards/middle_game/p94_b0"
+  },
+  {
+    "id": "middle_game_p98_b0",
+    "book": "middle_game",
+    "page": 98,
+    "boardIndex": 0,
+    "left": 945,
+    "top": 568,
+    "size": 928,
+    "dir": "tool/ebook_boards/middle_game/p98_b0"
+  },
+  {
+    "id": "middle_game_p100_b0",
+    "book": "middle_game",
+    "page": 100,
+    "boardIndex": 0,
+    "left": 906,
+    "top": 1918,
+    "size": 967,
+    "dir": "tool/ebook_boards/middle_game/p100_b0"
+  },
+  {
+    "id": "middle_game_p103_b0",
+    "book": "middle_game",
+    "page": 103,
+    "boardIndex": 0,
+    "left": 913,
+    "top": 851,
+    "size": 976,
+    "dir": "tool/ebook_boards/middle_game/p103_b0"
+  },
+  {
+    "id": "middle_game_p104_b0",
+    "book": "middle_game",
+    "page": 104,
+    "boardIndex": 0,
+    "left": 921,
+    "top": 1442,
+    "size": 985,
+    "dir": "tool/ebook_boards/middle_game/p104_b0"
+  },
+  {
+    "id": "middle_game_p108_b0",
+    "book": "middle_game",
+    "page": 108,
+    "boardIndex": 0,
+    "left": 950,
+    "top": 2657,
+    "size": 968,
+    "dir": "tool/ebook_boards/middle_game/p108_b0"
+  },
+  {
+    "id": "middle_game_p113_b0",
+    "book": "middle_game",
+    "page": 113,
+    "boardIndex": 0,
+    "left": 894,
+    "top": 1835,
+    "size": 982,
+    "dir": "tool/ebook_boards/middle_game/p113_b0"
+  },
+  {
+    "id": "middle_game_p117_b0",
+    "book": "middle_game",
+    "page": 117,
+    "boardIndex": 0,
+    "left": 886,
+    "top": 1969,
+    "size": 967,
+    "dir": "tool/ebook_boards/middle_game/p117_b0"
+  },
+  {
+    "id": "middle_game_p121_b0",
+    "book": "middle_game",
+    "page": 121,
+    "boardIndex": 0,
+    "left": 861,
+    "top": 557,
+    "size": 980,
+    "dir": "tool/ebook_boards/middle_game/p121_b0"
+  },
+  {
+    "id": "middle_game_p127_b0",
+    "book": "middle_game",
+    "page": 127,
+    "boardIndex": 0,
+    "left": 919,
+    "top": 2957,
+    "size": 980,
+    "dir": "tool/ebook_boards/middle_game/p127_b0"
+  },
+  {
+    "id": "middle_game_p129_b0",
+    "book": "middle_game",
+    "page": 129,
+    "boardIndex": 0,
+    "left": 839,
+    "top": 2976,
+    "size": 986,
+    "dir": "tool/ebook_boards/middle_game/p129_b0"
+  },
+  {
+    "id": "middle_game_p131_b0",
+    "book": "middle_game",
+    "page": 131,
+    "boardIndex": 0,
+    "left": 894,
+    "top": 2528,
+    "size": 974,
+    "dir": "tool/ebook_boards/middle_game/p131_b0"
+  },
+  {
+    "id": "middle_game_p132_b0",
+    "book": "middle_game",
+    "page": 132,
+    "boardIndex": 0,
+    "left": 893,
+    "top": 1869,
+    "size": 988,
+    "dir": "tool/ebook_boards/middle_game/p132_b0"
+  },
+  {
+    "id": "middle_game_p134_b0",
+    "book": "middle_game",
+    "page": 134,
+    "boardIndex": 0,
+    "left": 932,
+    "top": 533,
+    "size": 976,
+    "dir": "tool/ebook_boards/middle_game/p134_b0"
+  },
+  {
+    "id": "middle_game_p137_b0",
+    "book": "middle_game",
+    "page": 137,
+    "boardIndex": 0,
+    "left": 874,
+    "top": 520,
+    "size": 986,
+    "dir": "tool/ebook_boards/middle_game/p137_b0"
+  },
+  {
+    "id": "middle_game_p138_b0",
+    "book": "middle_game",
+    "page": 138,
+    "boardIndex": 0,
+    "left": 867,
+    "top": 1512,
+    "size": 986,
+    "dir": "tool/ebook_boards/middle_game/p138_b0"
+  },
+  {
+    "id": "middle_game_p138_b1",
+    "book": "middle_game",
+    "page": 138,
+    "boardIndex": 1,
+    "left": 867,
+    "top": 3005,
+    "size": 975,
+    "dir": "tool/ebook_boards/middle_game/p138_b1"
+  },
+  {
+    "id": "middle_game_p140_b0",
+    "book": "middle_game",
+    "page": 140,
+    "boardIndex": 0,
+    "left": 819,
+    "top": 1107,
+    "size": 985,
+    "dir": "tool/ebook_boards/middle_game/p140_b0"
+  },
+  {
+    "id": "middle_game_p142_b0",
+    "book": "middle_game",
+    "page": 142,
+    "boardIndex": 0,
+    "left": 849,
+    "top": 1511,
+    "size": 972,
+    "dir": "tool/ebook_boards/middle_game/p142_b0"
+  },
+  {
+    "id": "middle_game_p144_b0",
+    "book": "middle_game",
+    "page": 144,
+    "boardIndex": 0,
+    "left": 861,
+    "top": 542,
+    "size": 981,
+    "dir": "tool/ebook_boards/middle_game/p144_b0"
+  },
+  {
+    "id": "middle_game_p145_b0",
+    "book": "middle_game",
+    "page": 145,
+    "boardIndex": 0,
+    "left": 917,
+    "top": 2965,
+    "size": 982,
+    "dir": "tool/ebook_boards/middle_game/p145_b0"
+  },
+  {
+    "id": "middle_game_p147_b0",
+    "book": "middle_game",
+    "page": 147,
+    "boardIndex": 0,
+    "left": 941,
+    "top": 2092,
+    "size": 985,
+    "dir": "tool/ebook_boards/middle_game/p147_b0"
+  },
+  {
+    "id": "middle_game_p148_b0",
+    "book": "middle_game",
+    "page": 148,
+    "boardIndex": 0,
+    "left": 940,
+    "top": 1341,
+    "size": 984,
+    "dir": "tool/ebook_boards/middle_game/p148_b0"
+  },
+  {
+    "id": "middle_game_p150_b0",
+    "book": "middle_game",
+    "page": 150,
+    "boardIndex": 0,
+    "left": 953,
+    "top": 2983,
+    "size": 982,
+    "dir": "tool/ebook_boards/middle_game/p150_b0"
+  },
+  {
+    "id": "middle_game_p153_b0",
+    "book": "middle_game",
+    "page": 153,
+    "boardIndex": 0,
+    "left": 945,
+    "top": 1464,
+    "size": 986,
+    "dir": "tool/ebook_boards/middle_game/p153_b0"
+  },
+  {
+    "id": "middle_game_p155_b0",
+    "book": "middle_game",
+    "page": 155,
+    "boardIndex": 0,
+    "left": 948,
+    "top": 2400,
+    "size": 988,
+    "dir": "tool/ebook_boards/middle_game/p155_b0"
+  },
+  {
+    "id": "middle_game_p157_b0",
+    "book": "middle_game",
+    "page": 157,
+    "boardIndex": 0,
+    "left": 942,
+    "top": 928,
+    "size": 984,
+    "dir": "tool/ebook_boards/middle_game/p157_b0"
+  },
+  {
+    "id": "middle_game_p158_b0",
+    "book": "middle_game",
+    "page": 158,
+    "boardIndex": 0,
+    "left": 960,
+    "top": 1234,
+    "size": 980,
+    "dir": "tool/ebook_boards/middle_game/p158_b0"
+  },
+  {
+    "id": "middle_game_p160_b0",
+    "book": "middle_game",
+    "page": 160,
+    "boardIndex": 0,
+    "left": 878,
+    "top": 545,
+    "size": 988,
+    "dir": "tool/ebook_boards/middle_game/p160_b0"
+  },
+  {
+    "id": "middle_game_p161_b0",
+    "book": "middle_game",
+    "page": 161,
+    "boardIndex": 0,
+    "left": 873,
+    "top": 2987,
+    "size": 984,
+    "dir": "tool/ebook_boards/middle_game/p161_b0"
+  },
+  {
+    "id": "middle_game_p163_b0",
+    "book": "middle_game",
+    "page": 163,
+    "boardIndex": 0,
+    "left": 912,
+    "top": 1150,
+    "size": 982,
+    "dir": "tool/ebook_boards/middle_game/p163_b0"
+  },
+  {
+    "id": "middle_game_p165_b0",
+    "book": "middle_game",
+    "page": 165,
+    "boardIndex": 0,
+    "left": 887,
+    "top": 884,
+    "size": 982,
+    "dir": "tool/ebook_boards/middle_game/p165_b0"
+  },
+  {
+    "id": "middle_game_p166_b0",
+    "book": "middle_game",
+    "page": 166,
+    "boardIndex": 0,
+    "left": 959,
+    "top": 2985,
+    "size": 980,
+    "dir": "tool/ebook_boards/middle_game/p166_b0"
+  },
+  {
+    "id": "middle_game_p169_b0",
+    "book": "middle_game",
+    "page": 169,
+    "boardIndex": 0,
+    "left": 895,
+    "top": 2983,
+    "size": 980,
+    "dir": "tool/ebook_boards/middle_game/p169_b0"
+  },
+  {
+    "id": "middle_game_p174_b0",
+    "book": "middle_game",
+    "page": 174,
+    "boardIndex": 0,
+    "left": 936,
+    "top": 1195,
+    "size": 980,
+    "dir": "tool/ebook_boards/middle_game/p174_b0"
+  },
+  {
+    "id": "middle_game_p176_b0",
+    "book": "middle_game",
+    "page": 176,
+    "boardIndex": 0,
+    "left": 918,
+    "top": 2201,
+    "size": 985,
+    "dir": "tool/ebook_boards/middle_game/p176_b0"
+  },
+  {
+    "id": "middle_game_p179_b0",
+    "book": "middle_game",
+    "page": 179,
+    "boardIndex": 0,
+    "left": 933,
+    "top": 534,
+    "size": 981,
+    "dir": "tool/ebook_boards/middle_game/p179_b0"
+  },
+  {
+    "id": "middle_game_p182_b0",
+    "book": "middle_game",
+    "page": 182,
+    "boardIndex": 0,
+    "left": 894,
+    "top": 563,
+    "size": 981,
+    "dir": "tool/ebook_boards/middle_game/p182_b0"
+  },
+  {
+    "id": "middle_game_p184_b0",
+    "book": "middle_game",
+    "page": 184,
+    "boardIndex": 0,
+    "left": 925,
+    "top": 1846,
+    "size": 985,
+    "dir": "tool/ebook_boards/middle_game/p184_b0"
+  },
+  {
+    "id": "middle_game_p188_b0",
+    "book": "middle_game",
+    "page": 188,
+    "boardIndex": 0,
+    "left": 962,
+    "top": 2268,
+    "size": 983,
+    "dir": "tool/ebook_boards/middle_game/p188_b0"
+  },
+  {
+    "id": "middle_game_p192_b0",
+    "book": "middle_game",
+    "page": 192,
+    "boardIndex": 0,
+    "left": 958,
+    "top": 2985,
+    "size": 979,
+    "dir": "tool/ebook_boards/middle_game/p192_b0"
+  },
+  {
+    "id": "middle_game_p195_b0",
+    "book": "middle_game",
+    "page": 195,
+    "boardIndex": 0,
+    "left": 883,
+    "top": 968,
+    "size": 978,
+    "dir": "tool/ebook_boards/middle_game/p195_b0"
+  },
+  {
+    "id": "middle_game_p197_b0",
+    "book": "middle_game",
+    "page": 197,
+    "boardIndex": 0,
+    "left": 923,
+    "top": 2530,
+    "size": 981,
+    "dir": "tool/ebook_boards/middle_game/p197_b0"
+  },
+  {
+    "id": "middle_game_p202_b0",
+    "book": "middle_game",
+    "page": 202,
+    "boardIndex": 0,
+    "left": 956,
+    "top": 1689,
+    "size": 976,
+    "dir": "tool/ebook_boards/middle_game/p202_b0"
+  },
+  {
+    "id": "middle_game_p206_b0",
+    "book": "middle_game",
+    "page": 206,
+    "boardIndex": 0,
+    "left": 1034,
+    "top": 546,
+    "size": 980,
+    "dir": "tool/ebook_boards/middle_game/p206_b0"
+  },
+  {
+    "id": "middle_game_p208_b0",
+    "book": "middle_game",
+    "page": 208,
+    "boardIndex": 0,
+    "left": 1062,
+    "top": 2749,
+    "size": 972,
+    "dir": "tool/ebook_boards/middle_game/p208_b0"
+  },
+  {
+    "id": "middle_game_p212_b0",
+    "book": "middle_game",
+    "page": 212,
+    "boardIndex": 0,
+    "left": 1033,
+    "top": 1814,
+    "size": 985,
+    "dir": "tool/ebook_boards/middle_game/p212_b0"
+  },
+  {
+    "id": "middle_game_p216_b0",
+    "book": "middle_game",
+    "page": 216,
+    "boardIndex": 0,
+    "left": 1021,
+    "top": 2757,
+    "size": 979,
+    "dir": "tool/ebook_boards/middle_game/p216_b0"
+  },
+  {
+    "id": "middle_game_p218_b0",
+    "book": "middle_game",
+    "page": 218,
+    "boardIndex": 0,
+    "left": 1000,
+    "top": 2305,
+    "size": 972,
+    "dir": "tool/ebook_boards/middle_game/p218_b0"
+  },
+  {
+    "id": "middle_game_p220_b0",
+    "book": "middle_game",
+    "page": 220,
+    "boardIndex": 0,
+    "left": 971,
+    "top": 2582,
+    "size": 980,
+    "dir": "tool/ebook_boards/middle_game/p220_b0"
+  },
+  {
+    "id": "middle_game_p223_b0",
+    "book": "middle_game",
+    "page": 223,
+    "boardIndex": 0,
+    "left": 1001,
+    "top": 600,
+    "size": 978,
+    "dir": "tool/ebook_boards/middle_game/p223_b0"
+  },
+  {
+    "id": "middle_game_p225_b0",
+    "book": "middle_game",
+    "page": 225,
+    "boardIndex": 0,
+    "left": 956,
+    "top": 2998,
+    "size": 977,
+    "dir": "tool/ebook_boards/middle_game/p225_b0"
+  },
+  {
+    "id": "middle_game_p232_b0",
+    "book": "middle_game",
+    "page": 232,
+    "boardIndex": 0,
+    "left": 1113,
+    "top": 2707,
+    "size": 980,
+    "dir": "tool/ebook_boards/middle_game/p232_b0"
+  },
+  {
+    "id": "march_ideas_p1_b0",
+    "book": "march_ideas",
+    "page": 1,
+    "boardIndex": 0,
+    "left": 269,
+    "top": 609,
+    "size": 632,
+    "dir": "tool/ebook_boards/march_ideas/p1_b0"
+  },
+  {
+    "id": "march_ideas_p22_b0",
+    "book": "march_ideas",
+    "page": 22,
+    "boardIndex": 0,
+    "left": 242,
+    "top": 294,
+    "size": 352,
+    "dir": "tool/ebook_boards/march_ideas/p22_b0"
+  },
+  {
+    "id": "march_ideas_p35_b0",
+    "book": "march_ideas",
+    "page": 35,
+    "boardIndex": 0,
+    "left": 240,
+    "top": 161,
+    "size": 353,
+    "dir": "tool/ebook_boards/march_ideas/p35_b0"
+  },
+  {
+    "id": "march_ideas_p40_b0",
+    "book": "march_ideas",
+    "page": 40,
+    "boardIndex": 0,
+    "left": 240,
+    "top": 164,
+    "size": 352,
+    "dir": "tool/ebook_boards/march_ideas/p40_b0"
+  },
+  {
+    "id": "march_ideas_p43_b0",
+    "book": "march_ideas",
+    "page": 43,
+    "boardIndex": 0,
+    "left": 242,
+    "top": 896,
+    "size": 353,
+    "dir": "tool/ebook_boards/march_ideas/p43_b0"
+  },
+  {
+    "id": "march_ideas_p48_b0",
+    "book": "march_ideas",
+    "page": 48,
+    "boardIndex": 0,
+    "left": 241,
+    "top": 163,
+    "size": 353,
+    "dir": "tool/ebook_boards/march_ideas/p48_b0"
+  },
+  {
+    "id": "march_ideas_p51_b0",
+    "book": "march_ideas",
+    "page": 51,
+    "boardIndex": 0,
+    "left": 242,
+    "top": 747,
+    "size": 353,
+    "dir": "tool/ebook_boards/march_ideas/p51_b0"
+  },
+  {
+    "id": "march_ideas_p57_b0",
+    "book": "march_ideas",
+    "page": 57,
+    "boardIndex": 0,
+    "left": 240,
+    "top": 161,
+    "size": 354,
+    "dir": "tool/ebook_boards/march_ideas/p57_b0"
+  },
+  {
+    "id": "march_ideas_p63_b0",
+    "book": "march_ideas",
+    "page": 63,
+    "boardIndex": 0,
+    "left": 243,
+    "top": 972,
+    "size": 353,
+    "dir": "tool/ebook_boards/march_ideas/p63_b0"
+  },
+  {
+    "id": "march_ideas_p67_b0",
+    "book": "march_ideas",
+    "page": 67,
+    "boardIndex": 0,
+    "left": 240,
+    "top": 161,
+    "size": 355,
+    "dir": "tool/ebook_boards/march_ideas/p67_b0"
+  },
+  {
+    "id": "march_ideas_p70_b0",
+    "book": "march_ideas",
+    "page": 70,
+    "boardIndex": 0,
+    "left": 242,
+    "top": 408,
+    "size": 351,
+    "dir": "tool/ebook_boards/march_ideas/p70_b0"
+  },
+  {
+    "id": "march_ideas_p72_b0",
+    "book": "march_ideas",
+    "page": 72,
+    "boardIndex": 0,
+    "left": 242,
+    "top": 167,
+    "size": 351,
+    "dir": "tool/ebook_boards/march_ideas/p72_b0"
+  },
+  {
+    "id": "march_ideas_p74_b0",
+    "book": "march_ideas",
+    "page": 74,
+    "boardIndex": 0,
+    "left": 242,
+    "top": 642,
+    "size": 352,
+    "dir": "tool/ebook_boards/march_ideas/p74_b0"
+  },
+  {
+    "id": "march_ideas_p76_b0",
+    "book": "march_ideas",
+    "page": 76,
+    "boardIndex": 0,
+    "left": 241,
+    "top": 257,
+    "size": 352,
+    "dir": "tool/ebook_boards/march_ideas/p76_b0"
+  },
+  {
+    "id": "march_ideas_p83_b0",
+    "book": "march_ideas",
+    "page": 83,
+    "boardIndex": 0,
+    "left": 241,
+    "top": 162,
+    "size": 354,
+    "dir": "tool/ebook_boards/march_ideas/p83_b0"
+  },
+  {
+    "id": "march_ideas_p87_b0",
+    "book": "march_ideas",
+    "page": 87,
+    "boardIndex": 0,
+    "left": 240,
+    "top": 464,
+    "size": 353,
+    "dir": "tool/ebook_boards/march_ideas/p87_b0"
+  },
+  {
+    "id": "march_ideas_p89_b0",
+    "book": "march_ideas",
+    "page": 89,
+    "boardIndex": 0,
+    "left": 241,
+    "top": 162,
+    "size": 353,
+    "dir": "tool/ebook_boards/march_ideas/p89_b0"
+  },
+  {
+    "id": "march_ideas_p91_b0",
+    "book": "march_ideas",
+    "page": 91,
+    "boardIndex": 0,
+    "left": 242,
+    "top": 255,
+    "size": 354,
+    "dir": "tool/ebook_boards/march_ideas/p91_b0"
+  },
+  {
+    "id": "march_ideas_p93_b0",
+    "book": "march_ideas",
+    "page": 93,
+    "boardIndex": 0,
+    "left": 241,
+    "top": 162,
+    "size": 354,
+    "dir": "tool/ebook_boards/march_ideas/p93_b0"
+  },
+  {
+    "id": "march_ideas_p94_b0",
+    "book": "march_ideas",
+    "page": 94,
+    "boardIndex": 0,
+    "left": 241,
+    "top": 443,
+    "size": 352,
+    "dir": "tool/ebook_boards/march_ideas/p94_b0"
+  },
+  {
+    "id": "march_ideas_p98_b0",
+    "book": "march_ideas",
+    "page": 98,
+    "boardIndex": 0,
+    "left": 241,
+    "top": 983,
+    "size": 354,
+    "dir": "tool/ebook_boards/march_ideas/p98_b0"
+  },
+  {
+    "id": "march_ideas_p101_b0",
+    "book": "march_ideas",
+    "page": 101,
+    "boardIndex": 0,
+    "left": 243,
+    "top": 984,
+    "size": 354,
+    "dir": "tool/ebook_boards/march_ideas/p101_b0"
+  },
+  {
+    "id": "march_ideas_p105_b0",
+    "book": "march_ideas",
+    "page": 105,
+    "boardIndex": 0,
+    "left": 240,
+    "top": 162,
+    "size": 354,
+    "dir": "tool/ebook_boards/march_ideas/p105_b0"
+  },
+  {
+    "id": "march_ideas_p108_b0",
+    "book": "march_ideas",
+    "page": 108,
+    "boardIndex": 0,
+    "left": 241,
+    "top": 79,
+    "size": 354,
+    "dir": "tool/ebook_boards/march_ideas/p108_b0"
+  },
+  {
+    "id": "march_ideas_p113_b0",
+    "book": "march_ideas",
+    "page": 113,
+    "boardIndex": 0,
+    "left": 240,
+    "top": 162,
+    "size": 354,
+    "dir": "tool/ebook_boards/march_ideas/p113_b0"
+  },
+  {
+    "id": "march_ideas_p114_b0",
+    "book": "march_ideas",
+    "page": 114,
+    "boardIndex": 0,
+    "left": 243,
+    "top": 593,
+    "size": 353,
+    "dir": "tool/ebook_boards/march_ideas/p114_b0"
+  },
+  {
+    "id": "march_ideas_p116_b0",
+    "book": "march_ideas",
+    "page": 116,
+    "boardIndex": 0,
+    "left": 242,
+    "top": 164,
+    "size": 352,
+    "dir": "tool/ebook_boards/march_ideas/p116_b0"
+  },
+  {
+    "id": "march_ideas_p118_b0",
+    "book": "march_ideas",
+    "page": 118,
+    "boardIndex": 0,
+    "left": 242,
+    "top": 891,
+    "size": 352,
+    "dir": "tool/ebook_boards/march_ideas/p118_b0"
+  },
+  {
+    "id": "march_ideas_p121_b0",
+    "book": "march_ideas",
+    "page": 121,
+    "boardIndex": 0,
+    "left": 242,
+    "top": 619,
+    "size": 353,
+    "dir": "tool/ebook_boards/march_ideas/p121_b0"
+  },
+  {
+    "id": "march_ideas_p123_b0",
+    "book": "march_ideas",
+    "page": 123,
+    "boardIndex": 0,
+    "left": 241,
+    "top": 258,
+    "size": 353,
+    "dir": "tool/ebook_boards/march_ideas/p123_b0"
+  },
+  {
+    "id": "march_ideas_p124_b0",
+    "book": "march_ideas",
+    "page": 124,
+    "boardIndex": 0,
+    "left": 241,
+    "top": 163,
+    "size": 353,
+    "dir": "tool/ebook_boards/march_ideas/p124_b0"
+  },
+  {
+    "id": "march_ideas_p127_b0",
+    "book": "march_ideas",
+    "page": 127,
+    "boardIndex": 0,
+    "left": 241,
+    "top": 161,
+    "size": 353,
+    "dir": "tool/ebook_boards/march_ideas/p127_b0"
+  },
+  {
+    "id": "march_ideas_p129_b0",
+    "book": "march_ideas",
+    "page": 129,
+    "boardIndex": 0,
+    "left": 242,
+    "top": 259,
+    "size": 353,
+    "dir": "tool/ebook_boards/march_ideas/p129_b0"
+  },
+  {
+    "id": "march_ideas_p132_b0",
+    "book": "march_ideas",
+    "page": 132,
+    "boardIndex": 0,
+    "left": 241,
+    "top": 164,
+    "size": 353,
+    "dir": "tool/ebook_boards/march_ideas/p132_b0"
+  },
+  {
+    "id": "march_ideas_p135_b0",
+    "book": "march_ideas",
+    "page": 135,
+    "boardIndex": 0,
+    "left": 242,
+    "top": 661,
+    "size": 353,
+    "dir": "tool/ebook_boards/march_ideas/p135_b0"
+  },
+  {
+    "id": "march_ideas_p136_b0",
+    "book": "march_ideas",
+    "page": 136,
+    "boardIndex": 0,
+    "left": 244,
+    "top": 948,
+    "size": 353,
+    "dir": "tool/ebook_boards/march_ideas/p136_b0"
+  },
+  {
+    "id": "march_ideas_p143_b0",
+    "book": "march_ideas",
+    "page": 143,
+    "boardIndex": 0,
+    "left": 240,
+    "top": 162,
+    "size": 354,
+    "dir": "tool/ebook_boards/march_ideas/p143_b0"
+  },
+  {
+    "id": "march_ideas_p148_b0",
+    "book": "march_ideas",
+    "page": 148,
+    "boardIndex": 0,
+    "left": 237,
+    "top": 166,
+    "size": 358,
+    "dir": "tool/ebook_boards/march_ideas/p148_b0"
+  },
+  {
+    "id": "march_ideas_p150_b0",
+    "book": "march_ideas",
+    "page": 150,
+    "boardIndex": 0,
+    "left": 240,
+    "top": 392,
+    "size": 354,
+    "dir": "tool/ebook_boards/march_ideas/p150_b0"
+  },
+  {
+    "id": "march_ideas_p154_b0",
+    "book": "march_ideas",
+    "page": 154,
+    "boardIndex": 0,
+    "left": 238,
+    "top": 140,
+    "size": 353,
+    "dir": "tool/ebook_boards/march_ideas/p154_b0"
+  },
+  {
+    "id": "march_ideas_p157_b0",
+    "book": "march_ideas",
+    "page": 157,
+    "boardIndex": 0,
+    "left": 240,
+    "top": 162,
+    "size": 354,
+    "dir": "tool/ebook_boards/march_ideas/p157_b0"
+  },
+  {
+    "id": "march_ideas_p161_b0",
+    "book": "march_ideas",
+    "page": 161,
+    "boardIndex": 0,
+    "left": 241,
+    "top": 162,
+    "size": 354,
+    "dir": "tool/ebook_boards/march_ideas/p161_b0"
+  },
+  {
+    "id": "march_ideas_p164_b0",
+    "book": "march_ideas",
+    "page": 164,
+    "boardIndex": 0,
+    "left": 239,
+    "top": 80,
+    "size": 353,
+    "dir": "tool/ebook_boards/march_ideas/p164_b0"
+  },
+  {
+    "id": "march_ideas_p174_b0",
+    "book": "march_ideas",
+    "page": 174,
+    "boardIndex": 0,
+    "left": 241,
+    "top": 163,
+    "size": 353,
+    "dir": "tool/ebook_boards/march_ideas/p174_b0"
+  },
+  {
+    "id": "march_ideas_p178_b0",
+    "book": "march_ideas",
+    "page": 178,
+    "boardIndex": 0,
+    "left": 242,
+    "top": 761,
+    "size": 354,
+    "dir": "tool/ebook_boards/march_ideas/p178_b0"
+  },
+  {
+    "id": "march_ideas_p182_b0",
+    "book": "march_ideas",
+    "page": 182,
+    "boardIndex": 0,
+    "left": 241,
+    "top": 164,
+    "size": 352,
+    "dir": "tool/ebook_boards/march_ideas/p182_b0"
+  },
+  {
+    "id": "march_ideas_p184_b0",
+    "book": "march_ideas",
+    "page": 184,
+    "boardIndex": 0,
+    "left": 240,
+    "top": 162,
+    "size": 354,
+    "dir": "tool/ebook_boards/march_ideas/p184_b0"
+  },
+  {
+    "id": "march_ideas_p189_b0",
+    "book": "march_ideas",
+    "page": 189,
+    "boardIndex": 0,
+    "left": 241,
+    "top": 161,
+    "size": 354,
+    "dir": "tool/ebook_boards/march_ideas/p189_b0"
+  },
+  {
+    "id": "march_ideas_p193_b0",
+    "book": "march_ideas",
+    "page": 193,
+    "boardIndex": 0,
+    "left": 240,
+    "top": 162,
+    "size": 354,
+    "dir": "tool/ebook_boards/march_ideas/p193_b0"
+  },
+  {
+    "id": "march_ideas_p194_b0",
+    "book": "march_ideas",
+    "page": 194,
+    "boardIndex": 0,
+    "left": 241,
+    "top": 305,
+    "size": 352,
+    "dir": "tool/ebook_boards/march_ideas/p194_b0"
+  },
+  {
+    "id": "march_ideas_p196_b0",
+    "book": "march_ideas",
+    "page": 196,
+    "boardIndex": 0,
+    "left": 242,
+    "top": 837,
+    "size": 353,
+    "dir": "tool/ebook_boards/march_ideas/p196_b0"
+  },
+  {
+    "id": "march_ideas_p199_b0",
+    "book": "march_ideas",
+    "page": 199,
+    "boardIndex": 0,
+    "left": 240,
+    "top": 162,
+    "size": 354,
+    "dir": "tool/ebook_boards/march_ideas/p199_b0"
+  },
+  {
+    "id": "march_ideas_p202_b0",
+    "book": "march_ideas",
+    "page": 202,
+    "boardIndex": 0,
+    "left": 240,
+    "top": 164,
+    "size": 353,
+    "dir": "tool/ebook_boards/march_ideas/p202_b0"
+  },
+  {
+    "id": "march_ideas_p204_b0",
+    "book": "march_ideas",
+    "page": 204,
+    "boardIndex": 0,
+    "left": 242,
+    "top": 895,
+    "size": 354,
+    "dir": "tool/ebook_boards/march_ideas/p204_b0"
+  },
+  {
+    "id": "march_ideas_p206_b0",
+    "book": "march_ideas",
+    "page": 206,
+    "boardIndex": 0,
+    "left": 240,
+    "top": 424,
+    "size": 354,
+    "dir": "tool/ebook_boards/march_ideas/p206_b0"
+  },
+  {
+    "id": "march_ideas_p210_b0",
+    "book": "march_ideas",
+    "page": 210,
+    "boardIndex": 0,
+    "left": 242,
+    "top": 406,
+    "size": 353,
+    "dir": "tool/ebook_boards/march_ideas/p210_b0"
+  },
+  {
+    "id": "march_ideas_p212_b0",
+    "book": "march_ideas",
+    "page": 212,
+    "boardIndex": 0,
+    "left": 240,
+    "top": 161,
+    "size": 355,
+    "dir": "tool/ebook_boards/march_ideas/p212_b0"
+  },
+  {
+    "id": "march_ideas_p214_b0",
+    "book": "march_ideas",
+    "page": 214,
+    "boardIndex": 0,
+    "left": 240,
+    "top": 163,
+    "size": 352,
+    "dir": "tool/ebook_boards/march_ideas/p214_b0"
+  },
+  {
+    "id": "march_ideas_p217_b0",
+    "book": "march_ideas",
+    "page": 217,
+    "boardIndex": 0,
+    "left": 240,
+    "top": 537,
+    "size": 352,
+    "dir": "tool/ebook_boards/march_ideas/p217_b0"
+  },
+  {
+    "id": "march_ideas_p220_b0",
+    "book": "march_ideas",
+    "page": 220,
+    "boardIndex": 0,
+    "left": 242,
+    "top": 635,
+    "size": 352,
+    "dir": "tool/ebook_boards/march_ideas/p220_b0"
+  },
+  {
+    "id": "march_ideas_p221_b0",
+    "book": "march_ideas",
+    "page": 221,
+    "boardIndex": 0,
+    "left": 241,
+    "top": 728,
+    "size": 353,
+    "dir": "tool/ebook_boards/march_ideas/p221_b0"
+  },
+  {
+    "id": "march_ideas_p226_b0",
+    "book": "march_ideas",
+    "page": 226,
+    "boardIndex": 0,
+    "left": 242,
+    "top": 734,
+    "size": 353,
+    "dir": "tool/ebook_boards/march_ideas/p226_b0"
+  },
+  {
+    "id": "march_ideas_p235_b0",
+    "book": "march_ideas",
+    "page": 235,
+    "boardIndex": 0,
+    "left": 241,
+    "top": 444,
+    "size": 353,
+    "dir": "tool/ebook_boards/march_ideas/p235_b0"
+  },
+  {
+    "id": "march_ideas_p240_b0",
+    "book": "march_ideas",
+    "page": 240,
+    "boardIndex": 0,
+    "left": 242,
+    "top": 667,
+    "size": 354,
+    "dir": "tool/ebook_boards/march_ideas/p240_b0"
+  },
+  {
+    "id": "march_ideas_p242_b0",
+    "book": "march_ideas",
+    "page": 242,
+    "boardIndex": 0,
+    "left": 242,
+    "top": 388,
+    "size": 352,
+    "dir": "tool/ebook_boards/march_ideas/p242_b0"
+  },
+  {
+    "id": "march_ideas_p247_b0",
+    "book": "march_ideas",
+    "page": 247,
+    "boardIndex": 0,
+    "left": 240,
+    "top": 320,
+    "size": 354,
+    "dir": "tool/ebook_boards/march_ideas/p247_b0"
+  },
+  {
+    "id": "march_ideas_p248_b0",
+    "book": "march_ideas",
+    "page": 248,
+    "boardIndex": 0,
+    "left": 242,
+    "top": 656,
+    "size": 353,
+    "dir": "tool/ebook_boards/march_ideas/p248_b0"
+  },
+  {
+    "id": "march_ideas_p249_b0",
+    "book": "march_ideas",
+    "page": 249,
+    "boardIndex": 0,
+    "left": 242,
+    "top": 624,
+    "size": 353,
+    "dir": "tool/ebook_boards/march_ideas/p249_b0"
+  },
+  {
+    "id": "march_ideas_p251_b0",
+    "book": "march_ideas",
+    "page": 251,
+    "boardIndex": 0,
+    "left": 242,
+    "top": 698,
+    "size": 353,
+    "dir": "tool/ebook_boards/march_ideas/p251_b0"
+  },
+  {
+    "id": "march_ideas_p253_b0",
+    "book": "march_ideas",
+    "page": 253,
+    "boardIndex": 0,
+    "left": 240,
+    "top": 162,
+    "size": 354,
+    "dir": "tool/ebook_boards/march_ideas/p253_b0"
+  },
+  {
+    "id": "march_ideas_p259_b0",
+    "book": "march_ideas",
+    "page": 259,
+    "boardIndex": 0,
+    "left": 241,
+    "top": 162,
+    "size": 353,
+    "dir": "tool/ebook_boards/march_ideas/p259_b0"
+  },
+  {
+    "id": "march_ideas_p266_b0",
+    "book": "march_ideas",
+    "page": 266,
+    "boardIndex": 0,
+    "left": 240,
+    "top": 162,
+    "size": 354,
+    "dir": "tool/ebook_boards/march_ideas/p266_b0"
+  },
+  {
+    "id": "march_ideas_p270_b0",
+    "book": "march_ideas",
+    "page": 270,
+    "boardIndex": 0,
+    "left": 240,
+    "top": 162,
+    "size": 354,
+    "dir": "tool/ebook_boards/march_ideas/p270_b0"
+  },
+  {
+    "id": "march_ideas_p272_b0",
+    "book": "march_ideas",
+    "page": 272,
+    "boardIndex": 0,
+    "left": 243,
+    "top": 911,
+    "size": 353,
+    "dir": "tool/ebook_boards/march_ideas/p272_b0"
+  },
+  {
+    "id": "march_ideas_p284_b0",
+    "book": "march_ideas",
+    "page": 284,
+    "boardIndex": 0,
+    "left": 241,
+    "top": 164,
+    "size": 353,
+    "dir": "tool/ebook_boards/march_ideas/p284_b0"
+  },
+  {
+    "id": "march_ideas_p285_b0",
+    "book": "march_ideas",
+    "page": 285,
+    "boardIndex": 0,
+    "left": 240,
+    "top": 397,
+    "size": 354,
+    "dir": "tool/ebook_boards/march_ideas/p285_b0"
+  },
+  {
+    "id": "march_ideas_p288_b0",
+    "book": "march_ideas",
+    "page": 288,
+    "boardIndex": 0,
+    "left": 241,
+    "top": 367,
+    "size": 352,
+    "dir": "tool/ebook_boards/march_ideas/p288_b0"
+  },
+  {
+    "id": "march_ideas_p297_b0",
+    "book": "march_ideas",
+    "page": 297,
+    "boardIndex": 0,
+    "left": 243,
+    "top": 964,
+    "size": 352,
+    "dir": "tool/ebook_boards/march_ideas/p297_b0"
+  },
+  {
+    "id": "march_ideas_p301_b0",
+    "book": "march_ideas",
+    "page": 301,
+    "boardIndex": 0,
+    "left": 242,
+    "top": 695,
+    "size": 353,
+    "dir": "tool/ebook_boards/march_ideas/p301_b0"
+  },
+  {
+    "id": "march_ideas_p313_b0",
+    "book": "march_ideas",
+    "page": 313,
+    "boardIndex": 0,
+    "left": 242,
+    "top": 552,
+    "size": 352,
+    "dir": "tool/ebook_boards/march_ideas/p313_b0"
+  },
+  {
+    "id": "fischer_p13_b0",
+    "book": "fischer",
+    "page": 13,
+    "boardIndex": 0,
+    "left": 443,
+    "top": 1092,
+    "size": 422,
+    "dir": "tool/ebook_boards/fischer/p13_b0"
+  },
+  {
+    "id": "fischer_p14_b0",
+    "book": "fischer",
+    "page": 14,
+    "boardIndex": 0,
+    "left": 361,
+    "top": 1589,
+    "size": 419,
+    "dir": "tool/ebook_boards/fischer/p14_b0"
+  },
+  {
+    "id": "fischer_p15_b0",
+    "book": "fischer",
+    "page": 15,
+    "boardIndex": 0,
+    "left": 445,
+    "top": 1765,
+    "size": 426,
+    "dir": "tool/ebook_boards/fischer/p15_b0"
+  },
+  {
+    "id": "fischer_p16_b0",
+    "book": "fischer",
+    "page": 16,
+    "boardIndex": 0,
+    "left": 351,
+    "top": 1732,
+    "size": 424,
+    "dir": "tool/ebook_boards/fischer/p16_b0"
+  },
+  {
+    "id": "fischer_p18_b0",
+    "book": "fischer",
+    "page": 18,
+    "boardIndex": 0,
+    "left": 324,
+    "top": 583,
+    "size": 430,
+    "dir": "tool/ebook_boards/fischer/p18_b0"
+  },
+  {
+    "id": "fischer_p19_b0",
+    "book": "fischer",
+    "page": 19,
+    "boardIndex": 0,
+    "left": 388,
+    "top": 1788,
+    "size": 427,
+    "dir": "tool/ebook_boards/fischer/p19_b0"
+  },
+  {
+    "id": "fischer_p20_b0",
+    "book": "fischer",
+    "page": 20,
+    "boardIndex": 0,
+    "left": 309,
+    "top": 1712,
+    "size": 435,
+    "dir": "tool/ebook_boards/fischer/p20_b0"
+  },
+  {
+    "id": "fischer_p23_b0",
+    "book": "fischer",
+    "page": 23,
+    "boardIndex": 0,
+    "left": 412,
+    "top": 723,
+    "size": 428,
+    "dir": "tool/ebook_boards/fischer/p23_b0"
+  },
+  {
+    "id": "fischer_p24_b0",
+    "book": "fischer",
+    "page": 24,
+    "boardIndex": 0,
+    "left": 315,
+    "top": 1446,
+    "size": 426,
+    "dir": "tool/ebook_boards/fischer/p24_b0"
+  },
+  {
+    "id": "fischer_p25_b0",
+    "book": "fischer",
+    "page": 25,
+    "boardIndex": 0,
+    "left": 422,
+    "top": 1754,
+    "size": 431,
+    "dir": "tool/ebook_boards/fischer/p25_b0"
+  },
+  {
+    "id": "fischer_p26_b0",
+    "book": "fischer",
+    "page": 26,
+    "boardIndex": 0,
+    "left": 316,
+    "top": 1787,
+    "size": 427,
+    "dir": "tool/ebook_boards/fischer/p26_b0"
+  },
+  {
+    "id": "fischer_p28_b0",
+    "book": "fischer",
+    "page": 28,
+    "boardIndex": 0,
+    "left": 327,
+    "top": 215,
+    "size": 431,
+    "dir": "tool/ebook_boards/fischer/p28_b0"
+  },
+  {
+    "id": "fischer_p28_b1",
+    "book": "fischer",
+    "page": 28,
+    "boardIndex": 1,
+    "left": 324,
+    "top": 1733,
+    "size": 431,
+    "dir": "tool/ebook_boards/fischer/p28_b1"
+  },
+  {
+    "id": "fischer_p30_b0",
+    "book": "fischer",
+    "page": 30,
+    "boardIndex": 0,
+    "left": 318,
+    "top": 200,
+    "size": 430,
+    "dir": "tool/ebook_boards/fischer/p30_b0"
+  },
+  {
+    "id": "fischer_p32_b0",
+    "book": "fischer",
+    "page": 32,
+    "boardIndex": 0,
+    "left": 324,
+    "top": 1114,
+    "size": 437,
+    "dir": "tool/ebook_boards/fischer/p32_b0"
+  },
+  {
+    "id": "fischer_p34_b0",
+    "book": "fischer",
+    "page": 34,
+    "boardIndex": 0,
+    "left": 349,
+    "top": 1568,
+    "size": 432,
+    "dir": "tool/ebook_boards/fischer/p34_b0"
+  },
+  {
+    "id": "fischer_p35_b0",
+    "book": "fischer",
+    "page": 35,
+    "boardIndex": 0,
+    "left": 435,
+    "top": 1720,
+    "size": 431,
+    "dir": "tool/ebook_boards/fischer/p35_b0"
+  },
+  {
+    "id": "fischer_p39_b0",
+    "book": "fischer",
+    "page": 39,
+    "boardIndex": 0,
+    "left": 398,
+    "top": 464,
+    "size": 421,
+    "dir": "tool/ebook_boards/fischer/p39_b0"
+  },
+  {
+    "id": "fischer_p41_b0",
+    "book": "fischer",
+    "page": 41,
+    "boardIndex": 0,
+    "left": 347,
+    "top": 915,
+    "size": 488,
+    "dir": "tool/ebook_boards/fischer/p41_b0"
+  },
+  {
+    "id": "fischer_p43_b0",
+    "book": "fischer",
+    "page": 43,
+    "boardIndex": 0,
+    "left": 362,
+    "top": 790,
+    "size": 437,
+    "dir": "tool/ebook_boards/fischer/p43_b0"
+  },
+  {
+    "id": "fischer_p44_b0",
+    "book": "fischer",
+    "page": 44,
+    "boardIndex": 0,
+    "left": 297,
+    "top": 1390,
+    "size": 435,
+    "dir": "tool/ebook_boards/fischer/p44_b0"
+  },
+  {
+    "id": "fischer_p45_b0",
+    "book": "fischer",
+    "page": 45,
+    "boardIndex": 0,
+    "left": 412,
+    "top": 1795,
+    "size": 420,
+    "dir": "tool/ebook_boards/fischer/p45_b0"
+  },
+  {
+    "id": "fischer_p47_b0",
+    "book": "fischer",
+    "page": 47,
+    "boardIndex": 0,
+    "left": 335,
+    "top": 1089,
+    "size": 456,
+    "dir": "tool/ebook_boards/fischer/p47_b0"
+  },
+  {
+    "id": "fischer_p49_b0",
+    "book": "fischer",
+    "page": 49,
+    "boardIndex": 0,
+    "left": 416,
+    "top": 646,
+    "size": 426,
+    "dir": "tool/ebook_boards/fischer/p49_b0"
+  },
+  {
+    "id": "fischer_p51_b0",
+    "book": "fischer",
+    "page": 51,
+    "boardIndex": 0,
+    "left": 360,
+    "top": 172,
+    "size": 435,
+    "dir": "tool/ebook_boards/fischer/p51_b0"
+  },
+  {
+    "id": "fischer_p52_b0",
+    "book": "fischer",
+    "page": 52,
+    "boardIndex": 0,
+    "left": 255,
+    "top": 1206,
+    "size": 436,
+    "dir": "tool/ebook_boards/fischer/p52_b0"
+  },
+  {
+    "id": "fischer_p54_b0",
+    "book": "fischer",
+    "page": 54,
+    "boardIndex": 0,
+    "left": 283,
+    "top": 1742,
+    "size": 432,
+    "dir": "tool/ebook_boards/fischer/p54_b0"
+  },
+  {
+    "id": "fischer_p56_b0",
+    "book": "fischer",
+    "page": 56,
+    "boardIndex": 0,
+    "left": 278,
+    "top": 698,
+    "size": 438,
+    "dir": "tool/ebook_boards/fischer/p56_b0"
+  },
+  {
+    "id": "fischer_p57_b0",
+    "book": "fischer",
+    "page": 57,
+    "boardIndex": 0,
+    "left": 385,
+    "top": 1244,
+    "size": 429,
+    "dir": "tool/ebook_boards/fischer/p57_b0"
+  },
+  {
+    "id": "fischer_p59_b0",
+    "book": "fischer",
+    "page": 59,
+    "boardIndex": 0,
+    "left": 374,
+    "top": 207,
+    "size": 429,
+    "dir": "tool/ebook_boards/fischer/p59_b0"
+  },
+  {
+    "id": "fischer_p60_b0",
+    "book": "fischer",
+    "page": 60,
+    "boardIndex": 0,
+    "left": 289,
+    "top": 1652,
+    "size": 429,
+    "dir": "tool/ebook_boards/fischer/p60_b0"
+  },
+  {
+    "id": "fischer_p62_b0",
+    "book": "fischer",
+    "page": 62,
+    "boardIndex": 0,
+    "left": 287,
+    "top": 1445,
+    "size": 433,
+    "dir": "tool/ebook_boards/fischer/p62_b0"
+  },
+  {
+    "id": "fischer_p63_b0",
+    "book": "fischer",
+    "page": 63,
+    "boardIndex": 0,
+    "left": 364,
+    "top": 1599,
+    "size": 434,
+    "dir": "tool/ebook_boards/fischer/p63_b0"
+  },
+  {
+    "id": "fischer_p64_b0",
+    "book": "fischer",
+    "page": 64,
+    "boardIndex": 0,
+    "left": 255,
+    "top": 1804,
+    "size": 434,
+    "dir": "tool/ebook_boards/fischer/p64_b0"
+  },
+  {
+    "id": "fischer_p66_b0",
+    "book": "fischer",
+    "page": 66,
+    "boardIndex": 0,
+    "left": 388,
+    "top": 281,
+    "size": 433,
+    "dir": "tool/ebook_boards/fischer/p66_b0"
+  },
+  {
+    "id": "fischer_p68_b0",
+    "book": "fischer",
+    "page": 68,
+    "boardIndex": 0,
+    "left": 294,
+    "top": 795,
+    "size": 431,
+    "dir": "tool/ebook_boards/fischer/p68_b0"
+  },
+  {
+    "id": "fischer_p69_b0",
+    "book": "fischer",
+    "page": 69,
+    "boardIndex": 0,
+    "left": 377,
+    "top": 1743,
+    "size": 422,
+    "dir": "tool/ebook_boards/fischer/p69_b0"
+  },
+  {
+    "id": "fischer_p70_b0",
+    "book": "fischer",
+    "page": 70,
+    "boardIndex": 0,
+    "left": 290,
+    "top": 1179,
+    "size": 430,
+    "dir": "tool/ebook_boards/fischer/p70_b0"
+  },
+  {
+    "id": "fischer_p72_b0",
+    "book": "fischer",
+    "page": 72,
+    "boardIndex": 0,
+    "left": 332,
+    "top": 679,
+    "size": 429,
+    "dir": "tool/ebook_boards/fischer/p72_b0"
+  },
+  {
+    "id": "fischer_p74_b0",
+    "book": "fischer",
+    "page": 74,
+    "boardIndex": 0,
+    "left": 303,
+    "top": 1456,
+    "size": 430,
+    "dir": "tool/ebook_boards/fischer/p74_b0"
+  },
+  {
+    "id": "fischer_p75_b0",
+    "book": "fischer",
+    "page": 75,
+    "boardIndex": 0,
+    "left": 325,
+    "top": 1772,
+    "size": 428,
+    "dir": "tool/ebook_boards/fischer/p75_b0"
+  },
+  {
+    "id": "fischer_p78_b0",
+    "book": "fischer",
+    "page": 78,
+    "boardIndex": 0,
+    "left": 307,
+    "top": 1623,
+    "size": 429,
+    "dir": "tool/ebook_boards/fischer/p78_b0"
+  },
+  {
+    "id": "fischer_p80_b0",
+    "book": "fischer",
+    "page": 80,
+    "boardIndex": 0,
+    "left": 304,
+    "top": 808,
+    "size": 435,
+    "dir": "tool/ebook_boards/fischer/p80_b0"
+  },
+  {
+    "id": "fischer_p81_b0",
+    "book": "fischer",
+    "page": 81,
+    "boardIndex": 0,
+    "left": 348,
+    "top": 1725,
+    "size": 430,
+    "dir": "tool/ebook_boards/fischer/p81_b0"
+  },
+  {
+    "id": "fischer_p83_b0",
+    "book": "fischer",
+    "page": 83,
+    "boardIndex": 0,
+    "left": 314,
+    "top": 598,
+    "size": 429,
+    "dir": "tool/ebook_boards/fischer/p83_b0"
+  },
+  {
+    "id": "fischer_p84_b0",
+    "book": "fischer",
+    "page": 84,
+    "boardIndex": 0,
+    "left": 338,
+    "top": 1350,
+    "size": 432,
+    "dir": "tool/ebook_boards/fischer/p84_b0"
+  },
+  {
+    "id": "fischer_p85_b0",
+    "book": "fischer",
+    "page": 85,
+    "boardIndex": 0,
+    "left": 289,
+    "top": 1019,
+    "size": 438,
+    "dir": "tool/ebook_boards/fischer/p85_b0"
+  },
+  {
+    "id": "fischer_p87_b0",
+    "book": "fischer",
+    "page": 87,
+    "boardIndex": 0,
+    "left": 288,
+    "top": 1520,
+    "size": 430,
+    "dir": "tool/ebook_boards/fischer/p87_b0"
+  },
+  {
+    "id": "fischer_p89_b0",
+    "book": "fischer",
+    "page": 89,
+    "boardIndex": 0,
+    "left": 342,
+    "top": 225,
+    "size": 433,
+    "dir": "tool/ebook_boards/fischer/p89_b0"
+  },
+  {
+    "id": "fischer_p90_b0",
+    "book": "fischer",
+    "page": 90,
+    "boardIndex": 0,
+    "left": 233,
+    "top": 556,
+    "size": 432,
+    "dir": "tool/ebook_boards/fischer/p90_b0"
+  },
+  {
+    "id": "fischer_p92_b0",
+    "book": "fischer",
+    "page": 92,
+    "boardIndex": 0,
+    "left": 309,
+    "top": 828,
+    "size": 431,
+    "dir": "tool/ebook_boards/fischer/p92_b0"
+  },
+  {
+    "id": "fischer_p93_b0",
+    "book": "fischer",
+    "page": 93,
+    "boardIndex": 0,
+    "left": 335,
+    "top": 888,
+    "size": 422,
+    "dir": "tool/ebook_boards/fischer/p93_b0"
+  },
+  {
+    "id": "fischer_p94_b0",
+    "book": "fischer",
+    "page": 94,
+    "boardIndex": 0,
+    "left": 349,
+    "top": 623,
+    "size": 423,
+    "dir": "tool/ebook_boards/fischer/p94_b0"
+  },
+  {
+    "id": "fischer_p95_b0",
+    "book": "fischer",
+    "page": 95,
+    "boardIndex": 0,
+    "left": 339,
+    "top": 717,
+    "size": 424,
+    "dir": "tool/ebook_boards/fischer/p95_b0"
+  },
+  {
+    "id": "fischer_p96_b0",
+    "book": "fischer",
+    "page": 96,
+    "boardIndex": 0,
+    "left": 296,
+    "top": 874,
+    "size": 425,
+    "dir": "tool/ebook_boards/fischer/p96_b0"
+  },
+  {
+    "id": "fischer_p97_b0",
+    "book": "fischer",
+    "page": 97,
+    "boardIndex": 0,
+    "left": 331,
+    "top": 866,
+    "size": 431,
+    "dir": "tool/ebook_boards/fischer/p97_b0"
+  },
+  {
+    "id": "fischer_p98_b0",
+    "book": "fischer",
+    "page": 98,
+    "boardIndex": 0,
+    "left": 367,
+    "top": 1240,
+    "size": 438,
+    "dir": "tool/ebook_boards/fischer/p98_b0"
+  },
+  {
+    "id": "fischer_p100_b0",
+    "book": "fischer",
+    "page": 100,
+    "boardIndex": 0,
+    "left": 359,
+    "top": 588,
+    "size": 426,
+    "dir": "tool/ebook_boards/fischer/p100_b0"
+  },
+  {
+    "id": "fischer_p101_b0",
+    "book": "fischer",
+    "page": 101,
+    "boardIndex": 0,
+    "left": 305,
+    "top": 647,
+    "size": 426,
+    "dir": "tool/ebook_boards/fischer/p101_b0"
+  },
+  {
+    "id": "fischer_p102_b0",
+    "book": "fischer",
+    "page": 102,
+    "boardIndex": 0,
+    "left": 292,
+    "top": 1449,
+    "size": 422,
+    "dir": "tool/ebook_boards/fischer/p102_b0"
+  },
+  {
+    "id": "fischer_p104_b0",
+    "book": "fischer",
+    "page": 104,
+    "boardIndex": 0,
+    "left": 359,
+    "top": 1004,
+    "size": 431,
+    "dir": "tool/ebook_boards/fischer/p104_b0"
+  },
+  {
+    "id": "fischer_p106_b0",
+    "book": "fischer",
+    "page": 106,
+    "boardIndex": 0,
+    "left": 261,
+    "top": 730,
+    "size": 427,
+    "dir": "tool/ebook_boards/fischer/p106_b0"
+  },
+  {
+    "id": "fischer_p107_b0",
+    "book": "fischer",
+    "page": 107,
+    "boardIndex": 0,
+    "left": 314,
+    "top": 1316,
+    "size": 429,
+    "dir": "tool/ebook_boards/fischer/p107_b0"
+  },
+  {
+    "id": "fischer_p108_b0",
+    "book": "fischer",
+    "page": 108,
+    "boardIndex": 0,
+    "left": 339,
+    "top": 1266,
+    "size": 425,
+    "dir": "tool/ebook_boards/fischer/p108_b0"
+  },
+  {
+    "id": "fischer_p110_b0",
+    "book": "fischer",
+    "page": 110,
+    "boardIndex": 0,
+    "left": 328,
+    "top": 642,
+    "size": 427,
+    "dir": "tool/ebook_boards/fischer/p110_b0"
+  },
+  {
+    "id": "fischer_p111_b0",
+    "book": "fischer",
+    "page": 111,
+    "boardIndex": 0,
+    "left": 313,
+    "top": 906,
+    "size": 426,
+    "dir": "tool/ebook_boards/fischer/p111_b0"
+  },
+  {
+    "id": "fischer_p112_b0",
+    "book": "fischer",
+    "page": 112,
+    "boardIndex": 0,
+    "left": 336,
+    "top": 922,
+    "size": 424,
+    "dir": "tool/ebook_boards/fischer/p112_b0"
+  },
+  {
+    "id": "fischer_p113_b0",
+    "book": "fischer",
+    "page": 113,
+    "boardIndex": 0,
+    "left": 265,
+    "top": 1415,
+    "size": 428,
+    "dir": "tool/ebook_boards/fischer/p113_b0"
+  },
+  {
+    "id": "fischer_p117_b0",
+    "book": "fischer",
+    "page": 117,
+    "boardIndex": 0,
+    "left": 353,
+    "top": 552,
+    "size": 424,
+    "dir": "tool/ebook_boards/fischer/p117_b0"
+  },
+  {
+    "id": "fischer_p118_b0",
+    "book": "fischer",
+    "page": 118,
+    "boardIndex": 0,
+    "left": 338,
+    "top": 1254,
+    "size": 427,
+    "dir": "tool/ebook_boards/fischer/p118_b0"
+  },
+  {
+    "id": "fischer_p119_b0",
+    "book": "fischer",
+    "page": 119,
+    "boardIndex": 0,
+    "left": 355,
+    "top": 1215,
+    "size": 423,
+    "dir": "tool/ebook_boards/fischer/p119_b0"
+  },
+  {
+    "id": "fischer_p121_b0",
+    "book": "fischer",
+    "page": 121,
+    "boardIndex": 0,
+    "left": 326,
+    "top": 454,
+    "size": 421,
+    "dir": "tool/ebook_boards/fischer/p121_b0"
+  },
+  {
+    "id": "fischer_p123_b0",
+    "book": "fischer",
+    "page": 123,
+    "boardIndex": 0,
+    "left": 320,
+    "top": 888,
+    "size": 425,
+    "dir": "tool/ebook_boards/fischer/p123_b0"
+  },
+  {
+    "id": "fischer_p125_b0",
+    "book": "fischer",
+    "page": 125,
+    "boardIndex": 0,
+    "left": 319,
+    "top": 616,
+    "size": 424,
+    "dir": "tool/ebook_boards/fischer/p125_b0"
+  },
+  {
+    "id": "fischer_p126_b0",
+    "book": "fischer",
+    "page": 126,
+    "boardIndex": 0,
+    "left": 349,
+    "top": 836,
+    "size": 427,
+    "dir": "tool/ebook_boards/fischer/p126_b0"
+  },
+  {
+    "id": "fischer_p128_b0",
+    "book": "fischer",
+    "page": 128,
+    "boardIndex": 0,
+    "left": 363,
+    "top": 1825,
+    "size": 423,
+    "dir": "tool/ebook_boards/fischer/p128_b0"
+  },
+  {
+    "id": "fischer_p129_b0",
+    "book": "fischer",
+    "page": 129,
+    "boardIndex": 0,
+    "left": 335,
+    "top": 1507,
+    "size": 420,
+    "dir": "tool/ebook_boards/fischer/p129_b0"
+  },
+  {
+    "id": "fischer_p130_b0",
+    "book": "fischer",
+    "page": 130,
+    "boardIndex": 0,
+    "left": 354,
+    "top": 1452,
+    "size": 425,
+    "dir": "tool/ebook_boards/fischer/p130_b0"
+  },
+  {
+    "id": "fischer_p131_b0",
+    "book": "fischer",
+    "page": 131,
+    "boardIndex": 0,
+    "left": 343,
+    "top": 1805,
+    "size": 425,
+    "dir": "tool/ebook_boards/fischer/p131_b0"
+  },
+  {
+    "id": "fischer_p133_b0",
+    "book": "fischer",
+    "page": 133,
+    "boardIndex": 0,
+    "left": 316,
+    "top": 1505,
+    "size": 430,
+    "dir": "tool/ebook_boards/fischer/p133_b0"
+  },
+  {
+    "id": "fischer_p134_b0",
+    "book": "fischer",
+    "page": 134,
+    "boardIndex": 0,
+    "left": 333,
+    "top": 1539,
+    "size": 424,
+    "dir": "tool/ebook_boards/fischer/p134_b0"
+  },
+  {
+    "id": "fischer_p135_b0",
+    "book": "fischer",
+    "page": 135,
+    "boardIndex": 0,
+    "left": 311,
+    "top": 986,
+    "size": 423,
+    "dir": "tool/ebook_boards/fischer/p135_b0"
+  },
+  {
+    "id": "fischer_p137_b0",
+    "book": "fischer",
+    "page": 137,
+    "boardIndex": 0,
+    "left": 337,
+    "top": 1485,
+    "size": 431,
+    "dir": "tool/ebook_boards/fischer/p137_b0"
+  },
+  {
+    "id": "fischer_p138_b0",
+    "book": "fischer",
+    "page": 138,
+    "boardIndex": 0,
+    "left": 362,
+    "top": 1719,
+    "size": 426,
+    "dir": "tool/ebook_boards/fischer/p138_b0"
+  },
+  {
+    "id": "fischer_p139_b0",
+    "book": "fischer",
+    "page": 139,
+    "boardIndex": 0,
+    "left": 360,
+    "top": 1504,
+    "size": 429,
+    "dir": "tool/ebook_boards/fischer/p139_b0"
+  },
+  {
+    "id": "fischer_p141_b0",
+    "book": "fischer",
+    "page": 141,
+    "boardIndex": 0,
+    "left": 359,
+    "top": 854,
+    "size": 424,
+    "dir": "tool/ebook_boards/fischer/p141_b0"
+  },
+  {
+    "id": "fischer_p142_b0",
+    "book": "fischer",
+    "page": 142,
+    "boardIndex": 0,
+    "left": 319,
+    "top": 845,
+    "size": 429,
+    "dir": "tool/ebook_boards/fischer/p142_b0"
+  },
+  {
+    "id": "fischer_p143_b0",
+    "book": "fischer",
+    "page": 143,
+    "boardIndex": 0,
+    "left": 308,
+    "top": 642,
+    "size": 441,
+    "dir": "tool/ebook_boards/fischer/p143_b0"
+  },
+  {
+    "id": "fischer_p146_b0",
+    "book": "fischer",
+    "page": 146,
+    "boardIndex": 0,
+    "left": 329,
+    "top": 1536,
+    "size": 428,
+    "dir": "tool/ebook_boards/fischer/p146_b0"
+  },
+  {
+    "id": "fischer_p146_b1",
+    "book": "fischer",
+    "page": 146,
+    "boardIndex": 1,
+    "left": 331,
+    "top": 217,
+    "size": 427,
+    "dir": "tool/ebook_boards/fischer/p146_b1"
+  },
+  {
+    "id": "fischer_p147_b0",
+    "book": "fischer",
+    "page": 147,
+    "boardIndex": 0,
+    "left": 335,
+    "top": 1452,
+    "size": 425,
+    "dir": "tool/ebook_boards/fischer/p147_b0"
+  },
+  {
+    "id": "fischer_p148_b0",
+    "book": "fischer",
+    "page": 148,
+    "boardIndex": 0,
+    "left": 343,
+    "top": 1015,
+    "size": 433,
+    "dir": "tool/ebook_boards/fischer/p148_b0"
+  },
+  {
+    "id": "fischer_p150_b0",
+    "book": "fischer",
+    "page": 150,
+    "boardIndex": 0,
+    "left": 303,
+    "top": 229,
+    "size": 442,
+    "dir": "tool/ebook_boards/fischer/p150_b0"
+  },
+  {
+    "id": "fischer_p152_b0",
+    "book": "fischer",
+    "page": 152,
+    "boardIndex": 0,
+    "left": 310,
+    "top": 214,
+    "size": 438,
+    "dir": "tool/ebook_boards/fischer/p152_b0"
+  },
+  {
+    "id": "fischer_p153_b0",
+    "book": "fischer",
+    "page": 153,
+    "boardIndex": 0,
+    "left": 358,
+    "top": 1671,
+    "size": 425,
+    "dir": "tool/ebook_boards/fischer/p153_b0"
+  },
+  {
+    "id": "fischer_p156_b0",
+    "book": "fischer",
+    "page": 156,
+    "boardIndex": 0,
+    "left": 356,
+    "top": 1197,
+    "size": 428,
+    "dir": "tool/ebook_boards/fischer/p156_b0"
+  },
+  {
+    "id": "fischer_p157_b0",
+    "book": "fischer",
+    "page": 157,
+    "boardIndex": 0,
+    "left": 398,
+    "top": 873,
+    "size": 427,
+    "dir": "tool/ebook_boards/fischer/p157_b0"
+  },
+  {
+    "id": "fischer_p158_b0",
+    "book": "fischer",
+    "page": 158,
+    "boardIndex": 0,
+    "left": 326,
+    "top": 223,
+    "size": 427,
+    "dir": "tool/ebook_boards/fischer/p158_b0"
+  },
+  {
+    "id": "fischer_p159_b0",
+    "book": "fischer",
+    "page": 159,
+    "boardIndex": 0,
+    "left": 361,
+    "top": 778,
+    "size": 426,
+    "dir": "tool/ebook_boards/fischer/p159_b0"
+  },
+  {
+    "id": "fischer_p161_b0",
+    "book": "fischer",
+    "page": 161,
+    "boardIndex": 0,
+    "left": 361,
+    "top": 1198,
+    "size": 431,
+    "dir": "tool/ebook_boards/fischer/p161_b0"
+  },
+  {
+    "id": "fischer_p162_b0",
+    "book": "fischer",
+    "page": 162,
+    "boardIndex": 0,
+    "left": 258,
+    "top": 340,
+    "size": 427,
+    "dir": "tool/ebook_boards/fischer/p162_b0"
+  },
+  {
+    "id": "fischer_p163_b0",
+    "book": "fischer",
+    "page": 163,
+    "boardIndex": 0,
+    "left": 344,
+    "top": 1151,
+    "size": 427,
+    "dir": "tool/ebook_boards/fischer/p163_b0"
+  },
+  {
+    "id": "fischer_p164_b0",
+    "book": "fischer",
+    "page": 164,
+    "boardIndex": 0,
+    "left": 352,
+    "top": 1578,
+    "size": 433,
+    "dir": "tool/ebook_boards/fischer/p164_b0"
+  },
+  {
+    "id": "fischer_p167_b0",
+    "book": "fischer",
+    "page": 167,
+    "boardIndex": 0,
+    "left": 338,
+    "top": 1099,
+    "size": 425,
+    "dir": "tool/ebook_boards/fischer/p167_b0"
+  },
+  {
+    "id": "fischer_p168_b0",
+    "book": "fischer",
+    "page": 168,
+    "boardIndex": 0,
+    "left": 323,
+    "top": 1682,
+    "size": 428,
+    "dir": "tool/ebook_boards/fischer/p168_b0"
+  },
+  {
+    "id": "fischer_p169_b0",
+    "book": "fischer",
+    "page": 169,
+    "boardIndex": 0,
+    "left": 357,
+    "top": 941,
+    "size": 422,
+    "dir": "tool/ebook_boards/fischer/p169_b0"
+  },
+  {
+    "id": "fischer_p170_b0",
+    "book": "fischer",
+    "page": 170,
+    "boardIndex": 0,
+    "left": 360,
+    "top": 942,
+    "size": 426,
+    "dir": "tool/ebook_boards/fischer/p170_b0"
+  },
+  {
+    "id": "fischer_p171_b0",
+    "book": "fischer",
+    "page": 171,
+    "boardIndex": 0,
+    "left": 335,
+    "top": 331,
+    "size": 427,
+    "dir": "tool/ebook_boards/fischer/p171_b0"
+  },
+  {
+    "id": "fischer_p172_b0",
+    "book": "fischer",
+    "page": 172,
+    "boardIndex": 0,
+    "left": 307,
+    "top": 332,
+    "size": 426,
+    "dir": "tool/ebook_boards/fischer/p172_b0"
+  },
+  {
+    "id": "fischer_p173_b0",
+    "book": "fischer",
+    "page": 173,
+    "boardIndex": 0,
+    "left": 391,
+    "top": 252,
+    "size": 429,
+    "dir": "tool/ebook_boards/fischer/p173_b0"
+  },
+  {
+    "id": "fischer_p175_b0",
+    "book": "fischer",
+    "page": 175,
+    "boardIndex": 0,
+    "left": 372,
+    "top": 1218,
+    "size": 423,
+    "dir": "tool/ebook_boards/fischer/p175_b0"
+  },
+  {
+    "id": "fischer_p176_b0",
+    "book": "fischer",
+    "page": 176,
+    "boardIndex": 0,
+    "left": 301,
+    "top": 1122,
+    "size": 437,
+    "dir": "tool/ebook_boards/fischer/p176_b0"
+  },
+  {
+    "id": "fischer_p177_b0",
+    "book": "fischer",
+    "page": 177,
+    "boardIndex": 0,
+    "left": 338,
+    "top": 1123,
+    "size": 425,
+    "dir": "tool/ebook_boards/fischer/p177_b0"
+  },
+  {
+    "id": "fischer_p178_b0",
+    "book": "fischer",
+    "page": 178,
+    "boardIndex": 0,
+    "left": 314,
+    "top": 806,
+    "size": 428,
+    "dir": "tool/ebook_boards/fischer/p178_b0"
+  },
+  {
+    "id": "fischer_p180_b0",
+    "book": "fischer",
+    "page": 180,
+    "boardIndex": 0,
+    "left": 280,
+    "top": 249,
+    "size": 427,
+    "dir": "tool/ebook_boards/fischer/p180_b0"
+  },
+  {
+    "id": "fischer_p182_b0",
+    "book": "fischer",
+    "page": 182,
+    "boardIndex": 0,
+    "left": 305,
+    "top": 1003,
+    "size": 440,
+    "dir": "tool/ebook_boards/fischer/p182_b0"
+  },
+  {
+    "id": "fischer_p183_b0",
+    "book": "fischer",
+    "page": 183,
+    "boardIndex": 0,
+    "left": 358,
+    "top": 1172,
+    "size": 427,
+    "dir": "tool/ebook_boards/fischer/p183_b0"
+  },
+  {
+    "id": "fischer_p185_b0",
+    "book": "fischer",
+    "page": 185,
+    "boardIndex": 0,
+    "left": 359,
+    "top": 260,
+    "size": 430,
+    "dir": "tool/ebook_boards/fischer/p185_b0"
+  },
+  {
+    "id": "fischer_p185_b1",
+    "book": "fischer",
+    "page": 185,
+    "boardIndex": 1,
+    "left": 359,
+    "top": 1326,
+    "size": 429,
+    "dir": "tool/ebook_boards/fischer/p185_b1"
+  },
+  {
+    "id": "fischer_p188_b0",
+    "book": "fischer",
+    "page": 188,
+    "boardIndex": 0,
+    "left": 312,
+    "top": 1388,
+    "size": 431,
+    "dir": "tool/ebook_boards/fischer/p188_b0"
+  },
+  {
+    "id": "fischer_p188_b1",
+    "book": "fischer",
+    "page": 188,
+    "boardIndex": 1,
+    "left": 308,
+    "top": 204,
+    "size": 421,
+    "dir": "tool/ebook_boards/fischer/p188_b1"
+  },
+  {
+    "id": "fischer_p189_b0",
+    "book": "fischer",
+    "page": 189,
+    "boardIndex": 0,
+    "left": 362,
+    "top": 1611,
+    "size": 429,
+    "dir": "tool/ebook_boards/fischer/p189_b0"
+  },
+  {
+    "id": "fischer_p191_b0",
+    "book": "fischer",
+    "page": 191,
+    "boardIndex": 0,
+    "left": 342,
+    "top": 1794,
+    "size": 433,
+    "dir": "tool/ebook_boards/fischer/p191_b0"
+  },
+  {
+    "id": "fischer_p192_b0",
+    "book": "fischer",
+    "page": 192,
+    "boardIndex": 0,
+    "left": 322,
+    "top": 1791,
+    "size": 428,
+    "dir": "tool/ebook_boards/fischer/p192_b0"
+  },
+  {
+    "id": "fischer_p193_b0",
+    "book": "fischer",
+    "page": 193,
+    "boardIndex": 0,
+    "left": 336,
+    "top": 1425,
+    "size": 430,
+    "dir": "tool/ebook_boards/fischer/p193_b0"
+  },
+  {
+    "id": "fischer_p194_b0",
+    "book": "fischer",
+    "page": 194,
+    "boardIndex": 0,
+    "left": 271,
+    "top": 1778,
+    "size": 424,
+    "dir": "tool/ebook_boards/fischer/p194_b0"
+  },
+  {
+    "id": "fischer_p196_b0",
+    "book": "fischer",
+    "page": 196,
+    "boardIndex": 0,
+    "left": 294,
+    "top": 1291,
+    "size": 427,
+    "dir": "tool/ebook_boards/fischer/p196_b0"
+  },
+  {
+    "id": "fischer_p197_b0",
+    "book": "fischer",
+    "page": 197,
+    "boardIndex": 0,
+    "left": 317,
+    "top": 1823,
+    "size": 425,
+    "dir": "tool/ebook_boards/fischer/p197_b0"
+  },
+  {
+    "id": "fischer_p198_b0",
+    "book": "fischer",
+    "page": 198,
+    "boardIndex": 0,
+    "left": 302,
+    "top": 1398,
+    "size": 439,
+    "dir": "tool/ebook_boards/fischer/p198_b0"
+  },
+  {
+    "id": "fischer_p201_b0",
+    "book": "fischer",
+    "page": 201,
+    "boardIndex": 0,
+    "left": 374,
+    "top": 722,
+    "size": 426,
+    "dir": "tool/ebook_boards/fischer/p201_b0"
+  },
+  {
+    "id": "fischer_p202_b0",
+    "book": "fischer",
+    "page": 202,
+    "boardIndex": 0,
+    "left": 263,
+    "top": 195,
+    "size": 439,
+    "dir": "tool/ebook_boards/fischer/p202_b0"
+  },
+  {
+    "id": "fischer_p203_b0",
+    "book": "fischer",
+    "page": 203,
+    "boardIndex": 0,
+    "left": 366,
+    "top": 529,
+    "size": 435,
+    "dir": "tool/ebook_boards/fischer/p203_b0"
+  },
+  {
+    "id": "fischer_p204_b0",
+    "book": "fischer",
+    "page": 204,
+    "boardIndex": 0,
+    "left": 255,
+    "top": 1729,
+    "size": 431,
+    "dir": "tool/ebook_boards/fischer/p204_b0"
+  },
+  {
+    "id": "fischer_p207_b0",
+    "book": "fischer",
+    "page": 207,
+    "boardIndex": 0,
+    "left": 386,
+    "top": 1541,
+    "size": 427,
+    "dir": "tool/ebook_boards/fischer/p207_b0"
+  },
+  {
+    "id": "fischer_p208_b0",
+    "book": "fischer",
+    "page": 208,
+    "boardIndex": 0,
+    "left": 231,
+    "top": 1577,
+    "size": 431,
+    "dir": "tool/ebook_boards/fischer/p208_b0"
+  },
+  {
+    "id": "fischer_p209_b0",
+    "book": "fischer",
+    "page": 209,
+    "boardIndex": 0,
+    "left": 372,
+    "top": 1259,
+    "size": 430,
+    "dir": "tool/ebook_boards/fischer/p209_b0"
+  },
+  {
+    "id": "fischer_p210_b0",
+    "book": "fischer",
+    "page": 210,
+    "boardIndex": 0,
+    "left": 295,
+    "top": 1576,
+    "size": 430,
+    "dir": "tool/ebook_boards/fischer/p210_b0"
+  },
+  {
+    "id": "fischer_p212_b0",
+    "book": "fischer",
+    "page": 212,
+    "boardIndex": 0,
+    "left": 248,
+    "top": 908,
+    "size": 439,
+    "dir": "tool/ebook_boards/fischer/p212_b0"
+  },
+  {
+    "id": "fischer_p214_b0",
+    "book": "fischer",
+    "page": 214,
+    "boardIndex": 0,
+    "left": 218,
+    "top": 221,
+    "size": 439,
+    "dir": "tool/ebook_boards/fischer/p214_b0"
+  },
+  {
+    "id": "fischer_p215_b0",
+    "book": "fischer",
+    "page": 215,
+    "boardIndex": 0,
+    "left": 328,
+    "top": 207,
+    "size": 440,
+    "dir": "tool/ebook_boards/fischer/p215_b0"
+  },
+  {
+    "id": "fischer_p215_b1",
+    "book": "fischer",
+    "page": 215,
+    "boardIndex": 1,
+    "left": 328,
+    "top": 1751,
+    "size": 440,
+    "dir": "tool/ebook_boards/fischer/p215_b1"
+  },
+  {
+    "id": "fischer_p218_b0",
+    "book": "fischer",
+    "page": 218,
+    "boardIndex": 0,
+    "left": 242,
+    "top": 643,
+    "size": 433,
+    "dir": "tool/ebook_boards/fischer/p218_b0"
+  },
+  {
+    "id": "fischer_p220_b0",
+    "book": "fischer",
+    "page": 220,
+    "boardIndex": 0,
+    "left": 261,
+    "top": 1175,
+    "size": 442,
+    "dir": "tool/ebook_boards/fischer/p220_b0"
+  },
+  {
+    "id": "fischer_p222_b0",
+    "book": "fischer",
+    "page": 222,
+    "boardIndex": 0,
+    "left": 207,
+    "top": 1042,
+    "size": 436,
+    "dir": "tool/ebook_boards/fischer/p222_b0"
+  },
+  {
+    "id": "fischer_p223_b0",
+    "book": "fischer",
+    "page": 223,
+    "boardIndex": 0,
+    "left": 289,
+    "top": 1014,
+    "size": 436,
+    "dir": "tool/ebook_boards/fischer/p223_b0"
+  },
+  {
+    "id": "fischer_p224_b0",
+    "book": "fischer",
+    "page": 224,
+    "boardIndex": 0,
+    "left": 331,
+    "top": 1130,
+    "size": 462,
+    "dir": "tool/ebook_boards/fischer/p224_b0"
+  },
+  {
+    "id": "fischer_p227_b0",
+    "book": "fischer",
+    "page": 227,
+    "boardIndex": 0,
+    "left": 188,
+    "top": 234,
+    "size": 442,
+    "dir": "tool/ebook_boards/fischer/p227_b0"
+  },
+  {
+    "id": "fischer_p228_b0",
+    "book": "fischer",
+    "page": 228,
+    "boardIndex": 0,
+    "left": 392,
+    "top": 1285,
+    "size": 425,
+    "dir": "tool/ebook_boards/fischer/p228_b0"
+  },
+  {
+    "id": "fischer_p230_b0",
+    "book": "fischer",
+    "page": 230,
+    "boardIndex": 0,
+    "left": 385,
+    "top": 329,
+    "size": 428,
+    "dir": "tool/ebook_boards/fischer/p230_b0"
+  },
+  {
+    "id": "fischer_p231_b0",
+    "book": "fischer",
+    "page": 231,
+    "boardIndex": 0,
+    "left": 260,
+    "top": 764,
+    "size": 429,
+    "dir": "tool/ebook_boards/fischer/p231_b0"
+  },
+  {
+    "id": "fischer_p232_b0",
+    "book": "fischer",
+    "page": 232,
+    "boardIndex": 0,
+    "left": 371,
+    "top": 739,
+    "size": 431,
+    "dir": "tool/ebook_boards/fischer/p232_b0"
+  },
+  {
+    "id": "fischer_p233_b0",
+    "book": "fischer",
+    "page": 233,
+    "boardIndex": 0,
+    "left": 232,
+    "top": 560,
+    "size": 453,
+    "dir": "tool/ebook_boards/fischer/p233_b0"
+  },
+  {
+    "id": "fischer_p235_b0",
+    "book": "fischer",
+    "page": 235,
+    "boardIndex": 0,
+    "left": 244,
+    "top": 200,
+    "size": 436,
+    "dir": "tool/ebook_boards/fischer/p235_b0"
+  },
+  {
+    "id": "fischer_p236_b0",
+    "book": "fischer",
+    "page": 236,
+    "boardIndex": 0,
+    "left": 432,
+    "top": 722,
+    "size": 442,
+    "dir": "tool/ebook_boards/fischer/p236_b0"
+  },
+  {
+    "id": "fischer_p237_b0",
+    "book": "fischer",
+    "page": 237,
+    "boardIndex": 0,
+    "left": 201,
+    "top": 1101,
+    "size": 455,
+    "dir": "tool/ebook_boards/fischer/p237_b0"
+  },
+  {
+    "id": "fischer_p238_b0",
+    "book": "fischer",
+    "page": 238,
+    "boardIndex": 0,
+    "left": 374,
+    "top": 1539,
+    "size": 430,
+    "dir": "tool/ebook_boards/fischer/p238_b0"
+  },
+  {
+    "id": "fischer_p241_b0",
+    "book": "fischer",
+    "page": 241,
+    "boardIndex": 0,
+    "left": 281,
+    "top": 1078,
+    "size": 435,
+    "dir": "tool/ebook_boards/fischer/p241_b0"
+  },
+  {
+    "id": "fischer_p243_b0",
+    "book": "fischer",
+    "page": 243,
+    "boardIndex": 0,
+    "left": 279,
+    "top": 804,
+    "size": 443,
+    "dir": "tool/ebook_boards/fischer/p243_b0"
+  },
+  {
+    "id": "fischer_p245_b0",
+    "book": "fischer",
+    "page": 245,
+    "boardIndex": 0,
+    "left": 190,
+    "top": 175,
+    "size": 463,
+    "dir": "tool/ebook_boards/fischer/p245_b0"
+  },
+  {
+    "id": "fischer_p247_b0",
+    "book": "fischer",
+    "page": 247,
+    "boardIndex": 0,
+    "left": 297,
+    "top": 1601,
+    "size": 453,
+    "dir": "tool/ebook_boards/fischer/p247_b0"
+  },
+  {
+    "id": "fischer_p249_b0",
+    "book": "fischer",
+    "page": 249,
+    "boardIndex": 0,
+    "left": 254,
+    "top": 214,
+    "size": 455,
+    "dir": "tool/ebook_boards/fischer/p249_b0"
+  },
+  {
+    "id": "fischer_p250_b0",
+    "book": "fischer",
+    "page": 250,
+    "boardIndex": 0,
+    "left": 339,
+    "top": 1024,
+    "size": 440,
+    "dir": "tool/ebook_boards/fischer/p250_b0"
+  },
+  {
+    "id": "fischer_p251_b0",
+    "book": "fischer",
+    "page": 251,
+    "boardIndex": 0,
+    "left": 318,
+    "top": 1846,
+    "size": 429,
+    "dir": "tool/ebook_boards/fischer/p251_b0"
+  },
+  {
+    "id": "fischer_p252_b0",
+    "book": "fischer",
+    "page": 252,
+    "boardIndex": 0,
+    "left": 383,
+    "top": 1704,
+    "size": 430,
+    "dir": "tool/ebook_boards/fischer/p252_b0"
+  },
+  {
+    "id": "fischer_p253_b0",
+    "book": "fischer",
+    "page": 253,
+    "boardIndex": 0,
+    "left": 269,
+    "top": 897,
+    "size": 435,
+    "dir": "tool/ebook_boards/fischer/p253_b0"
+  },
+  {
+    "id": "fischer_p255_b0",
+    "book": "fischer",
+    "page": 255,
+    "boardIndex": 0,
+    "left": 229,
+    "top": 210,
+    "size": 442,
+    "dir": "tool/ebook_boards/fischer/p255_b0"
+  },
+  {
+    "id": "fischer_p256_b0",
+    "book": "fischer",
+    "page": 256,
+    "boardIndex": 0,
+    "left": 379,
+    "top": 777,
+    "size": 438,
+    "dir": "tool/ebook_boards/fischer/p256_b0"
+  },
+  {
+    "id": "fischer_p257_b0",
+    "book": "fischer",
+    "page": 257,
+    "boardIndex": 0,
+    "left": 271,
+    "top": 474,
+    "size": 430,
+    "dir": "tool/ebook_boards/fischer/p257_b0"
+  },
+  {
+    "id": "fischer_p258_b0",
+    "book": "fischer",
+    "page": 258,
+    "boardIndex": 0,
+    "left": 378,
+    "top": 1077,
+    "size": 431,
+    "dir": "tool/ebook_boards/fischer/p258_b0"
+  },
+  {
+    "id": "fischer_p259_b0",
+    "book": "fischer",
+    "page": 259,
+    "boardIndex": 0,
+    "left": 211,
+    "top": 486,
+    "size": 471,
+    "dir": "tool/ebook_boards/fischer/p259_b0"
+  },
+  {
+    "id": "fischer_p261_b0",
+    "book": "fischer",
+    "page": 261,
+    "boardIndex": 0,
+    "left": 259,
+    "top": 1353,
+    "size": 428,
+    "dir": "tool/ebook_boards/fischer/p261_b0"
+  },
+  {
+    "id": "fischer_p262_b0",
+    "book": "fischer",
+    "page": 262,
+    "boardIndex": 0,
+    "left": 383,
+    "top": 1091,
+    "size": 447,
+    "dir": "tool/ebook_boards/fischer/p262_b0"
+  },
+  {
+    "id": "fischer_p264_b0",
+    "book": "fischer",
+    "page": 264,
+    "boardIndex": 0,
+    "left": 344,
+    "top": 252,
+    "size": 478,
+    "dir": "tool/ebook_boards/fischer/p264_b0"
+  },
+  {
+    "id": "fischer_p266_b0",
+    "book": "fischer",
+    "page": 266,
+    "boardIndex": 0,
+    "left": 334,
+    "top": 977,
+    "size": 441,
+    "dir": "tool/ebook_boards/fischer/p266_b0"
+  },
+  {
+    "id": "fischer_p267_b0",
+    "book": "fischer",
+    "page": 267,
+    "boardIndex": 0,
+    "left": 301,
+    "top": 1398,
+    "size": 432,
+    "dir": "tool/ebook_boards/fischer/p267_b0"
+  },
+  {
+    "id": "fischer_p268_b0",
+    "book": "fischer",
+    "page": 268,
+    "boardIndex": 0,
+    "left": 360,
+    "top": 1084,
+    "size": 454,
+    "dir": "tool/ebook_boards/fischer/p268_b0"
+  },
+  {
+    "id": "fischer_p270_b0",
+    "book": "fischer",
+    "page": 270,
+    "boardIndex": 0,
+    "left": 366,
+    "top": 991,
+    "size": 428,
+    "dir": "tool/ebook_boards/fischer/p270_b0"
+  },
+  {
+    "id": "fischer_p271_b0",
+    "book": "fischer",
+    "page": 271,
+    "boardIndex": 0,
+    "left": 295,
+    "top": 1014,
+    "size": 436,
+    "dir": "tool/ebook_boards/fischer/p271_b0"
+  },
+  {
+    "id": "fischer_p272_b0",
+    "book": "fischer",
+    "page": 272,
+    "boardIndex": 0,
+    "left": 368,
+    "top": 1566,
+    "size": 434,
+    "dir": "tool/ebook_boards/fischer/p272_b0"
+  },
+  {
+    "id": "fischer_p273_b0",
+    "book": "fischer",
+    "page": 273,
+    "boardIndex": 0,
+    "left": 285,
+    "top": 930,
+    "size": 437,
+    "dir": "tool/ebook_boards/fischer/p273_b0"
+  },
+  {
+    "id": "fischer_p274_b0",
+    "book": "fischer",
+    "page": 274,
+    "boardIndex": 0,
+    "left": 367,
+    "top": 1499,
+    "size": 430,
+    "dir": "tool/ebook_boards/fischer/p274_b0"
+  },
+  {
+    "id": "fischer_p277_b0",
+    "book": "fischer",
+    "page": 277,
+    "boardIndex": 0,
+    "left": 263,
+    "top": 197,
+    "size": 436,
+    "dir": "tool/ebook_boards/fischer/p277_b0"
+  },
+  {
+    "id": "fischer_p277_b1",
+    "book": "fischer",
+    "page": 277,
+    "boardIndex": 1,
+    "left": 265,
+    "top": 1502,
+    "size": 435,
+    "dir": "tool/ebook_boards/fischer/p277_b1"
+  },
+  {
+    "id": "fischer_p278_b0",
+    "book": "fischer",
+    "page": 278,
+    "boardIndex": 0,
+    "left": 336,
+    "top": 1068,
+    "size": 441,
+    "dir": "tool/ebook_boards/fischer/p278_b0"
+  },
+  {
+    "id": "fischer_p279_b0",
+    "book": "fischer",
+    "page": 279,
+    "boardIndex": 0,
+    "left": 172,
+    "top": 642,
+    "size": 512,
+    "dir": "tool/ebook_boards/fischer/p279_b0"
+  },
+  {
+    "id": "fischer_p281_b0",
+    "book": "fischer",
+    "page": 281,
+    "boardIndex": 0,
+    "left": 290,
+    "top": 972,
+    "size": 443,
+    "dir": "tool/ebook_boards/fischer/p281_b0"
+  },
+  {
+    "id": "fischer_p282_b0",
+    "book": "fischer",
+    "page": 282,
+    "boardIndex": 0,
+    "left": 377,
+    "top": 579,
+    "size": 434,
+    "dir": "tool/ebook_boards/fischer/p282_b0"
+  },
+  {
+    "id": "fischer_p284_b0",
+    "book": "fischer",
+    "page": 284,
+    "boardIndex": 0,
+    "left": 360,
+    "top": 425,
+    "size": 427,
+    "dir": "tool/ebook_boards/fischer/p284_b0"
+  },
+  {
+    "id": "fischer_p285_b0",
+    "book": "fischer",
+    "page": 285,
+    "boardIndex": 0,
+    "left": 282,
+    "top": 722,
+    "size": 435,
+    "dir": "tool/ebook_boards/fischer/p285_b0"
+  },
+  {
+    "id": "fischer_p287_b0",
+    "book": "fischer",
+    "page": 287,
+    "boardIndex": 0,
+    "left": 252,
+    "top": 1566,
+    "size": 435,
+    "dir": "tool/ebook_boards/fischer/p287_b0"
+  },
+  {
+    "id": "fischer_p288_b0",
+    "book": "fischer",
+    "page": 288,
+    "boardIndex": 0,
+    "left": 350,
+    "top": 885,
+    "size": 440,
+    "dir": "tool/ebook_boards/fischer/p288_b0"
+  },
+  {
+    "id": "fischer_p290_b0",
+    "book": "fischer",
+    "page": 290,
+    "boardIndex": 0,
+    "left": 268,
+    "top": 372,
+    "size": 505,
+    "dir": "tool/ebook_boards/fischer/p290_b0"
+  },
+  {
+    "id": "fischer_p292_b0",
+    "book": "fischer",
+    "page": 292,
+    "boardIndex": 0,
+    "left": 360,
+    "top": 1795,
+    "size": 433,
+    "dir": "tool/ebook_boards/fischer/p292_b0"
+  },
+  {
+    "id": "fischer_p294_b0",
+    "book": "fischer",
+    "page": 294,
+    "boardIndex": 0,
+    "left": 358,
+    "top": 236,
+    "size": 429,
+    "dir": "tool/ebook_boards/fischer/p294_b0"
+  },
+  {
+    "id": "fischer_p295_b0",
+    "book": "fischer",
+    "page": 295,
+    "boardIndex": 0,
+    "left": 278,
+    "top": 709,
+    "size": 440,
+    "dir": "tool/ebook_boards/fischer/p295_b0"
+  },
+  {
+    "id": "fischer_p296_b0",
+    "book": "fischer",
+    "page": 296,
+    "boardIndex": 0,
+    "left": 264,
+    "top": 1170,
+    "size": 510,
+    "dir": "tool/ebook_boards/fischer/p296_b0"
+  },
+  {
+    "id": "fischer_p299_b0",
+    "book": "fischer",
+    "page": 299,
+    "boardIndex": 0,
+    "left": 291,
+    "top": 173,
+    "size": 440,
+    "dir": "tool/ebook_boards/fischer/p299_b0"
+  },
+  {
+    "id": "fischer_p300_b0",
+    "book": "fischer",
+    "page": 300,
+    "boardIndex": 0,
+    "left": 342,
+    "top": 880,
+    "size": 437,
+    "dir": "tool/ebook_boards/fischer/p300_b0"
+  },
+  {
+    "id": "fischer_p301_b0",
+    "book": "fischer",
+    "page": 301,
+    "boardIndex": 0,
+    "left": 196,
+    "top": 939,
+    "size": 497,
+    "dir": "tool/ebook_boards/fischer/p301_b0"
+  },
+  {
+    "id": "fischer_p302_b0",
+    "book": "fischer",
+    "page": 302,
+    "boardIndex": 0,
+    "left": 356,
+    "top": 1658,
+    "size": 445,
+    "dir": "tool/ebook_boards/fischer/p302_b0"
+  },
+  {
+    "id": "fischer_p304_b0",
+    "book": "fischer",
+    "page": 304,
+    "boardIndex": 0,
+    "left": 375,
+    "top": 663,
+    "size": 429,
+    "dir": "tool/ebook_boards/fischer/p304_b0"
+  },
+  {
+    "id": "fischer_p305_b0",
+    "book": "fischer",
+    "page": 305,
+    "boardIndex": 0,
+    "left": 278,
+    "top": 446,
+    "size": 438,
+    "dir": "tool/ebook_boards/fischer/p305_b0"
+  },
+  {
+    "id": "fischer_p307_b0",
+    "book": "fischer",
+    "page": 307,
+    "boardIndex": 0,
+    "left": 259,
+    "top": 1145,
+    "size": 436,
+    "dir": "tool/ebook_boards/fischer/p307_b0"
+  },
+  {
+    "id": "fischer_p308_b0",
+    "book": "fischer",
+    "page": 308,
+    "boardIndex": 0,
+    "left": 297,
+    "top": 1090,
+    "size": 438,
+    "dir": "tool/ebook_boards/fischer/p308_b0"
+  },
+  {
+    "id": "fischer_p309_b0",
+    "book": "fischer",
+    "page": 309,
+    "boardIndex": 0,
+    "left": 280,
+    "top": 1115,
+    "size": 432,
+    "dir": "tool/ebook_boards/fischer/p309_b0"
+  },
+  {
+    "id": "fischer_p310_b0",
+    "book": "fischer",
+    "page": 310,
+    "boardIndex": 0,
+    "left": 332,
+    "top": 905,
+    "size": 439,
+    "dir": "tool/ebook_boards/fischer/p310_b0"
+  },
+  {
+    "id": "fischer_p312_b0",
+    "book": "fischer",
+    "page": 312,
+    "boardIndex": 0,
+    "left": 312,
+    "top": 199,
+    "size": 435,
+    "dir": "tool/ebook_boards/fischer/p312_b0"
+  },
+  {
+    "id": "fischer_p314_b0",
+    "book": "fischer",
+    "page": 314,
+    "boardIndex": 0,
+    "left": 329,
+    "top": 334,
+    "size": 436,
+    "dir": "tool/ebook_boards/fischer/p314_b0"
+  },
+  {
+    "id": "fischer_p315_b0",
+    "book": "fischer",
+    "page": 315,
+    "boardIndex": 0,
+    "left": 310,
+    "top": 202,
+    "size": 433,
+    "dir": "tool/ebook_boards/fischer/p315_b0"
+  },
+  {
+    "id": "fischer_p316_b0",
+    "book": "fischer",
+    "page": 316,
+    "boardIndex": 0,
+    "left": 290,
+    "top": 531,
+    "size": 437,
+    "dir": "tool/ebook_boards/fischer/p316_b0"
+  },
+  {
+    "id": "fischer_p317_b0",
+    "book": "fischer",
+    "page": 317,
+    "boardIndex": 0,
+    "left": 301,
+    "top": 1605,
+    "size": 432,
+    "dir": "tool/ebook_boards/fischer/p317_b0"
+  },
+  {
+    "id": "fischer_p319_b0",
+    "book": "fischer",
+    "page": 319,
+    "boardIndex": 0,
+    "left": 269,
+    "top": 1166,
+    "size": 451,
+    "dir": "tool/ebook_boards/fischer/p319_b0"
+  },
+  {
+    "id": "fischer_p320_b0",
+    "book": "fischer",
+    "page": 320,
+    "boardIndex": 0,
+    "left": 279,
+    "top": 619,
+    "size": 464,
+    "dir": "tool/ebook_boards/fischer/p320_b0"
+  },
+  {
+    "id": "fischer_p321_b0",
+    "book": "fischer",
+    "page": 321,
+    "boardIndex": 0,
+    "left": 282,
+    "top": 190,
+    "size": 449,
+    "dir": "tool/ebook_boards/fischer/p321_b0"
+  },
+  {
+    "id": "fischer_p322_b0",
+    "book": "fischer",
+    "page": 322,
+    "boardIndex": 0,
+    "left": 326,
+    "top": 192,
+    "size": 439,
+    "dir": "tool/ebook_boards/fischer/p322_b0"
+  },
+  {
+    "id": "fischer_p323_b0",
+    "book": "fischer",
+    "page": 323,
+    "boardIndex": 0,
+    "left": 231,
+    "top": 1036,
+    "size": 509,
+    "dir": "tool/ebook_boards/fischer/p323_b0"
+  },
+  {
+    "id": "fischer_p325_b0",
+    "book": "fischer",
+    "page": 325,
+    "boardIndex": 0,
+    "left": 310,
+    "top": 1602,
+    "size": 437,
+    "dir": "tool/ebook_boards/fischer/p325_b0"
+  },
+  {
+    "id": "fischer_p327_b0",
+    "book": "fischer",
+    "page": 327,
+    "boardIndex": 0,
+    "left": 282,
+    "top": 191,
+    "size": 452,
+    "dir": "tool/ebook_boards/fischer/p327_b0"
+  },
+  {
+    "id": "fischer_p328_b0",
+    "book": "fischer",
+    "page": 328,
+    "boardIndex": 0,
+    "left": 326,
+    "top": 234,
+    "size": 432,
+    "dir": "tool/ebook_boards/fischer/p328_b0"
+  },
+  {
+    "id": "fischer_p329_b0",
+    "book": "fischer",
+    "page": 329,
+    "boardIndex": 0,
+    "left": 332,
+    "top": 1296,
+    "size": 437,
+    "dir": "tool/ebook_boards/fischer/p329_b0"
+  },
+  {
+    "id": "fischer_p333_b0",
+    "book": "fischer",
+    "page": 333,
+    "boardIndex": 0,
+    "left": 298,
+    "top": 202,
+    "size": 442,
+    "dir": "tool/ebook_boards/fischer/p333_b0"
+  },
+  {
+    "id": "fischer_p334_b0",
+    "book": "fischer",
+    "page": 334,
+    "boardIndex": 0,
+    "left": 293,
+    "top": 485,
+    "size": 437,
+    "dir": "tool/ebook_boards/fischer/p334_b0"
+  },
+  {
+    "id": "fischer_p335_b0",
+    "book": "fischer",
+    "page": 335,
+    "boardIndex": 0,
+    "left": 307,
+    "top": 1615,
+    "size": 438,
+    "dir": "tool/ebook_boards/fischer/p335_b0"
+  },
+  {
+    "id": "fischer_p336_b0",
+    "book": "fischer",
+    "page": 336,
+    "boardIndex": 0,
+    "left": 340,
+    "top": 1782,
+    "size": 432,
+    "dir": "tool/ebook_boards/fischer/p336_b0"
+  },
+  {
+    "id": "fischer_p337_b0",
+    "book": "fischer",
+    "page": 337,
+    "boardIndex": 0,
+    "left": 287,
+    "top": 1487,
+    "size": 441,
+    "dir": "tool/ebook_boards/fischer/p337_b0"
+  },
+  {
+    "id": "fischer_p339_b0",
+    "book": "fischer",
+    "page": 339,
+    "boardIndex": 0,
+    "left": 324,
+    "top": 618,
+    "size": 428,
+    "dir": "tool/ebook_boards/fischer/p339_b0"
+  },
+  {
+    "id": "fischer_p340_b0",
+    "book": "fischer",
+    "page": 340,
+    "boardIndex": 0,
+    "left": 303,
+    "top": 1800,
+    "size": 436,
+    "dir": "tool/ebook_boards/fischer/p340_b0"
+  },
+  {
+    "id": "fischer_p342_b0",
+    "book": "fischer",
+    "page": 342,
+    "boardIndex": 0,
+    "left": 208,
+    "top": 225,
+    "size": 486,
+    "dir": "tool/ebook_boards/fischer/p342_b0"
+  },
+  {
+    "id": "fischer_p344_b0",
+    "book": "fischer",
+    "page": 344,
+    "boardIndex": 0,
+    "left": 320,
+    "top": 186,
+    "size": 434,
+    "dir": "tool/ebook_boards/fischer/p344_b0"
+  },
+  {
+    "id": "fischer_p346_b0",
+    "book": "fischer",
+    "page": 346,
+    "boardIndex": 0,
+    "left": 335,
+    "top": 205,
+    "size": 436,
+    "dir": "tool/ebook_boards/fischer/p346_b0"
+  },
+  {
+    "id": "fischer_p347_b0",
+    "book": "fischer",
+    "page": 347,
+    "boardIndex": 0,
+    "left": 302,
+    "top": 1509,
+    "size": 431,
+    "dir": "tool/ebook_boards/fischer/p347_b0"
+  },
+  {
+    "id": "fischer_p348_b0",
+    "book": "fischer",
+    "page": 348,
+    "boardIndex": 0,
+    "left": 333,
+    "top": 1542,
+    "size": 427,
+    "dir": "tool/ebook_boards/fischer/p348_b0"
+  },
+  {
+    "id": "fischer_p351_b0",
+    "book": "fischer",
+    "page": 351,
+    "boardIndex": 0,
+    "left": 263,
+    "top": 220,
+    "size": 446,
+    "dir": "tool/ebook_boards/fischer/p351_b0"
+  },
+  {
+    "id": "fischer_p352_b0",
+    "book": "fischer",
+    "page": 352,
+    "boardIndex": 0,
+    "left": 342,
+    "top": 476,
+    "size": 432,
+    "dir": "tool/ebook_boards/fischer/p352_b0"
+  },
+  {
+    "id": "fischer_p353_b0",
+    "book": "fischer",
+    "page": 353,
+    "boardIndex": 0,
+    "left": 344,
+    "top": 639,
+    "size": 425,
+    "dir": "tool/ebook_boards/fischer/p353_b0"
+  },
+  {
+    "id": "fischer_p354_b0",
+    "book": "fischer",
+    "page": 354,
+    "boardIndex": 0,
+    "left": 315,
+    "top": 427,
+    "size": 431,
+    "dir": "tool/ebook_boards/fischer/p354_b0"
+  },
+  {
+    "id": "fischer_p355_b0",
+    "book": "fischer",
+    "page": 355,
+    "boardIndex": 0,
+    "left": 304,
+    "top": 1715,
+    "size": 423,
+    "dir": "tool/ebook_boards/fischer/p355_b0"
+  },
+  {
+    "id": "fischer_p356_b0",
+    "book": "fischer",
+    "page": 356,
+    "boardIndex": 0,
+    "left": 330,
+    "top": 963,
+    "size": 434,
+    "dir": "tool/ebook_boards/fischer/p356_b0"
+  },
+  {
+    "id": "fischer_p357_b0",
+    "book": "fischer",
+    "page": 357,
+    "boardIndex": 0,
+    "left": 324,
+    "top": 737,
+    "size": 431,
+    "dir": "tool/ebook_boards/fischer/p357_b0"
+  },
+  {
+    "id": "fischer_p358_b0",
+    "book": "fischer",
+    "page": 358,
+    "boardIndex": 0,
+    "left": 210,
+    "top": 512,
+    "size": 482,
+    "dir": "tool/ebook_boards/fischer/p358_b0"
+  },
+  {
+    "id": "fischer_p360_b0",
+    "book": "fischer",
+    "page": 360,
+    "boardIndex": 0,
+    "left": 295,
+    "top": 216,
+    "size": 438,
+    "dir": "tool/ebook_boards/fischer/p360_b0"
+  },
+  {
+    "id": "fischer_p361_b0",
+    "book": "fischer",
+    "page": 361,
+    "boardIndex": 0,
+    "left": 353,
+    "top": 1159,
+    "size": 433,
+    "dir": "tool/ebook_boards/fischer/p361_b0"
+  },
+  {
+    "id": "fischer_p362_b0",
+    "book": "fischer",
+    "page": 362,
+    "boardIndex": 0,
+    "left": 317,
+    "top": 1407,
+    "size": 431,
+    "dir": "tool/ebook_boards/fischer/p362_b0"
+  },
+  {
+    "id": "fischer_p364_b0",
+    "book": "fischer",
+    "page": 364,
+    "boardIndex": 0,
+    "left": 293,
+    "top": 1016,
+    "size": 444,
+    "dir": "tool/ebook_boards/fischer/p364_b0"
+  },
+  {
+    "id": "fischer_p365_b0",
+    "book": "fischer",
+    "page": 365,
+    "boardIndex": 0,
+    "left": 298,
+    "top": 953,
+    "size": 459,
+    "dir": "tool/ebook_boards/fischer/p365_b0"
+  },
+  {
+    "id": "fischer_p368_b0",
+    "book": "fischer",
+    "page": 368,
+    "boardIndex": 0,
+    "left": 275,
+    "top": 892,
+    "size": 431,
+    "dir": "tool/ebook_boards/fischer/p368_b0"
+  },
+  {
+    "id": "fischer_p370_b0",
+    "book": "fischer",
+    "page": 370,
+    "boardIndex": 0,
+    "left": 337,
+    "top": 654,
+    "size": 429,
+    "dir": "tool/ebook_boards/fischer/p370_b0"
+  },
+  {
+    "id": "fischer_p372_b0",
+    "book": "fischer",
+    "page": 372,
+    "boardIndex": 0,
+    "left": 291,
+    "top": 1428,
+    "size": 444,
+    "dir": "tool/ebook_boards/fischer/p372_b0"
+  },
+  {
+    "id": "fischer_p374_b0",
+    "book": "fischer",
+    "page": 374,
+    "boardIndex": 0,
+    "left": 283,
+    "top": 235,
+    "size": 428,
+    "dir": "tool/ebook_boards/fischer/p374_b0"
+  },
+  {
+    "id": "fischer_p375_b0",
+    "book": "fischer",
+    "page": 375,
+    "boardIndex": 0,
+    "left": 353,
+    "top": 1080,
+    "size": 423,
+    "dir": "tool/ebook_boards/fischer/p375_b0"
+  },
+  {
+    "id": "fischer_p377_b0",
+    "book": "fischer",
+    "page": 377,
+    "boardIndex": 0,
+    "left": 317,
+    "top": 397,
+    "size": 428,
+    "dir": "tool/ebook_boards/fischer/p377_b0"
+  },
+  {
+    "id": "fischer_p378_b0",
+    "book": "fischer",
+    "page": 378,
+    "boardIndex": 0,
+    "left": 328,
+    "top": 403,
+    "size": 425,
+    "dir": "tool/ebook_boards/fischer/p378_b0"
+  },
+  {
+    "id": "fischer_p379_b0",
+    "book": "fischer",
+    "page": 379,
+    "boardIndex": 0,
+    "left": 367,
+    "top": 884,
+    "size": 430,
+    "dir": "tool/ebook_boards/fischer/p379_b0"
+  }
+]
