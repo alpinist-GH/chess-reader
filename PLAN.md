@@ -2,7 +2,7 @@
 
 ## Context
 
-Build a fully offline, cross-platform (Windows, macOS, Android, iOS) Flutter app that turns PDF/EPUB chess books into interactive books: moves printed in the text become clickable and an on-screen board follows along, an embedded Stockfish analyzes any position, and a local vision AI converts printed chess diagrams into board positions (like chessvision.ai, but with no server). The user's rough spec is `multi_platform_project_plan_v2.md`.
+Build a fully offline, cross-platform (Windows, macOS, Android, iOS) Flutter app that turns PDF/EPUB chess books into interactive books: moves printed in the text become clickable and an on-screen board follows along, an embedded Stockfish analyzes any position, and a local vision AI converts printed chess diagrams into board positions (like chessvision.ai, but with no server).
 
 **UX reference: Forward Chess** (forwardchess.com — the commercial benchmark for interactive chess books). Patterns to adopt:
 - Tap any move in the text → board instantly snaps to that position (core interaction).

@@ -4,6 +4,21 @@ All notable changes to ChessBook Reader are documented here. The project loosely
 follows [Keep a Changelog](https://keepachangelog.com/) and
 [Semantic Versioning](https://semver.org/).
 
+## [2.1.0] — 2026-09-11
+
+### Changed
+- **Diagram recognition model retrained and improved.** The board-square
+  classifier used to read printed diagrams was retrained on an expanded,
+  hand-verified corpus (7 books, 1,821 board diagrams, including newly added
+  *The Art of Attack in Chess*, *How to Reassess Your Chess*, and *The Life
+  and Games of Mikhail Tal*), with corrected ground-truth labels and
+  consistent extraction resolution across all source books. Training now
+  uses plateau-based early stopping validated against the full corpus's
+  post-repair legality rate rather than a fixed epoch count. Overall
+  repaired-board legality improved from 97.2% to 97.9%, and hand-verified
+  cell accuracy from 99.22% to 99.34%, with the largest gains on books that
+  previously read worst.
+
 ## [2.0.0] — 2026-09-09
 
 ### Added
