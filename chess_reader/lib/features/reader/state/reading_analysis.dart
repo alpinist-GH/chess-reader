@@ -176,6 +176,10 @@ class ReadingAnalysis extends Notifier<ReadingAnalysisState> {
 
   /// Start a separate game without discarding the book or earlier analysis.
   void newGame(Object sourceKey) {
+    if (_book == null) {
+      ref.read(gameSessionProvider.notifier).reset();
+      return;
+    }
     final id = state.nodes.length;
     final number =
         state.nodes.where((n) => n.label.startsWith('New game ')).length + 1;

@@ -121,6 +121,21 @@ class _BranchChoices extends StatelessWidget {
 class _SavedLinesDialog extends ConsumerWidget {
   const _SavedLinesDialog();
 
+  String _formatLocation(String location) {
+    if (location.startsWith('int:')) {
+      return 'Page ${location.substring(4)}';
+    }
+    if (location.startsWith('String:pg')) {
+      final idx = int.tryParse(location.substring(9));
+      return 'Page ${idx != null ? idx + 1 : location.substring(9)}';
+    }
+    if (location.startsWith('String:ch')) {
+      final idx = int.tryParse(location.substring(9));
+      return 'Chapter ${idx != null ? idx + 1 : location.substring(9)}';
+    }
+    return location;
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final tree = ref.watch(readingAnalysisProvider);
@@ -172,12 +187,7 @@ class _SavedLinesDialog extends ConsumerWidget {
                       ),
                       title: Text(node.label),
                       subtitle: node.parent == null
-                          ? Text(
-                              node.location.replaceFirst(
-                                'int:',
-                                'Page / chapter ',
-                              ),
-                            )
+                          ? Text(_formatLocation(node.location))
                           : tree.main == id
                           ? const Text('Main-line return point')
                           : null,

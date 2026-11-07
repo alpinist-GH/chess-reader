@@ -216,7 +216,9 @@ class _DiagramAnchorsOverlay extends ConsumerWidget {
                 final ok = ref
                     .read(gameSessionProvider.notifier)
                     .loadFen(d.fen, turnRecoverable: true);
-                if (!ok) {
+                if (ok) {
+                  ref.read(activeLineProvider.notifier).clear();
+                } else {
                   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
                       content:
                           Text('Could not read this diagram reliably')));

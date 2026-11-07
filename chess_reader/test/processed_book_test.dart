@@ -54,6 +54,8 @@ void main() {
         await exportProcessedBook(source.path, conversion),
       );
       final imported = await importProcessedBook(bundle.path);
+      final reimported = await importProcessedBook(bundle.path);
+      expect(reimported, imported);
       expect(await File(imported).readAsBytes(), [1, 2, 3, 4]);
       // convertBook must return the installed cache even for this synthetic PDF;
       // attempting PDF recognition on these bytes would fail.

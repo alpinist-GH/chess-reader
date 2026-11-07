@@ -75,7 +75,11 @@ Future<String> importProcessedBook(String path) async {
   final support = await getApplicationSupportDirectory();
   final root = Directory(p.join(support.path, 'books'));
   await root.create(recursive: true);
-  final directory = await root.createTemp('processed_');
+  final baseName = p.basenameWithoutExtension(decoded.$1);
+  final key = '${baseName}_${decoded.$3.length}';
+  final directory = Directory(p.join(root.path, key));
+  final existed = directory.existsSync();
+  await directory.create(recursive: true);
   try {
     final book = File(p.join(directory.path, decoded.$1));
     await book.writeAsBytes(decoded.$3, flush: true);
@@ -92,7 +96,9 @@ Future<String> importProcessedBook(String path) async {
     );
     return book.path;
   } catch (_) {
-    await directory.delete(recursive: true);
+    if (!existed && directory.existsSync()) {
+      await directory.delete(recursive: true);
+    }
     rethrow;
   }
 }

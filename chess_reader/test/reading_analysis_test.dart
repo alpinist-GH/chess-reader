@@ -239,4 +239,16 @@ void main() {
       expect(c.read(readingAnalysisProvider).nodes, isEmpty);
     },
   );
+
+  test('newGame when no book is open resets board without saving nodes', () {
+    final analysis = c.read(readingAnalysisProvider.notifier);
+    final session = c.read(gameSessionProvider.notifier);
+    analysis.open(null);
+    session.playMove(Move.parse('e2e4')!);
+    expect(c.read(gameSessionProvider).fen, isNot(Chess.initial.fen));
+    analysis.newGame(1);
+    expect(c.read(gameSessionProvider).fen, Chess.initial.fen);
+    expect(c.read(readingAnalysisProvider).nodes, isEmpty);
+    expect(c.read(readingAnalysisProvider).cursor, isNull);
+  });
 }

@@ -588,7 +588,7 @@ class ChessnutController extends Notifier<ChessnutState>
         settings.chessnutDeviceId != deviceId) {
       return;
     }
-    await connectToDevice(deviceId);
+    await connectToDevice(deviceId, nameHint: settings.chessnutDeviceName);
   }
 
   Future<void> disconnect() async {
@@ -761,6 +761,7 @@ class ChessnutController extends Notifier<ChessnutState>
           : 'Synchronization paused.',
     );
     if (wasMoving &&
+        boardModel.canMovePieces &&
         deviceId != null &&
         state.isConnected &&
         _transport.motionProtocolVerified) {

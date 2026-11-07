@@ -214,10 +214,9 @@ class _BoardPanelState extends ConsumerState<BoardPanel> {
                   opponent.ownsBoard || guess.phase != GuessMovePhase.idle
                   ? null
                   : () {
-                      final source =
+                      final Object source =
                           ref.read(activeLineProvider)?.sourceKey ??
-                          ref.read(currentPageProvider) ??
-                          1;
+                          ref.read(currentPageProvider);
                       ref.read(activeLineProvider.notifier).clear();
                       ref
                           .read(readingAnalysisProvider.notifier)
