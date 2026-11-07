@@ -46,3 +46,8 @@ chess_reader/packages/multistockfish_sf16/android/.cxx/
 
 # macOS AppleDouble resource-fork files (created when copying via Finder/AFP)
 ._*
+
+# macOS metadata and Python bytecode
+.DS_Store
+__pycache__/
+chess_reader/tool/camera_models/
