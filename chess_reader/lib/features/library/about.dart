@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// App version shown in the About box. Keep in sync with pubspec `version`.
-const String kAppVersion = '2.0.0';
+const String kAppVersion = '2.2.0';
 
 /// Where users can obtain the corresponding source code. Bundling Stockfish
 /// (GPL v3) obliges us to offer its source; we link both upstream Stockfish
@@ -58,12 +58,42 @@ void showAppAboutDialog(BuildContext context) {
         '• Analyse any position with the built-in Stockfish engine.\n'
         '• Automatically detects printed diagrams and reads them into '
         'positions you can load with one tap.\n'
+        '• Misread a diagram? Load it, fix the FEN with "Set position from '
+        'FEN" and save it as a correction. It is remembered when you reopen '
+        'the book, can be reset to the detected position, and travels with '
+        'the exported book.\n'
+        '• Your reading analysis is saved per book: main lines and '
+        'variations are kept, with a saved-line picker, previous/next '
+        'navigation and a direct way back to the main line. The analysis and '
+        'board position are restored when you reopen the book.\n'
+        '• "New game" starts from the initial position without closing the '
+        'book or losing earlier games; inline move choices show main-line '
+        'continuations and variations.\n'
+        '• "Find chess books" is available from the reader\'s menu while a '
+        'book is open.\n'
         '• Converts books to a reflowed reading view and can export them as '
-        'standalone HTML.\n\n'
+        'standalone HTML.\n'
+        '• Exports a processed book (the original plus its detected diagrams '
+        'and your corrections) as a ZIP you can import on another device '
+        'without converting it again.\n\n'
         'Pro unlocks:\n'
-        '• Syncing a Chessnut electronic board.\n'
+        '• Syncing a Chessnut electronic board: Move, plus Evo, Air and Go '
+        'with LED-guided manual placement (Evo, Air and Go are experimental '
+        'until confirmed on hardware).\n'
         '• Playing against the computer.\n'
         '• Guess the Move training.\n\n'
+        'Recent fixes:\n'
+        '• Saved lines stay connected and on the current line after undo and '
+        '"Back to book", and printed lines survive transpositions.\n'
+        '• Analysis is kept for diagrams with an impossible check.\n'
+        '• The analysis bar no longer squeezes the board on phones, and the '
+        'library scrolls in short panes.\n'
+        '• Importing a processed book never replaces a different book with '
+        'the same name and size, leaves identical files untouched and '
+        'refreshes the book if it is already open.\n'
+        '• Chessnut: manual-board LEDs clear on pause, Resume uses the last '
+        'board report, and a dead Evo service connection is released before '
+        'reconnecting.\n\n'
         'Everything runs locally — no internet connection or server is '
         'required.',
       ),

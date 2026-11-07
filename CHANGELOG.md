@@ -19,6 +19,11 @@ follows [Keep a Changelog](https://keepachangelog.com/) and
 - Export a processed book (the original plus its detection results) as a ZIP and
   import it on another device without converting it again.
 - "Find chess books" in the reader's menu, available while a book is open.
+- Save corrected diagram positions. Editing a loaded diagram's FEN via "Set
+  position from FEN" can now be saved as a per-book correction that persists
+  across sessions and detector upgrades, is marked on the diagram, can be reset
+  to the detected position, and is included in processed-book export/import
+  (merged on import; local edits win).
 
 ## [2.1.0] — 2026-09-11
 
