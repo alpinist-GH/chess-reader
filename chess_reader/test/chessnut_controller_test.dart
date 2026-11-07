@@ -66,7 +66,7 @@ void main() {
       await controller.connectToDevice(FakeChessnutBoard.fakeDeviceId);
       final state = container.read(chessnutControllerProvider);
       expect(state.connectionState, ChessnutConnectionState.error);
-      expect(state.lastError, contains('missing required Chessnut Move'));
+      expect(state.lastError, contains('missing required Chessnut'));
     });
 
     test('auto-synchronizes without Start/Resume when the board already matches the app', () async {

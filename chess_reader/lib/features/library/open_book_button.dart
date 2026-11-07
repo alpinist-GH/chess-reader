@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../reader/state/book_providers.dart';
 import '../reader/data/processed_book.dart';
+import '../reader/state/conversion_provider.dart';
 
 class OpenBookButton extends ConsumerWidget {
   const OpenBookButton({super.key, this.filled = false, this.tooltip});
@@ -35,9 +36,15 @@ class OpenBookButton extends ConsumerWidget {
       );
       if (file != null) {
         try {
-          final path = file.path.toLowerCase().endsWith('.zip')
+          final isProcessed = file.path.toLowerCase().endsWith('.zip');
+          final path = isProcessed
               ? await importProcessedBook(file.path)
               : file.path;
+          if (isProcessed) {
+            // The import can replace a conversion already held for this path.
+            ref.invalidate(conversionCachedProvider(path));
+            ref.invalidate(conversionProvider(path));
+          }
           await ref.read(openedBookProvider.notifier).open(path);
         } catch (e) {
           if (context.mounted) {

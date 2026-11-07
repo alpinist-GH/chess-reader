@@ -1,3 +1,5 @@
+import 'package:chess_reader/core/entitlements/purchase_service.dart';
+import 'fakes/fake_pro_store_gateway.dart';
 import 'package:chess_reader/core/models/move_token.dart';
 import 'package:chess_reader/core/entitlements/pro_entitlement.dart';
 import 'package:chess_reader/core/entitlements/pro_trial.dart';
@@ -21,7 +23,10 @@ void main() {
       SharedPreferences.setMockInitialValues({});
       final prefs = await SharedPreferences.getInstance();
       final container = ProviderContainer(
-        overrides: [sharedPrefsProvider.overrideWithValue(prefs)],
+        overrides: [
+          sharedPrefsProvider.overrideWithValue(prefs),
+          proStoreGatewayProvider.overrideWithValue(FakeProStoreGateway()),
+        ],
       );
       addTearDown(container.dispose);
 

@@ -86,4 +86,57 @@ void main() {
       expect(Directory('${dir.path}/books').existsSync(), false);
     },
   );
+
+  Future<File> bundleOf(String name, List<int> bytes, String label) async {
+    final source = File('${dir.path}/$name');
+    await source.writeAsBytes(bytes);
+    final zip = File('${dir.path}/$label.chessbook.zip');
+    await zip.writeAsBytes(
+      await exportProcessedBook(
+        source.path,
+        BookConversion(
+          title: label,
+          format: 'pdf',
+          sourcePath: source.path,
+          ocrAttempted: false,
+          pages: const [ConvertedPage(index: 1, text: '1. e4')],
+        ),
+      ),
+    );
+    return zip;
+  }
+
+  test(
+    're-import keeps the file timestamp and updates its detection',
+    () async {
+      final first = await importProcessedBook(
+        (await bundleOf('same.pdf', [1, 2, 3], 'first')).path,
+      );
+      final modified = DateTime(2020);
+      File(first).setLastModifiedSync(modified);
+      final second = await importProcessedBook(
+        (await bundleOf('same.pdf', [1, 2, 3], 'second')).path,
+      );
+      expect(second, first);
+      expect(File(first).lastModifiedSync(), modified);
+      final restored = await loadOrConvert(first, DiagramRecognizer());
+      expect(restored.title, 'second');
+      expect(File('$first.partial').existsSync(), isFalse);
+    },
+  );
+
+  test(
+    'a different book with the same name and size is not replaced',
+    () async {
+      final first = await importProcessedBook(
+        (await bundleOf('same.pdf', [1, 2, 3], 'first')).path,
+      );
+      final second = await importProcessedBook(
+        (await bundleOf('same.pdf', [9, 9, 9], 'second')).path,
+      );
+      expect(second, isNot(first));
+      expect(await File(first).readAsBytes(), [1, 2, 3]);
+      expect(await File(second).readAsBytes(), [9, 9, 9]);
+    },
+  );
 }

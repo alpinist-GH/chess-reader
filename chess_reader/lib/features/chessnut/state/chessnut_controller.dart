@@ -425,7 +425,7 @@ class ChessnutController extends Notifier<ChessnutState>
         if (!current()) return;
         if (!servicesValid) {
           throw StateError(
-            'Device is missing required Chessnut Move GATT services.',
+            'Device is missing required Chessnut GATT services.',
           );
         }
 
@@ -751,7 +751,14 @@ class ChessnutController extends Notifier<ChessnutState>
     _completionTimer?.cancel();
     _pendingTargetPlacement = null;
     _inFlightTargetPlacement = null;
-    _latestReportedPlacement = null;
+    // A manual board does not move by itself, so its last report stays true
+    // and Resume can light the differing squares straight away.
+    if (boardModel.canMovePieces) {
+      _latestReportedPlacement = null;
+    } else {
+      _clearBoardLeds();
+      state = state.copyWith(mismatchedSquares: const {});
+    }
     state = state.copyWith(
       syncState: ChessnutSyncState.paused,
       clearPendingTurnRecovery: true,

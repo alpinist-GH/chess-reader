@@ -61,7 +61,7 @@ void showAppAboutDialog(BuildContext context) {
         '• Converts books to a reflowed reading view and can export them as '
         'standalone HTML.\n\n'
         'Pro unlocks:\n'
-        '• Syncing a Chessnut Move electronic board.\n'
+        '• Syncing a Chessnut electronic board.\n'
         '• Playing against the computer.\n'
         '• Guess the Move training.\n\n'
         'Everything runs locally — no internet connection or server is '
@@ -89,10 +89,11 @@ void showAppAboutDialog(BuildContext context) {
       _SourceLink(label: 'ChessBook Reader source code', url: _kAppSourceUrl),
       const SizedBox(height: 12),
       const Text(
-        '"Chessnut Move" is a product and trademark of Chessnut. ChessBook '
+        'Chessnut Move, Evo, Air and Go are products and trademarks of '
+        'Chessnut. ChessBook '
         'Reader is not affiliated with or endorsed by Chessnut; it '
         'independently implements Chessnut\'s published Bluetooth protocol '
-        'to support the Chessnut Move electronic board.',
+        'to support Chessnut electronic boards.',
       ),
     ],
   );

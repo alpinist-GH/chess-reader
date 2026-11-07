@@ -4,7 +4,10 @@ import '../reader/state/reading_analysis.dart';
 import '../reader/state/book_providers.dart';
 
 class ReadingAnalysisBar extends ConsumerWidget {
-  const ReadingAnalysisBar({super.key});
+  const ReadingAnalysisBar({super.key, this.compact = false});
+
+  /// Leaves branch choices to the arrows and Saved lines, for a short panel.
+  final bool compact;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -20,19 +23,19 @@ class ReadingAnalysisBar extends ConsumerWidget {
       actions.select(id);
     }
 
+    // Stays within two short rows: the phone board panel has little height.
+    final hasBranches =
+        !compact && (siblings.length > 1 || children.length > 1);
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Wrap(
-          alignment: WrapAlignment.center,
-          crossAxisAlignment: WrapCrossAlignment.center,
+        ScrollingRow(
           children: [
             IconButton(
               tooltip: 'Previous saved move',
               icon: const Icon(Icons.chevron_left),
-              onPressed: tree.nodes[cursor].parent == null
-                  ? null
-                  : () => select(tree.nodes[cursor].parent!),
+              visualDensity: VisualDensity.compact,
+              onPressed: parent == null ? null : () => select(parent),
             ),
             TextButton.icon(
               icon: const Icon(Icons.account_tree_outlined),
@@ -45,6 +48,7 @@ class ReadingAnalysisBar extends ConsumerWidget {
             IconButton(
               tooltip: 'Next saved move',
               icon: const Icon(Icons.chevron_right),
+              visualDensity: VisualDensity.compact,
               onPressed: children.isEmpty ? null : () => select(children.first),
             ),
             TextButton.icon(
@@ -59,61 +63,81 @@ class ReadingAnalysisBar extends ConsumerWidget {
             ),
           ],
         ),
-        if (siblings.length > 1)
-          _BranchChoices(
-            label: 'Alternatives',
-            ids: siblings,
-            tree: tree,
-            onSelect: select,
-          ),
-        if (children.isNotEmpty)
-          _BranchChoices(
-            label: children.length > 1 ? 'Branches' : 'Continue',
-            ids: children,
-            tree: tree,
-            onSelect: select,
+        if (hasBranches)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 4),
+            child: ScrollingRow(
+              children: [
+                if (siblings.length > 1)
+                  ..._branchChoices(
+                    context,
+                    'Alternatives',
+                    siblings,
+                    tree,
+                    select,
+                  ),
+                if (children.isNotEmpty)
+                  ..._branchChoices(
+                    context,
+                    children.length > 1 ? 'Branches' : 'Continue',
+                    children,
+                    tree,
+                    select,
+                  ),
+              ],
+            ),
           ),
       ],
     );
   }
+
+  List<Widget> _branchChoices(
+    BuildContext context,
+    String label,
+    List<int> ids,
+    ReadingAnalysisState tree,
+    ValueChanged<int> onSelect,
+  ) => [
+    Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 6),
+      child: Text('$label:', style: Theme.of(context).textTheme.labelMedium),
+    ),
+    for (var i = 0; i < ids.length; i++)
+      Padding(
+        padding: const EdgeInsets.only(right: 6),
+        child: ChoiceChip(
+          label: Text(
+            '${tree.nodes[ids[i]].label}${ids.length > 1
+                ? i == 0
+                      ? ' · Main'
+                      : ' · Variation'
+                : ''}',
+          ),
+          selected: tree.cursor == ids[i],
+          onSelected: (_) => onSelect(ids[i]),
+          visualDensity: VisualDensity.compact,
+          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        ),
+      ),
+  ];
 }
 
-class _BranchChoices extends StatelessWidget {
-  const _BranchChoices({
-    required this.label,
-    required this.ids,
-    required this.tree,
-    required this.onSelect,
-  });
-  final String label;
-  final List<int> ids;
-  final ReadingAnalysisState tree;
-  final ValueChanged<int> onSelect;
+/// One centered row that scrolls sideways instead of wrapping when too wide.
+class ScrollingRow extends StatelessWidget {
+  const ScrollingRow({super.key, required this.children});
+  final List<Widget> children;
 
   @override
-  Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.only(bottom: 4),
-    child: Wrap(
-      alignment: WrapAlignment.center,
-      spacing: 6,
-      runSpacing: 4,
-      crossAxisAlignment: WrapCrossAlignment.center,
-      children: [
-        Text('$label:', style: Theme.of(context).textTheme.labelMedium),
-        for (var i = 0; i < ids.length; i++)
-          ChoiceChip(
-            label: Text(
-              '${tree.nodes[ids[i]].label}${ids.length > 1
-                  ? i == 0
-                        ? ' · Main'
-                        : ' · Variation'
-                  : ''}',
-            ),
-            selected: tree.cursor == ids[i],
-            onSelected: (_) => onSelect(ids[i]),
-            visualDensity: VisualDensity.compact,
-          ),
-      ],
+  Widget build(BuildContext context) => LayoutBuilder(
+    builder: (context, constraints) => SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(minWidth: constraints.maxWidth),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: children,
+        ),
+      ),
     ),
   );
 }
@@ -121,9 +145,9 @@ class _BranchChoices extends StatelessWidget {
 class _SavedLinesDialog extends ConsumerWidget {
   const _SavedLinesDialog();
 
-  String _formatLocation(String location) {
+  String _formatLocation(String location, {required bool isEpub}) {
     if (location.startsWith('int:')) {
-      return 'Page ${location.substring(4)}';
+      return '${isEpub ? 'Chapter' : 'Page'} ${location.substring(4)}';
     }
     if (location.startsWith('String:pg')) {
       final idx = int.tryParse(location.substring(9));
@@ -139,6 +163,8 @@ class _SavedLinesDialog extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final tree = ref.watch(readingAnalysisProvider);
+    final isEpub =
+        ref.watch(openedBookProvider)?.toLowerCase().endsWith('.epub') ?? false;
     final rows = <(int, int)>[];
     void visit(int id, int depth) {
       rows.add((id, depth));
@@ -187,7 +213,7 @@ class _SavedLinesDialog extends ConsumerWidget {
                       ),
                       title: Text(node.label),
                       subtitle: node.parent == null
-                          ? Text(_formatLocation(node.location))
+                          ? Text(_formatLocation(node.location, isEpub: isEpub))
                           : tree.main == id
                           ? const Text('Main-line return point')
                           : null,

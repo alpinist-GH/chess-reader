@@ -232,7 +232,7 @@ class ChessnutCodec {
     return command;
   }
 
-  /// Encodes command to highlight specific Chessnut square indices in red (e.g. for mismatch).
+  /// Encodes the Chessnut Go's row-bitmap LED command (10 bytes).
   static Uint8List encodeBitmapLedsCommand(Set<int> squares) {
     final command = Uint8List(10)
       ..[0] = 0x0a
@@ -244,6 +244,7 @@ class ChessnutCodec {
     return command;
   }
 
+  /// Encodes command to highlight specific Chessnut square indices in red (e.g. for mismatch).
   static Uint8List encodeMismatchLedsCommand(Set<int> redSquareIndices) {
     final leds = <int, int>{};
     for (final sq in redSquareIndices) {

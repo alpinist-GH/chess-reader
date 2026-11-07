@@ -1,3 +1,5 @@
+import 'package:chess_reader/core/entitlements/purchase_service.dart';
+import 'fakes/fake_pro_store_gateway.dart';
 import 'package:chess_reader/core/models/move_token.dart';
 import 'package:chess_reader/core/settings/app_settings.dart';
 import 'package:chess_reader/core/state/game_session.dart';
@@ -6,7 +8,9 @@ import 'package:chess_reader/features/reader/state/book_providers.dart';
 import 'package:chess_reader/features/reader/state/reading_analysis.dart';
 import 'package:dartchess/dartchess.dart';
 import 'package:flutter/material.dart';
+import 'package:chess_reader/features/board/board_panel.dart';
 import 'package:chess_reader/features/board/reading_analysis_bar.dart';
+import 'package:chessground/chessground.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -37,7 +41,10 @@ void main() {
     SharedPreferences.setMockInitialValues({});
     prefs = await SharedPreferences.getInstance();
     c = ProviderContainer(
-      overrides: [sharedPrefsProvider.overrideWithValue(prefs)],
+      overrides: [
+        sharedPrefsProvider.overrideWithValue(prefs),
+        proStoreGatewayProvider.overrideWithValue(FakeProStoreGateway()),
+      ],
     );
     c.read(readingAnalysisProvider.notifier).open('book.pdf');
   });
@@ -250,5 +257,124 @@ void main() {
     expect(c.read(gameSessionProvider).fen, Chess.initial.fen);
     expect(c.read(readingAnalysisProvider).nodes, isEmpty);
     expect(c.read(readingAnalysisProvider).cursor, isNull);
+  });
+
+  test('moves played before selecting a book move form one connected line', () {
+    final session = c.read(gameSessionProvider.notifier);
+    session.playMove(Move.parse('e2e4')!);
+    session.playMove(Move.parse('e7e5')!);
+    final tree = c.read(readingAnalysisProvider);
+    expect(tree.nodes.map((n) => n.label), [
+      'Start position',
+      '1.e4',
+      '1...e5',
+    ]);
+    expect(tree.nodes.map((n) => n.parent), [null, 0, 1]);
+    expect(tree.nodes.first.fen, Chess.initial.fen);
+    expect(tree.main, tree.cursor);
+    session.undo();
+    expect(c.read(readingAnalysisProvider).cursor, 1);
+  });
+
+  test('undo and Back to book stay on the current page line', () {
+    final moves = line(['e4', 'e5']);
+    final active = c.read(activeLineProvider.notifier);
+    final session = c.read(gameSessionProvider.notifier);
+    active.select(moves, 0, 1);
+    active.select(moves, 0, 2);
+    final onPageTwo = c.read(readingAnalysisProvider).cursor!;
+    session.playMove(Move.parse('c7c5')!);
+    session.undo();
+    expect(c.read(readingAnalysisProvider).cursor, onPageTwo);
+    session.playMove(Move.parse('c7c5')!);
+    session.backToBook();
+    expect(c.read(readingAnalysisProvider).cursor, onPageTwo);
+  });
+
+  test('selecting another game moves the main-line return point with it', () {
+    final analysis = c.read(readingAnalysisProvider.notifier);
+    final session = c.read(gameSessionProvider.notifier);
+    analysis.newGame(1);
+    session.playMove(Move.parse('e2e4')!);
+    final firstGame = c.read(readingAnalysisProvider).cursor!;
+    final firstGameFen = c.read(gameSessionProvider).fen;
+    session.playMove(Move.parse('e7e5')!);
+    analysis.newGame(1);
+    session.playMove(Move.parse('d2d4')!);
+    analysis.select(firstGame);
+    expect(c.read(readingAnalysisProvider).main, firstGame);
+    session.playMove(Move.parse('c7c5')!);
+    analysis.backToMain();
+    expect(c.read(gameSessionProvider).fen, firstGameFen);
+  });
+
+  test('a diagram with an impossible check survives reopening the book', () {
+    const fen = '4k3/8/8/8/r3K2r/8/8/4r3 w - - 0 1';
+    final session = c.read(gameSessionProvider.notifier);
+    expect(session.loadFen(fen), isTrue);
+    expect(c.read(gameSessionProvider).legal, isTrue);
+    session.playMove(Move.parse('e4d5')!);
+    final count = c.read(readingAnalysisProvider).nodes.length;
+    expect(count, 2);
+    final analysis = c.read(readingAnalysisProvider.notifier);
+    analysis.open('book.pdf');
+    expect(c.read(readingAnalysisProvider).nodes.length, count);
+    analysis.select(0);
+    expect(c.read(gameSessionProvider).fen, fen);
+  });
+
+  test('a printed line stays connected when it transposes into another', () {
+    final analysis = c.read(readingAnalysisProvider.notifier);
+    final session = c.read(gameSessionProvider.notifier);
+    analysis.newGame(1);
+    final root = c.read(readingAnalysisProvider).cursor!;
+    // The earlier nodes reach the printed position by another move order.
+    for (final uci in ['g1f3', 'b8c6', 'b1c3']) {
+      session.playMove(Move.parse(uci)!);
+    }
+    final transposedFen = c.read(gameSessionProvider).fen;
+    analysis.select(root);
+    for (final uci in ['b1c3', 'b8c6', 'g1f3']) {
+      session.playMove(Move.parse(uci)!);
+    }
+    expect(c.read(gameSessionProvider).fen, transposedFen);
+    c
+        .read(activeLineProvider.notifier)
+        .select(line(['Nc3', 'Nc6', 'Nf3', 'e5']), 3, 1);
+    final tree = c.read(readingAnalysisProvider);
+    final labels = <String>[];
+    for (int? id = tree.cursor; id != null; id = tree.nodes[id].parent) {
+      labels.insert(0, tree.nodes[id].label);
+    }
+    expect(labels, ['New game 1', '1.Nc3', '1...Nc6', '2.Nf3', '2...e5']);
+  });
+
+  testWidgets('saved-line controls leave the phone board usable', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 300);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final moves = line(['e4', 'e5']);
+    c
+        .read(activeLineProvider.notifier)
+        .select(
+          [
+            ...moves,
+            ...line(['c5'], start: moves.first.positionAfter),
+          ],
+          0,
+          1,
+        );
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: c,
+        child: const MaterialApp(home: Scaffold(body: BoardPanel())),
+      ),
+    );
+    await tester.pump();
+    expect(tester.takeException(), isNull);
+    expect(tester.getSize(find.byType(Chessboard)).width, greaterThan(120));
+    await tester.pumpWidget(const SizedBox());
   });
 }

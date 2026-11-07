@@ -26,6 +26,8 @@ import 'external_links.dart';
 import 'fen_anchor_dialog.dart';
 import 'reading_analysis_bar.dart';
 
+const _kShortPanelHeight = 480.0;
+
 /// Interactive chessground board bound to the [gameSessionProvider].
 ///
 /// Both sides are playable (free play): the board is the user's analysis
@@ -156,153 +158,177 @@ class _BoardPanelState extends ConsumerState<BoardPanel> {
       enableCoordinates: true,
     );
 
-    return Column(
-      children: [
-        const EnginePanel(),
-        const SizedBox(height: 8),
-        Expanded(
-          child: Center(
-            child: LayoutBuilder(
-              builder: (context, constraints) => Chessboard(
-                controller: _controller,
-                size: min(constraints.maxWidth, constraints.maxHeight),
-                settings: boardSettings,
-                orientation: _orientation,
-                onMove: (move, {viaDragAndDrop}) =>
-                    ref.read(gameSessionProvider.notifier).playMove(move),
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(height: 8),
-        if (guess.phase != GuessMovePhase.idle)
-          const GuessMoveBar()
-        else if (opponent.showsGameBar)
-          const ComputerGameBar()
-        else if (!session.onBookLine)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 4),
-            child: FilledButton.tonalIcon(
-              icon: const Icon(Icons.keyboard_return),
-              label: const Text('Back to book'),
-              onPressed: () =>
-                  ref.read(gameSessionProvider.notifier).backToBook(),
-            ),
-          ),
-        if (!opponent.ownsBoard && guess.phase == GuessMovePhase.idle)
-          const ReadingAnalysisBar(),
-        const ChessnutStatusWidget(),
-        Wrap(
-          alignment: WrapAlignment.center,
-          crossAxisAlignment: WrapCrossAlignment.center,
+    return LayoutBuilder(
+      builder: (context, panel) {
+        // A short panel (the phone default) keeps its height for the board.
+        final short = panel.maxHeight < _kShortPanelHeight;
+        return Column(
           children: [
-            const ChessnutConnectIconButton(),
-            IconButton(
-              tooltip: 'Undo move',
-              icon: const Icon(Icons.undo),
-              onPressed:
-                  (opponent.ownsBoard ||
-                      guess.phase != GuessMovePhase.idle ||
-                      !session.canUndo)
-                  ? null
-                  : () => ref.read(gameSessionProvider.notifier).undo(),
-            ),
-            TextButton.icon(
-              icon: const Icon(Icons.restart_alt),
-              label: const Text('New game'),
-              onPressed:
-                  opponent.ownsBoard || guess.phase != GuessMovePhase.idle
-                  ? null
-                  : () {
-                      final Object source =
-                          ref.read(activeLineProvider)?.sourceKey ??
-                          ref.read(currentPageProvider);
-                      ref.read(activeLineProvider.notifier).clear();
-                      ref
-                          .read(readingAnalysisProvider.notifier)
-                          .newGame(source);
-                    },
-            ),
-            IconButton(
-              tooltip: 'Flip board',
-              icon: const Icon(Icons.swap_vert),
-              onPressed: () =>
-                  setState(() => _orientation = _orientation.opposite),
-            ),
-            IconButton(
-              tooltip: 'Set position from FEN',
-              icon: const Icon(Icons.edit_location_alt_outlined),
-              onPressed:
-                  opponent.ownsBoard || guess.phase != GuessMovePhase.idle
-                  ? null
-                  : () => showFenAnchorDialog(context, ref),
-            ),
-            IconButton(
-              tooltip: opponent.ownsBoard
-                  ? 'Game vs computer in progress'
-                  : 'Play vs computer',
-              icon: Icon(
-                opponent.ownsBoard ? Icons.smart_toy : Icons.smart_toy_outlined,
-                color: opponent.ownsBoard
-                    ? Theme.of(context).colorScheme.primary
-                    : null,
+            const EnginePanel(),
+            const SizedBox(height: 8),
+            Expanded(
+              child: Center(
+                child: LayoutBuilder(
+                  builder: (context, constraints) => Chessboard(
+                    controller: _controller,
+                    size: min(constraints.maxWidth, constraints.maxHeight),
+                    settings: boardSettings,
+                    orientation: _orientation,
+                    onMove: (move, {viaDragAndDrop}) =>
+                        ref.read(gameSessionProvider.notifier).playMove(move),
+                  ),
+                ),
               ),
-              onPressed:
-                  opponent.ownsBoard || guess.phase != GuessMovePhase.idle
-                  ? null
-                  : () => showComputerOpponentDialog(context, ref),
             ),
-            IconButton(
-              tooltip: guess.phase == GuessMovePhase.idle && !guessHasProAccess
-                  ? 'Guess the next move (Pro)'
-                  : guess.phase == GuessMovePhase.idle
-                  ? 'Guess the next move'
-                  : 'Guess the move in progress',
-              icon: Icon(
-                guess.phase == GuessMovePhase.idle && !guessHasProAccess
-                    ? Icons.lock_outline
-                    : guess.phase == GuessMovePhase.idle
-                    ? Icons.school_outlined
-                    : Icons.school,
-                color: guess.phase == GuessMovePhase.idle && !guessHasProAccess
-                    ? Theme.of(context).colorScheme.primary
-                    : guess.phase == GuessMovePhase.idle
-                    ? null
-                    : Theme.of(context).colorScheme.primary,
+            const SizedBox(height: 8),
+            if (guess.phase != GuessMovePhase.idle)
+              const GuessMoveBar()
+            else if (opponent.showsGameBar)
+              const ComputerGameBar()
+            else if (!session.onBookLine)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 4),
+                child: FilledButton.tonalIcon(
+                  icon: const Icon(Icons.keyboard_return),
+                  label: const Text('Back to book'),
+                  onPressed: () =>
+                      ref.read(gameSessionProvider.notifier).backToBook(),
+                ),
               ),
-              onPressed:
-                  opponent.ownsBoard || guess.phase != GuessMovePhase.idle
-                  ? null
-                  : canStartGuess
-                  ? () async {
-                      final proceed = await presentProFeatureGate(
-                        context,
-                        ref,
-                        featureName: 'Guess the Move',
-                        featureDescription:
-                            "Test yourself by predicting each move before it's revealed.",
-                      );
-                      if (!context.mounted || !proceed) return;
-                      ref.read(guessMoveProvider.notifier).start();
-                    }
-                  : null,
-            ),
-            const SizedBox(width: 12),
-            IconButton(
-              tooltip: 'Open in Lichess',
-              icon: const Icon(Icons.open_in_new),
-              onPressed: () =>
-                  launchUrl(Uri.parse(lichessAnalysisUrl(session.fen))),
-            ),
-            IconButton(
-              tooltip: 'Open in Chess.com',
-              icon: const Icon(Icons.language),
-              onPressed: () =>
-                  launchUrl(Uri.parse(chessComAnalysisUrl(session.fen))),
+            if (!opponent.ownsBoard && guess.phase == GuessMovePhase.idle)
+              ReadingAnalysisBar(compact: short),
+            const ChessnutStatusWidget(),
+            _Toolbar(
+              singleRow: short,
+              children: [
+                const ChessnutConnectIconButton(),
+                IconButton(
+                  tooltip: 'Undo move',
+                  icon: const Icon(Icons.undo),
+                  onPressed:
+                      (opponent.ownsBoard ||
+                          guess.phase != GuessMovePhase.idle ||
+                          !session.canUndo)
+                      ? null
+                      : () => ref.read(gameSessionProvider.notifier).undo(),
+                ),
+                TextButton.icon(
+                  icon: const Icon(Icons.restart_alt),
+                  label: const Text('New game'),
+                  onPressed:
+                      opponent.ownsBoard || guess.phase != GuessMovePhase.idle
+                      ? null
+                      : () {
+                          final Object source =
+                              ref.read(activeLineProvider)?.sourceKey ??
+                              ref.read(currentPageProvider);
+                          ref.read(activeLineProvider.notifier).clear();
+                          ref
+                              .read(readingAnalysisProvider.notifier)
+                              .newGame(source);
+                        },
+                ),
+                IconButton(
+                  tooltip: 'Flip board',
+                  icon: const Icon(Icons.swap_vert),
+                  onPressed: () =>
+                      setState(() => _orientation = _orientation.opposite),
+                ),
+                IconButton(
+                  tooltip: 'Set position from FEN',
+                  icon: const Icon(Icons.edit_location_alt_outlined),
+                  onPressed:
+                      opponent.ownsBoard || guess.phase != GuessMovePhase.idle
+                      ? null
+                      : () => showFenAnchorDialog(context, ref),
+                ),
+                IconButton(
+                  tooltip: opponent.ownsBoard
+                      ? 'Game vs computer in progress'
+                      : 'Play vs computer',
+                  icon: Icon(
+                    opponent.ownsBoard
+                        ? Icons.smart_toy
+                        : Icons.smart_toy_outlined,
+                    color: opponent.ownsBoard
+                        ? Theme.of(context).colorScheme.primary
+                        : null,
+                  ),
+                  onPressed:
+                      opponent.ownsBoard || guess.phase != GuessMovePhase.idle
+                      ? null
+                      : () => showComputerOpponentDialog(context, ref),
+                ),
+                IconButton(
+                  tooltip:
+                      guess.phase == GuessMovePhase.idle && !guessHasProAccess
+                      ? 'Guess the next move (Pro)'
+                      : guess.phase == GuessMovePhase.idle
+                      ? 'Guess the next move'
+                      : 'Guess the move in progress',
+                  icon: Icon(
+                    guess.phase == GuessMovePhase.idle && !guessHasProAccess
+                        ? Icons.lock_outline
+                        : guess.phase == GuessMovePhase.idle
+                        ? Icons.school_outlined
+                        : Icons.school,
+                    color:
+                        guess.phase == GuessMovePhase.idle && !guessHasProAccess
+                        ? Theme.of(context).colorScheme.primary
+                        : guess.phase == GuessMovePhase.idle
+                        ? null
+                        : Theme.of(context).colorScheme.primary,
+                  ),
+                  onPressed:
+                      opponent.ownsBoard || guess.phase != GuessMovePhase.idle
+                      ? null
+                      : canStartGuess
+                      ? () async {
+                          final proceed = await presentProFeatureGate(
+                            context,
+                            ref,
+                            featureName: 'Guess the Move',
+                            featureDescription:
+                                "Test yourself by predicting each move before it's revealed.",
+                          );
+                          if (!context.mounted || !proceed) return;
+                          ref.read(guessMoveProvider.notifier).start();
+                        }
+                      : null,
+                ),
+                const SizedBox(width: 12),
+                IconButton(
+                  tooltip: 'Open in Lichess',
+                  icon: const Icon(Icons.open_in_new),
+                  onPressed: () =>
+                      launchUrl(Uri.parse(lichessAnalysisUrl(session.fen))),
+                ),
+                IconButton(
+                  tooltip: 'Open in Chess.com',
+                  icon: const Icon(Icons.language),
+                  onPressed: () =>
+                      launchUrl(Uri.parse(chessComAnalysisUrl(session.fen))),
+                ),
+              ],
             ),
           ],
-        ),
-      ],
+        );
+      },
     );
   }
+}
+
+class _Toolbar extends StatelessWidget {
+  const _Toolbar({required this.singleRow, required this.children});
+  final bool singleRow;
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) => singleRow
+      ? ScrollingRow(children: children)
+      : Wrap(
+          alignment: WrapAlignment.center,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: children,
+        );
 }

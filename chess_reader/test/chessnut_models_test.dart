@@ -176,6 +176,50 @@ void main() {
     );
   }
 
+  test(
+    'pausing a manual board clears its LEDs and Resume relights them',
+    () async {
+      SharedPreferences.setMockInitialValues({});
+      final prefs = await SharedPreferences.getInstance();
+      final board = FakeChessnutBoard()..availablePieces = null;
+      final container = ProviderContainer(
+        overrides: [
+          sharedPrefsProvider.overrideWithValue(prefs),
+          chessnutTransportProvider.overrideWithValue(board),
+        ],
+      );
+      addTearDown(() {
+        container.dispose();
+        board.dispose();
+      });
+      final controller = container.read(chessnutControllerProvider.notifier);
+      await controller.connectToDevice('air', nameHint: 'Chessnut Air');
+      final e4 = Chess.initial.playUnchecked(NormalMove.fromUci('e2e4'));
+      board.simulatePhysicalMove(ChessnutCodec.extractPlacement(e4.fen));
+      await controller.startOrResume();
+      expect(
+        container.read(chessnutControllerProvider).mismatchedSquares,
+        isNotEmpty,
+      );
+
+      await controller.pause();
+      expect(
+        container.read(chessnutControllerProvider).mismatchedSquares,
+        isEmpty,
+      );
+      expect(
+        board.receivedCommands.last,
+        ChessnutCodec.encodeClearLedsCommand(),
+      );
+
+      // No new report is needed: a manual board's last report remains true.
+      await controller.startOrResume();
+      final state = container.read(chessnutControllerProvider);
+      expect(state.syncState, ChessnutSyncState.aligning);
+      expect(state.mismatchedSquares, isNotEmpty);
+    },
+  );
+
   test('Evo native service discovery, FEN and LEDs bypass Bluetooth', () async {
     final ble = FakeChessnutBoard();
     final evo = EvoPort(true);

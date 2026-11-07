@@ -112,6 +112,9 @@ class EvoBoardService(private val context: Context) {
             result.error("busy", "Already connecting to the Evo service.", null)
             return
         }
+        // A binding left over from a dead service must be released, or binding
+        // the same connection again never reports a new connection.
+        unbind()
         val intent = Intent().setComponent(ComponentName(SERVICE_PACKAGE, SERVICE_CLASS))
         val started = try {
             context.bindService(intent, connection, Context.BIND_AUTO_CREATE)

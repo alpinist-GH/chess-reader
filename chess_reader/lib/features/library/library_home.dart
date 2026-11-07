@@ -26,16 +26,22 @@ class LibraryHome extends ConsumerWidget {
       return Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 520),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.menu_book, size: 64, color: theme.colorScheme.outline),
-              const SizedBox(height: 16),
-              const OpenBookButton(filled: true),
-              const SizedBox(height: 8),
-              const ScanBookButton(),
-              const BookSuggestions(),
-            ],
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.menu_book,
+                  size: 64,
+                  color: theme.colorScheme.outline,
+                ),
+                const SizedBox(height: 16),
+                const OpenBookButton(filled: true),
+                const SizedBox(height: 8),
+                const ScanBookButton(),
+                const BookSuggestions(),
+              ],
+            ),
           ),
         ),
       );
@@ -46,30 +52,38 @@ class LibraryHome extends ConsumerWidget {
         constraints: const BoxConstraints(maxWidth: 720),
         child: Padding(
           padding: const EdgeInsets.all(16),
-          child: Column(
-            children: [
-              const SizedBox(height: 8),
-              const OpenBookButton(filled: true),
-              const ScanBookButton(),
-              const BookSuggestions(),
-              const SizedBox(height: 24),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Text('Recent books', style: theme.textTheme.titleSmall),
-              ),
-              const SizedBox(height: 8),
-              Expanded(
-                child: GridView.builder(
-                  gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                    maxCrossAxisExtent: 150,
-                    childAspectRatio: 0.62,
-                    crossAxisSpacing: 12,
-                    mainAxisSpacing: 12,
-                  ),
-                  itemCount: recent.length,
-                  itemBuilder: (context, i) =>
-                      _RecentCover(key: ValueKey(recent[i]), path: recent[i]),
+          // Scrolls as one so the actions cannot overflow a short pane.
+          child: CustomScrollView(
+            slivers: [
+              SliverToBoxAdapter(
+                child: Column(
+                  children: [
+                    const SizedBox(height: 8),
+                    const OpenBookButton(filled: true),
+                    const ScanBookButton(),
+                    const BookSuggestions(),
+                    const SizedBox(height: 24),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        'Recent books',
+                        style: theme.textTheme.titleSmall,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                  ],
                 ),
+              ),
+              SliverGrid.builder(
+                gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                  maxCrossAxisExtent: 150,
+                  childAspectRatio: 0.62,
+                  crossAxisSpacing: 12,
+                  mainAxisSpacing: 12,
+                ),
+                itemCount: recent.length,
+                itemBuilder: (context, i) =>
+                    _RecentCover(key: ValueKey(recent[i]), path: recent[i]),
               ),
             ],
           ),

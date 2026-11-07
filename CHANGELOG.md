@@ -13,6 +13,12 @@ follows [Keep a Changelog](https://keepachangelog.com/) and
 - Automatically saved reading analysis with preserved main lines and variations,
   a saved-line picker, previous/next navigation, and direct return to the main
   line. Analysis and the selected board position are restored per book.
+- Chessnut Evo, Air and Go support with LED-guided manual placement, alongside
+  the Chessnut Move. The Evo's on-device Android service is used when present.
+  These boards are experimental until confirmed on hardware.
+- Export a processed book (the original plus its detection results) as a ZIP and
+  import it on another device without converting it again.
+- "Find chess books" in the reader's menu, available while a book is open.
 
 ## [2.1.0] — 2026-09-11
 
