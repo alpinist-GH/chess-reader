@@ -47,24 +47,24 @@ class ConvertedDiagram {
   final int anchor;
 
   Map<String, dynamic> toJson() => {
-        'fen': fen,
-        'png': cropPngBase64,
-        'l': left,
-        't': top,
-        's': size,
-        'a': anchor,
-        if (annotations.isNotEmpty) 'ann': annotations,
-      };
+    'fen': fen,
+    'png': cropPngBase64,
+    'l': left,
+    't': top,
+    's': size,
+    'a': anchor,
+    if (annotations.isNotEmpty) 'ann': annotations,
+  };
 
   factory ConvertedDiagram.fromJson(Map<String, dynamic> j) => ConvertedDiagram(
-        fen: j['fen'] as String,
-        cropPngBase64: j['png'] as String,
-        left: j['l'] as int,
-        top: j['t'] as int,
-        size: j['s'] as int,
-        anchor: j['a'] as int,
-        annotations: j['ann'] as String? ?? '',
-      );
+    fen: j['fen'] as String,
+    cropPngBase64: j['png'] as String,
+    left: j['l'] as int,
+    top: j['t'] as int,
+    size: j['s'] as int,
+    anchor: j['a'] as int,
+    annotations: j['ann'] as String? ?? '',
+  );
 }
 
 /// One PDF page or EPUB chapter after conversion.
@@ -84,19 +84,19 @@ class ConvertedPage {
   final List<ConvertedDiagram> diagrams;
 
   Map<String, dynamic> toJson() => {
-        'i': index,
-        if (text != null) 'text': text,
-        'd': [for (final d in diagrams) d.toJson()],
-      };
+    'i': index,
+    if (text != null) 'text': text,
+    'd': [for (final d in diagrams) d.toJson()],
+  };
 
   factory ConvertedPage.fromJson(Map<String, dynamic> j) => ConvertedPage(
-        index: j['i'] as int,
-        text: j['text'] as String?,
-        diagrams: [
-          for (final d in (j['d'] as List? ?? const []))
-            ConvertedDiagram.fromJson(d as Map<String, dynamic>)
-        ],
-      );
+    index: j['i'] as int,
+    text: j['text'] as String?,
+    diagrams: [
+      for (final d in (j['d'] as List? ?? const []))
+        ConvertedDiagram.fromJson(d as Map<String, dynamic>),
+    ],
+  );
 }
 
 /// The cached result of detecting diagrams (and, for PDF, extracting text)
@@ -129,9 +129,12 @@ class BookConversion {
   final bool ocrAttempted;
 
   /// Diagrams for a given PDF page number / EPUB chapter index.
-  List<ConvertedDiagram> diagramsFor(int index) =>
-      pages.firstWhere((p) => p.index == index,
-          orElse: () => const ConvertedPage(index: -1)).diagrams;
+  List<ConvertedDiagram> diagramsFor(int index) => pages
+      .firstWhere(
+        (p) => p.index == index,
+        orElse: () => const ConvertedPage(index: -1),
+      )
+      .diagrams;
 
   /// Whether the book has a usable text layer. A scanned/image-only PDF
   /// extracts (almost) no text, so move resolution and the HTML reading view
@@ -235,34 +238,37 @@ class BookConversion {
   //     bishop); a king-less board *with* pawns stays a crop (pawn move aid).
   static const _version = 26;
 
+  static bool supportsVersion(Object? version) => version == _version;
+
   Map<String, dynamic> toJson() => {
-        'v': _version,
-        'title': title,
-        'format': format,
-        'sourcePath': sourcePath,
-        'ocrAttempted': ocrAttempted,
-        'pages': [for (final p in pages) p.toJson()],
-      };
+    'v': _version,
+    'title': title,
+    'format': format,
+    'sourcePath': sourcePath,
+    'ocrAttempted': ocrAttempted,
+    'pages': [for (final p in pages) p.toJson()],
+  };
 
   factory BookConversion.fromJson(Map<String, dynamic> j) => BookConversion(
-        title: j['title'] as String,
-        format: j['format'] as String,
-        sourcePath: j['sourcePath'] as String? ?? '',
-        ocrAttempted: j['ocrAttempted'] as bool? ?? true,
-        pages: [
-          for (final pg in (j['pages'] as List))
-            ConvertedPage.fromJson(pg as Map<String, dynamic>)
-        ],
-      );
+    title: j['title'] as String,
+    format: j['format'] as String,
+    sourcePath: j['sourcePath'] as String? ?? '',
+    ocrAttempted: j['ocrAttempted'] as bool? ?? true,
+    pages: [
+      for (final pg in (j['pages'] as List))
+        ConvertedPage.fromJson(pg as Map<String, dynamic>),
+    ],
+  );
 }
 
 /// A converted book on disk: enough to list and reopen it.
 class CachedBook {
-  const CachedBook(
-      {required this.path,
-      required this.title,
-      required this.format,
-      required this.cacheFile});
+  const CachedBook({
+    required this.path,
+    required this.title,
+    required this.format,
+    required this.cacheFile,
+  });
   final String path;
   final String title;
   final String format;
@@ -300,13 +306,20 @@ Future<BookConversion> loadOrConvert(
     return cached;
   }
   final conversion = path.toLowerCase().endsWith('.epub')
-      ? await convertEpub(path, recognizer,
-          onProgress: onProgress, isCancelled: isCancelled)
-      : await convertPdf(path, recognizer,
+      ? await convertEpub(
+          path,
+          recognizer,
+          onProgress: onProgress,
+          isCancelled: isCancelled,
+        )
+      : await convertPdf(
+          path,
+          recognizer,
           ocr: ocr,
           onProgress: onProgress,
           onPartial: onPartial,
-          isCancelled: isCancelled);
+          isCancelled: isCancelled,
+        );
   await _writeCache(path, conversion);
   return conversion;
 }
@@ -317,7 +330,7 @@ Future<BookConversion> loadOrConvert(
 /// a scanned page has ~0.
 bool _pageTextIsSparse(String text) =>
     text.replaceAll(RegExp(r'\s'), '').length <
-        BookConversion._minTextCharsPerPage;
+    BookConversion._minTextCharsPerPage;
 
 /// How many pages are recognized concurrently. The per-page locate step runs
 /// in its own isolate (`compute`), so several pages overlap across CPU cores;
@@ -394,39 +407,45 @@ Future<BookConversion> convertPdf(
           }
           image.dispose();
           for (final r in recognized) {
-            diagrams.add(ConvertedDiagram(
-              fen: r.fen,
-              annotations: r.annotations,
-              cropPngBase64: base64Encode(r.cropPng),
-              left: r.left,
-              top: r.top,
-              size: r.size,
-              anchor: _insertOffsetForDiagram(
-                charRects: charRects,
-                pageHeight: pageHeight,
-                scale: scale,
-                diagramTopPx: r.top,
-                textLength: text.length,
+            diagrams.add(
+              ConvertedDiagram(
+                fen: r.fen,
+                annotations: r.annotations,
+                cropPngBase64: base64Encode(r.cropPng),
+                left: r.left,
+                top: r.top,
+                size: r.size,
+                anchor: _insertOffsetForDiagram(
+                  charRects: charRects,
+                  pageHeight: pageHeight,
+                  scale: scale,
+                  diagramTopPx: r.top,
+                  textLength: text.length,
+                ),
               ),
-            ));
+            );
           }
         }
-        results[index] =
-            ConvertedPage(index: pageNumber, text: pageText, diagrams: diagrams);
+        results[index] = ConvertedPage(
+          index: pageNumber,
+          text: pageText,
+          diagrams: diagrams,
+        );
         completed++;
         onProgress?.call(completed / total);
         // Emit a growing partial so the reader can open early (pages convert
         // out of order; diagramsFor() looks up by index, so a subset is fine).
         // Throttle to keep widget rebuilds cheap on long books.
-        if (onPartial != null &&
-            (completed == total || completed % 4 == 0)) {
-          onPartial(BookConversion(
-            title: p.basenameWithoutExtension(path),
-            format: 'pdf',
-            sourcePath: path,
-            ocrAttempted: ocr != null,
-            pages: [for (final pg in results) ?pg],
-          ));
+        if (onPartial != null && (completed == total || completed % 4 == 0)) {
+          onPartial(
+            BookConversion(
+              title: p.basenameWithoutExtension(path),
+              format: 'pdf',
+              sourcePath: path,
+              ocrAttempted: ocr != null,
+              pages: [for (final pg in results) ?pg],
+            ),
+          );
         }
       }
 
@@ -486,15 +505,17 @@ Future<BookConversion> convertEpub(
         // EPUB reader already shows the chapter's raw <img> when it isn't
         // wrapped in <chessdiagram>, which IS the as-printed fallback.
         if (r.fen.isEmpty) continue;
-        diagrams.add(ConvertedDiagram(
-          fen: r.fen,
-          annotations: r.annotations,
-          cropPngBase64: base64Encode(r.cropPng),
-          left: r.left,
-          top: r.top,
-          size: r.size,
-          anchor: j,
-        ));
+        diagrams.add(
+          ConvertedDiagram(
+            fen: r.fen,
+            annotations: r.annotations,
+            cropPngBase64: base64Encode(r.cropPng),
+            left: r.left,
+            top: r.top,
+            size: r.size,
+            anchor: j,
+          ),
+        );
       }
       results[index] = ConvertedPage(index: index, diagrams: diagrams);
       completed++;
@@ -596,25 +617,29 @@ Future<List<CachedBook>> listCachedConversions() async {
 
 List<CachedBook> _listCachedConversionsSync(String dirPath) {
   try {
-    final files = Directory(dirPath)
-        .listSync()
-        .whereType<File>()
-        .where((f) => f.path.endsWith('.json'))
-        .toList()
-      ..sort((a, b) =>
-          b.statSync().modified.compareTo(a.statSync().modified));
+    final files =
+        Directory(dirPath)
+            .listSync()
+            .whereType<File>()
+            .where((f) => f.path.endsWith('.json'))
+            .toList()
+          ..sort(
+            (a, b) => b.statSync().modified.compareTo(a.statSync().modified),
+          );
     final books = <CachedBook>[];
     for (final f in files) {
       try {
         final j = jsonDecode(f.readAsStringSync()) as Map<String, dynamic>;
         final source = j['sourcePath'] as String? ?? '';
         if (source.isEmpty) continue; // pre-v2 cache without a source path
-        books.add(CachedBook(
-          path: source,
-          title: j['title'] as String? ?? p.basenameWithoutExtension(source),
-          format: j['format'] as String? ?? 'pdf',
-          cacheFile: f.path,
-        ));
+        books.add(
+          CachedBook(
+            path: source,
+            title: j['title'] as String? ?? p.basenameWithoutExtension(source),
+            format: j['format'] as String? ?? 'pdf',
+            cacheFile: f.path,
+          ),
+        );
       } catch (_) {
         // Skip corrupt entries.
       }
@@ -678,8 +703,9 @@ Future<File> _cacheFile(String path) async {
 // JSON small and the images binary. Reads/writes still run off the UI isolate.
 
 /// Sidecar PNG directory for a cache [file] (`<key>.json` → `<key>_png/`).
-Directory _pngDirFor(File file) =>
-    Directory('${file.path.substring(0, file.path.length - '.json'.length)}_png');
+Directory _pngDirFor(File file) => Directory(
+  '${file.path.substring(0, file.path.length - '.json'.length)}_png',
+);
 
 Future<BookConversion?> _readCache(String path) async {
   try {
@@ -687,8 +713,7 @@ Future<BookConversion?> _readCache(String path) async {
     if (!file.existsSync()) return null;
     final pngDirPath = _pngDirFor(file).path;
     return await Isolate.run(() {
-      final json =
-          jsonDecode(file.readAsStringSync()) as Map<String, dynamic>;
+      final json = jsonDecode(file.readAsStringSync()) as Map<String, dynamic>;
       if (json['v'] != BookConversion._version) return null;
       for (final page in json['pages'] as List) {
         for (final d in (page as Map<String, dynamic>)['d'] as List) {
@@ -697,7 +722,8 @@ Future<BookConversion?> _readCache(String path) async {
           if (pf == null) continue;
           // A missing sidecar throws here → outer catch → reconvert.
           diagram['png'] = base64Encode(
-              File(p.join(pngDirPath, pf)).readAsBytesSync());
+            File(p.join(pngDirPath, pf)).readAsBytesSync(),
+          );
         }
       }
       return BookConversion.fromJson(json);
@@ -707,7 +733,14 @@ Future<BookConversion?> _readCache(String path) async {
   }
 }
 
-Future<void> _writeCache(String path, BookConversion conversion) async {
+Future<void> saveImportedConversion(String path, BookConversion conversion) =>
+    _writeCache(path, conversion, strict: true);
+
+Future<void> _writeCache(
+  String path,
+  BookConversion conversion, {
+  bool strict = false,
+}) async {
   try {
     final file = await _cacheFile(path);
     final pngDirPath = _pngDirFor(file).path;
@@ -722,14 +755,16 @@ Future<void> _writeCache(String path, BookConversion conversion) async {
         for (var j = 0; j < diagrams.length; j++) {
           final diagram = diagrams[j] as Map<String, dynamic>;
           final name = 'p${pageMap['i']}_$j.png';
-          File(p.join(pngDirPath, name)).writeAsBytesSync(
-              base64Decode(diagram.remove('png') as String));
+          File(
+            p.join(pngDirPath, name),
+          ).writeAsBytesSync(base64Decode(diagram.remove('png') as String));
           diagram['pf'] = name;
         }
       }
       file.writeAsStringSync(jsonEncode(json));
     });
   } catch (_) {
+    if (strict) rethrow;
     // Best-effort cache; conversion still returns to the caller.
   }
 }

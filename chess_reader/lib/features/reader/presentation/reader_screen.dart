@@ -22,6 +22,7 @@ import '../../library/open_book_button.dart';
 import '../../settings/settings_screen.dart';
 import '../data/book_conversion.dart';
 import '../data/book_exporter.dart';
+import '../data/processed_book.dart';
 import '../data/epub_book.dart';
 import '../data/pdf_html_builder.dart';
 import '../state/book_providers.dart';
@@ -116,13 +117,17 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
       _maybePromptOcr(path);
       return;
     }
-    ref.watch(conversionProvider(path)).whenOrNull(data: (c) {
-      if (c.hasExtractableText) {
-        _maybePromptView(path);
-      } else {
-        _maybeWarnNoText(path);
-      }
-    });
+    ref
+        .watch(conversionProvider(path))
+        .whenOrNull(
+          data: (c) {
+            if (c.hasExtractableText) {
+              _maybePromptView(path);
+            } else {
+              _maybeWarnNoText(path);
+            }
+          },
+        );
   }
 
   /// A scanned/image-only PDF: ask once whether to convert it with on-device
@@ -295,13 +300,52 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
     });
   }
 
+  Future<void> _exportProcessed(String path) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final origin = _shareOrigin();
+    messenger.showSnackBar(
+      const SnackBar(content: Text('Preparing processed book…')),
+    );
+    try {
+      final conversion = await ref.read(conversionProvider(path).future);
+      final bytes = await exportProcessedBook(path, conversion);
+      final name = '${p.basenameWithoutExtension(path)}.chessbook.zip';
+      if (Platform.isIOS || Platform.isAndroid) {
+        final dir = await (await getTemporaryDirectory()).createTemp(
+          'book_export_',
+        );
+        final file = File(p.join(dir.path, name));
+        await file.writeAsBytes(bytes);
+        await SharePlus.instance.share(
+          ShareParams(
+            files: [XFile(file.path, mimeType: 'application/zip')],
+            sharePositionOrigin: origin,
+          ),
+        );
+      } else {
+        final location = await getSaveLocation(
+          suggestedName: name,
+          acceptedTypeGroups: const [
+            XTypeGroup(label: 'Processed book', extensions: ['zip']),
+          ],
+        );
+        if (location == null) return;
+        await File(location.path).writeAsBytes(bytes);
+        messenger.showSnackBar(
+          SnackBar(content: Text('Exported to ${location.path}')),
+        );
+      }
+    } catch (e) {
+      messenger.showSnackBar(SnackBar(content: Text('Export failed: $e')));
+    }
+  }
+
   Future<void> _exportConverted(String path) async {
     final messenger = ScaffoldMessenger.of(context);
     // Captured before any await for the iPad share popover anchor (and to keep
     // the async gap clear of BuildContext use).
     final shareOrigin = _shareOrigin();
-    messenger.showSnackBar(
-        const SnackBar(content: Text('Preparing export…')));
+    messenger.showSnackBar(const SnackBar(content: Text('Preparing export…')));
     try {
       final conversion = await ref.read(conversionProvider(path).future);
       final chapters = _isEpub(path)
@@ -316,13 +360,17 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
         // can't return a writable path (it fails with a "set path" error).
         // Instead write to a temp file and hand it to the system share sheet,
         // letting the user save it to Files/iCloud or send it onward.
-        final file = File(p.join((await getTemporaryDirectory()).path, fileName));
+        final file = File(
+          p.join((await getTemporaryDirectory()).path, fileName),
+        );
         await file.writeAsString(html);
-        await SharePlus.instance.share(ShareParams(
-          files: [XFile(file.path, mimeType: 'text/html')],
-          subject: title,
-          sharePositionOrigin: shareOrigin,
-        ));
+        await SharePlus.instance.share(
+          ShareParams(
+            files: [XFile(file.path, mimeType: 'text/html')],
+            subject: title,
+            sharePositionOrigin: shareOrigin,
+          ),
+        );
         return;
       }
 
@@ -335,7 +383,8 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
       if (location == null) return;
       await File(location.path).writeAsString(html);
       messenger.showSnackBar(
-          SnackBar(content: Text('Exported to ${location.path}')));
+        SnackBar(content: Text('Exported to ${location.path}')),
+      );
     } catch (e) {
       messenger.showSnackBar(SnackBar(content: Text('Export failed: $e')));
     }
@@ -375,12 +424,13 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
                   'Chessnut${!isChessnutPro
                       ? ' (Pro)'
                       : chessnutState.isConnected
-                          ? ''
-                          : ' (connect)'}',
+                      ? ''
+                      : ' (connect)'}',
                 ),
                 onPressed: () => Navigator.of(context).push(
                   MaterialPageRoute(
-                      builder: (_) => const ChessnutQuickSettingsScreen()),
+                    builder: (_) => const ChessnutQuickSettingsScreen(),
+                  ),
                 ),
               ),
             ),
@@ -391,13 +441,14 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
               label: const Text('Run OCR'),
             ),
           if (showViewToggle) _ViewToggle(path: bookPath),
-          OpenBookButton(tooltip: bookPath == null ? null : 'Open another book'),
+          OpenBookButton(
+            tooltip: bookPath == null ? null : 'Open another book',
+          ),
           if (bookPath != null)
             IconButton(
               tooltip: 'Close book',
               icon: const Icon(Icons.close),
-              onPressed: () =>
-                  ref.read(openedBookProvider.notifier).close(),
+              onPressed: () => ref.read(openedBookProvider.notifier).close(),
             ),
           if (bookPath != null)
             Builder(
@@ -410,19 +461,34 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
           PopupMenuButton<String>(
             onSelected: (value) {
               switch (value) {
+                case 'processed':
+                  if (bookPath != null) _exportProcessed(bookPath);
                 case 'export':
                   if (bookPath != null) _exportConverted(bookPath);
                 case 'library':
-                  Navigator.of(context).push(MaterialPageRoute(
-                      builder: (_) => const ConvertedLibraryScreen()));
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => const ConvertedLibraryScreen(),
+                    ),
+                  );
                 case 'settings':
-                  Navigator.of(context).push(MaterialPageRoute(
-                      builder: (_) => const SettingsScreen()));
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const SettingsScreen()),
+                  );
                 case 'about':
                   showAppAboutDialog(context);
               }
             },
             itemBuilder: (context) => [
+              if (bookPath != null)
+                const PopupMenuItem(
+                  value: 'processed',
+                  child: ListTile(
+                    leading: Icon(Icons.inventory_2_outlined),
+                    title: Text('Export processed book…'),
+                    subtitle: Text('Original book + detection results'),
+                  ),
+                ),
               if (bookPath != null)
                 const PopupMenuItem(
                   value: 'export',
@@ -467,8 +533,9 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
             ],
           );
 
-          final placement =
-              ref.watch(settingsProvider.select((s) => s.boardPlacement));
+          final placement = ref.watch(
+            settingsProvider.select((s) => s.boardPlacement),
+          );
           final isWide = _isWideLayout(context, constraints);
 
           // No book open: show the free-play board alongside the library on
@@ -497,8 +564,12 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
   }
 
   /// A resizable two-pane split with the board on the [placement] side.
-  Widget _split(BoxConstraints constraints, BoardPlacement placement,
-      Widget bookPane, Widget boardPane) {
+  Widget _split(
+    BoxConstraints constraints,
+    BoardPlacement placement,
+    Widget bookPane,
+    Widget boardPane,
+  ) {
     final horizontal =
         placement == BoardPlacement.left || placement == BoardPlacement.right;
     final boardFirst =
@@ -527,11 +598,10 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
           .setBoardFraction(fraction + (boardFirst ? d : -d) / total),
     );
 
-    final children =
-        boardFirst ? [board, divider, book] : [book, divider, board];
-    return horizontal
-        ? Row(children: children)
-        : Column(children: children);
+    final children = boardFirst
+        ? [board, divider, book]
+        : [book, divider, board];
+    return horizontal ? Row(children: children) : Column(children: children);
   }
 
   /// Phone default: book fills the screen with a toggleable bottom board panel.
@@ -539,7 +609,10 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
   /// `_ResizeHandle` as the explicit side/top/bottom splits); the chevron still
   /// collapses it away entirely.
   Widget _narrowCollapsible(
-      BoxConstraints constraints, Widget bookPane, Widget boardPane) {
+    BoxConstraints constraints,
+    Widget bookPane,
+    Widget boardPane,
+  ) {
     final fraction = ref.watch(settingsProvider.select((s) => s.boardFraction));
     final total = constraints.maxHeight;
     return Column(
@@ -551,13 +624,15 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               InkWell(
-                onTap: () => setState(
-                    () => _boardVisibleNarrow = !_boardVisibleNarrow),
+                onTap: () =>
+                    setState(() => _boardVisibleNarrow = !_boardVisibleNarrow),
                 child: SizedBox(
                   height: 32,
-                  child: Icon(_boardVisibleNarrow
-                      ? Icons.keyboard_arrow_down
-                      : Icons.keyboard_arrow_up),
+                  child: Icon(
+                    _boardVisibleNarrow
+                        ? Icons.keyboard_arrow_down
+                        : Icons.keyboard_arrow_up,
+                  ),
                 ),
               ),
               if (_boardVisibleNarrow) ...[
@@ -598,13 +673,15 @@ class _ViewToggle extends ConsumerWidget {
         showSelectedIcon: false,
         segments: const [
           ButtonSegment(
-              value: kViewModePdf,
-              icon: Icon(Icons.picture_as_pdf_outlined),
-              tooltip: 'Original pages'),
+            value: kViewModePdf,
+            icon: Icon(Icons.picture_as_pdf_outlined),
+            tooltip: 'Original pages',
+          ),
           ButtonSegment(
-              value: kViewModeHtml,
-              icon: Icon(Icons.article_outlined),
-              tooltip: 'Reading view'),
+            value: kViewModeHtml,
+            icon: Icon(Icons.article_outlined),
+            tooltip: 'Reading view',
+          ),
         ],
         selected: {mode},
         onSelectionChanged: (s) =>
@@ -639,10 +716,8 @@ class _ResizeHandle extends StatelessWidget {
           : SystemMouseCursors.resizeUpDown,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
-        onHorizontalDragUpdate:
-            horizontal ? (d) => onDelta(d.delta.dx) : null,
-        onVerticalDragUpdate:
-            horizontal ? null : (d) => onDelta(d.delta.dy),
+        onHorizontalDragUpdate: horizontal ? (d) => onDelta(d.delta.dx) : null,
+        onVerticalDragUpdate: horizontal ? null : (d) => onDelta(d.delta.dy),
         child: SizedBox(
           width: horizontal ? 10 : double.infinity,
           height: horizontal ? double.infinity : 10,
@@ -698,8 +773,10 @@ class _BookPane extends ConsumerWidget {
           : PdfBookView(path: path);
     }
 
-    final progress =
-        (ref.watch(conversionProgressProvider)[path] ?? 1).clamp(0.0, 1.0);
+    final progress = (ref.watch(conversionProgressProvider)[path] ?? 1).clamp(
+      0.0,
+      1.0,
+    );
     if (progress >= 1) return view;
     return Stack(
       children: [
@@ -714,10 +791,16 @@ class _BookPane extends ConsumerWidget {
     );
   }
 
-  Widget _progress(BuildContext context, WidgetRef ref, String path,
-      {bool canStart = false}) {
-    final fraction =
-        (ref.watch(conversionProgressProvider)[path] ?? 0).clamp(0.0, 1.0);
+  Widget _progress(
+    BuildContext context,
+    WidgetRef ref,
+    String path, {
+    bool canStart = false,
+  }) {
+    final fraction = (ref.watch(conversionProgressProvider)[path] ?? 0).clamp(
+      0.0,
+      1.0,
+    );
     final pct = (fraction * 100).toStringAsFixed(0);
     return Center(
       child: Column(
@@ -726,7 +809,8 @@ class _BookPane extends ConsumerWidget {
           SizedBox(
             width: 220,
             child: LinearProgressIndicator(
-                value: fraction == 0 ? null : fraction),
+              value: fraction == 0 ? null : fraction,
+            ),
           ),
           const SizedBox(height: 12),
           Text('Detecting chess diagrams… $pct%'),
@@ -735,8 +819,7 @@ class _BookPane extends ConsumerWidget {
           if (canStart) ...[
             const SizedBox(height: 16),
             FilledButton.icon(
-              onPressed: () =>
-                  ref.read(readEarlyProvider.notifier).start(path),
+              onPressed: () => ref.read(readEarlyProvider.notifier).start(path),
               icon: const Icon(Icons.menu_book),
               label: const Text('Start reading'),
             ),
@@ -789,7 +872,9 @@ class _BackgroundConversionBar extends StatelessWidget {
               child: Text(
                 'Converting diagrams… ${(progress * 100).toStringAsFixed(0)}%',
                 style: TextStyle(
-                    fontSize: 11, color: scheme.onSecondaryContainer),
+                  fontSize: 11,
+                  color: scheme.onSecondaryContainer,
+                ),
               ),
             ),
           ),

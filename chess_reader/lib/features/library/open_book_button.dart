@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../reader/state/book_providers.dart';
+import '../reader/data/processed_book.dart';
 
 class OpenBookButton extends ConsumerWidget {
   const OpenBookButton({super.key, this.filled = false, this.tooltip});
@@ -22,9 +23,29 @@ class OpenBookButton extends ConsumerWidget {
         // On iOS/macOS type groups are matched by UTI.
         uniformTypeIdentifiers: ['com.adobe.pdf', 'org.idpf.epub-container'],
       );
-      final file = await openFile(acceptedTypeGroups: const [typeGroup]);
+      final file = await openFile(
+        acceptedTypeGroups: const [
+          typeGroup,
+          XTypeGroup(
+            label: 'Processed chess book',
+            extensions: ['zip'],
+            uniformTypeIdentifiers: ['public.zip-archive'],
+          ),
+        ],
+      );
       if (file != null) {
-        ref.read(openedBookProvider.notifier).open(file.path);
+        try {
+          final path = file.path.toLowerCase().endsWith('.zip')
+              ? await importProcessedBook(file.path)
+              : file.path;
+          await ref.read(openedBookProvider.notifier).open(path);
+        } catch (e) {
+          if (context.mounted) {
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text('Import failed: $e')));
+          }
+        }
       }
     }
 
@@ -32,11 +53,11 @@ class OpenBookButton extends ConsumerWidget {
       return FilledButton.icon(
         onPressed: pick,
         icon: const Icon(Icons.folder_open),
-        label: const Text('Open a chess book (PDF or EPUB)'),
+        label: const Text('Open / import book (PDF, EPUB or processed ZIP)'),
       );
     }
     return IconButton(
-      tooltip: tooltip ?? 'Open book',
+      tooltip: tooltip ?? 'Open / import book',
       icon: const Icon(Icons.folder_open),
       onPressed: pick,
     );
