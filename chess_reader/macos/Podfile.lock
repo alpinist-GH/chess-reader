@@ -71,7 +71,7 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   file_selector_macos: 9e9e068e90ebee155097d00e89ae91edb2374db7
   flutter_onnxruntime: fb7bede79ac00a8e129c95d7e6b99c0f4e960d98
-  FlutterMacOS: d0db08ddef1a9af05a5ec4b724367152bb0500b1
+  FlutterMacOS: c232990155153907050900a2e175c7773903ba4e
   in_app_purchase_storekit: 22cca7d08eebca9babdf4d07d0baccb73325d3c8
   multistockfish_sf16: a296dc1122042e790a3ef03c082842e894d7b8ac
   onnxruntime-c: b58bafbc58707d165404665e46a7467a16e8e0e4
@@ -82,6 +82,6 @@ SPEC CHECKSUMS:
   universal_ble: a322ebabee64f0ec27a313e89a5dd6967f37a60f
   url_launcher_macos: f87a979182d112f911de6820aefddaf56ee9fbfd
 
-PODFILE CHECKSUM: 68d305432f2f8f9e5fd22b6e596006c66660d656
+PODFILE CHECKSUM: 1d7ea51fff46cffa490deaed9ea5af87b23eb145
 
 COCOAPODS: 1.17.0

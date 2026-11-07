@@ -91,7 +91,7 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   cunning_document_scanner: 43a2bda11ef6a33fd68766b287ed056b4caf6a06
   file_selector_ios: ec57ec07954363dd730b642e765e58f199bb621a
-  Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
+  Flutter: 71a624a5bc0c04062bf19101d501e466baf2fb47
   flutter_onnxruntime: 577a012771672fd168079e29be7909a9d0f9c302
   in_app_purchase_storekit: 22cca7d08eebca9babdf4d07d0baccb73325d3c8
   multistockfish_chess: 826a3fb3746cbf66496bb1388eb664084fac393c
