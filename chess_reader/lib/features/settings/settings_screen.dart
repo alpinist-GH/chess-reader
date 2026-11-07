@@ -161,7 +161,7 @@ class _ProStatusSection extends ConsumerWidget {
             leading: Icon(Icons.verified, color: Colors.green),
             title: Text('Pro unlocked'),
             subtitle: Text(
-              'Chessnut Move sync, Play vs Computer, and Guess the Move are '
+              'Chessnut board sync, Play vs Computer, and Guess the Move are '
               'unlocked on this device and any other you sign in on.',
             ),
           )
@@ -174,7 +174,7 @@ class _ProStatusSection extends ConsumerWidget {
                   : 'Free sessions used up',
             ),
             subtitle: const Text(
-              'Chessnut Move sync, Play vs Computer, and Guess the Move '
+              'Chessnut board sync, Play vs Computer, and Guess the Move '
               'training.',
             ),
             trailing: FilledButton(

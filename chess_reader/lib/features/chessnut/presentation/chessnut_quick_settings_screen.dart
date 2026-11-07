@@ -10,7 +10,7 @@ class ChessnutQuickSettingsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Chessnut Move Board')),
+      appBar: AppBar(title: const Text('Chessnut Board')),
       body: ListView(
         children: const [ChessnutSettingsSection(showDivider: false)],
       ),

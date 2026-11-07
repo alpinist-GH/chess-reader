@@ -20,6 +20,7 @@ class AppSettings {
     this.themeMode = ThemeMode.system,
     this.boardPlacement = BoardPlacement.auto,
     this.chessnutDeviceId,
+    this.chessnutDeviceName,
     this.chessnutAutoReconnect = true,
   });
 
@@ -44,6 +45,7 @@ class AppSettings {
 
   /// Remembered Bluetooth device identifier for Chessnut Move board.
   final String? chessnutDeviceId;
+  final String? chessnutDeviceName;
 
   /// Whether to automatically reconnect to the remembered Chessnut board.
   final bool chessnutAutoReconnect;
@@ -61,6 +63,7 @@ class AppSettings {
     ThemeMode? themeMode,
     BoardPlacement? boardPlacement,
     String? chessnutDeviceId,
+    String? chessnutDeviceName,
     bool clearChessnutDevice = false,
     bool? chessnutAutoReconnect,
   }) {
@@ -76,6 +79,9 @@ class AppSettings {
       chessnutDeviceId: clearChessnutDevice
           ? null
           : (chessnutDeviceId ?? this.chessnutDeviceId),
+      chessnutDeviceName: clearChessnutDevice
+          ? null
+          : (chessnutDeviceName ?? this.chessnutDeviceName),
       chessnutAutoReconnect:
           chessnutAutoReconnect ?? this.chessnutAutoReconnect,
     );
@@ -134,6 +140,7 @@ class SettingsNotifier extends Notifier<AppSettings> {
         orElse: () => BoardPlacement.auto,
       ),
       chessnutDeviceId: p.getString(_kChessnutDeviceId),
+      chessnutDeviceName: p.getString("chessnutDeviceName"),
       chessnutAutoReconnect: p.getBool(_kChessnutAutoReconnect) ?? true,
     );
   }
@@ -179,12 +186,17 @@ class SettingsNotifier extends Notifier<AppSettings> {
     state = state.copyWith(boardPlacement: placement);
   }
 
-  void setChessnutDevice(String? deviceId) {
+  void setChessnutDevice(String? deviceId, {String? name}) {
     if (deviceId != null) {
       _prefs.setString(_kChessnutDeviceId, deviceId);
-      state = state.copyWith(chessnutDeviceId: deviceId);
+      _prefs.setString("chessnutDeviceName", name ?? "Chessnut");
+      state = state.copyWith(
+        chessnutDeviceId: deviceId,
+        chessnutDeviceName: name ?? "Chessnut",
+      );
     } else {
       _prefs.remove(_kChessnutDeviceId);
+      _prefs.remove("chessnutDeviceName");
       state = state.copyWith(clearChessnutDevice: true);
     }
   }
@@ -195,5 +207,6 @@ class SettingsNotifier extends Notifier<AppSettings> {
   }
 }
 
-final settingsProvider =
-    NotifierProvider<SettingsNotifier, AppSettings>(SettingsNotifier.new);
+final settingsProvider = NotifierProvider<SettingsNotifier, AppSettings>(
+  SettingsNotifier.new,
+);

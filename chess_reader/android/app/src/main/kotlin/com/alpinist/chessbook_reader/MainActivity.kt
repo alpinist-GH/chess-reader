@@ -13,10 +13,13 @@ import io.flutter.plugin.common.MethodChannel
 /// returns recognized lines as `[{text, l, t, w, h}]` in source-pixel
 /// coordinates, which the Dart side reassembles into page text.
 class MainActivity : FlutterActivity() {
+    private var evoBoard: EvoBoardService? = null
+
     private val channelName = "chess_reader/native_ocr"
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
+        evoBoard = EvoBoardService(this).also { it.register(flutterEngine.dartExecutor.binaryMessenger) }
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, channelName)
             .setMethodCallHandler { call, result ->
                 if (call.method == "recognize") {
@@ -34,6 +37,12 @@ class MainActivity : FlutterActivity() {
                     result.notImplemented()
                 }
             }
+    }
+
+    override fun cleanUpFlutterEngine(flutterEngine: FlutterEngine) {
+        evoBoard?.disconnect()
+        evoBoard = null
+        super.cleanUpFlutterEngine(flutterEngine)
     }
 
     private fun recognize(

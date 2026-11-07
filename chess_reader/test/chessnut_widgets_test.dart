@@ -36,13 +36,13 @@ void main() {
   }
 
   group('ChessnutStatusWidget UI', () {
-    testWidgets('renders connect button when completely disconnected', (tester) async {
+    testWidgets('hides status card when completely disconnected', (tester) async {
       final prefs = await SharedPreferences.getInstance();
       await tester.pumpWidget(
         createWidgetUnderTest(const ChessnutStatusWidget(), prefs: prefs),
       );
 
-      expect(find.text('Connect Chessnut'), findsOneWidget);
+      expect(find.byType(Card), findsNothing);
     });
 
     testWidgets('shows Paused and Play button when connected in paused state', (tester) async {
@@ -145,7 +145,7 @@ void main() {
         ),
       );
 
-      expect(find.text('Chessnut Move Board'), findsOneWidget);
+      expect(find.text('Chessnut Board'), findsOneWidget);
       expect(find.text('Pro feature'), findsOneWidget);
       expect(find.text('Scan for boards'), findsNothing);
     });
@@ -244,7 +244,7 @@ void main() {
         ),
       );
 
-      expect(find.text('Chessnut Move Board'), findsOneWidget);
+      expect(find.text('Chessnut Board'), findsOneWidget);
       expect(find.text('Scan for boards'), findsOneWidget);
       expect(find.widgetWithText(FilledButton, 'Scan'), findsOneWidget);
 

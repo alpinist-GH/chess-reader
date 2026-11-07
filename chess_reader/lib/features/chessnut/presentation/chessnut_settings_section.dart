@@ -8,8 +8,9 @@ import '../../../core/settings/app_settings.dart';
 import '../model/chessnut_state.dart';
 import '../state/chessnut_controller.dart';
 
-const _kChessnutSyncDescription = 'Sync a physical Chessnut Move board with '
-    'the app — piece moves on the board move in the reader, and vice versa.';
+const _kChessnutSyncDescription =
+    'Sync a physical Chessnut board with '
+    'the app. Move supports automatic movement; Evo, Air and Go use LED guidance.';
 
 /// Chessnut Move section within Settings for discovery, connection,
 /// remembered board management, and auto-reconnect preferences.
@@ -32,10 +33,10 @@ class ChessnutSettingsSection extends ConsumerWidget {
     final header = Padding(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
       child: Text(
-        'Chessnut Move Board',
+        'Chessnut Board',
         style: Theme.of(context).textTheme.titleSmall?.copyWith(
-              color: Theme.of(context).colorScheme.primary,
-            ),
+          color: Theme.of(context).colorScheme.primary,
+        ),
       ),
     );
 
@@ -61,16 +62,17 @@ class ChessnutSettingsSection extends ConsumerWidget {
         header,
 
         // Status message or error banner
-        if (chessnutState.statusMessage != null || chessnutState.lastError != null)
+        if (chessnutState.statusMessage != null ||
+            chessnutState.lastError != null)
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
             child: Text(
               chessnutState.lastError ?? chessnutState.statusMessage ?? '',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: chessnutState.lastError != null
-                        ? Theme.of(context).colorScheme.error
-                        : null,
-                  ),
+                color: chessnutState.lastError != null
+                    ? Theme.of(context).colorScheme.error
+                    : null,
+              ),
             ),
           ),
 
@@ -78,7 +80,7 @@ class ChessnutSettingsSection extends ConsumerWidget {
         if (settings.chessnutDeviceId != null) ...[
           ListTile(
             leading: const Icon(Icons.memory),
-            title: Text(chessnutState.connectedDeviceName ?? 'Chessnut Move Board'),
+            title: Text(chessnutState.connectedDeviceName ?? 'Chessnut Board'),
             subtitle: Text('ID: ${settings.chessnutDeviceId}'),
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
@@ -94,14 +96,16 @@ class ChessnutSettingsSection extends ConsumerWidget {
                       final proceed = await presentProFeatureGate(
                         context,
                         ref,
-                        featureName: 'Chessnut Move sync',
+                        featureName: 'Chessnut board sync',
                         featureDescription: _kChessnutSyncDescription,
                       );
                       if (!context.mounted || !proceed) return;
-                      ref.read(proTrialRemainingProvider.notifier).consumeIfEligible();
+                      ref
+                          .read(proTrialRemainingProvider.notifier)
+                          .consumeIfEligible();
                       controller.connectToDevice(
                         settings.chessnutDeviceId!,
-                        nameHint: 'Chessnut Move',
+                        nameHint: settings.chessnutDeviceName,
                       );
                     },
                     child: const Text('Connect'),
@@ -128,8 +132,11 @@ class ChessnutSettingsSection extends ConsumerWidget {
         // Scan button & controls
         ListTile(
           title: const Text('Scan for boards'),
-          subtitle: const Text('Discover nearby Chessnut Move electronic boards'),
-          trailing: chessnutState.connectionState == ChessnutConnectionState.scanning
+          subtitle: const Text(
+            'Discover nearby Chessnut Move, Evo, Air and Go boards',
+          ),
+          trailing:
+              chessnutState.connectionState == ChessnutConnectionState.scanning
               ? const SizedBox(
                   width: 24,
                   height: 24,
@@ -145,12 +152,15 @@ class ChessnutSettingsSection extends ConsumerWidget {
         // Discovered devices list
         if (controller.discoveredDevices.isNotEmpty)
           ...controller.discoveredDevices.map((device) {
-            final isCurrent = chessnutState.connectedDeviceId == device.deviceId;
+            final isCurrent =
+                chessnutState.connectedDeviceId == device.deviceId;
             return ListTile(
               leading: const Icon(Icons.bluetooth),
-              title: Text(device.name?.isNotEmpty == true
-                  ? device.name!
-                  : 'Unnamed BLE Device'),
+              title: Text(
+                device.name?.isNotEmpty == true
+                    ? device.name!
+                    : 'Unnamed BLE Device',
+              ),
               subtitle: Text(
                 '${device.deviceId}${device.rssi != null ? ' (${device.rssi} dBm)' : ''}',
               ),
@@ -164,11 +174,13 @@ class ChessnutSettingsSection extends ConsumerWidget {
                         final proceed = await presentProFeatureGate(
                           context,
                           ref,
-                          featureName: 'Chessnut Move sync',
+                          featureName: 'Chessnut board sync',
                           featureDescription: _kChessnutSyncDescription,
                         );
                         if (!context.mounted || !proceed) return;
-                        ref.read(proTrialRemainingProvider.notifier).consumeIfEligible();
+                        ref
+                            .read(proTrialRemainingProvider.notifier)
+                            .consumeIfEligible();
                         controller.connectToDevice(
                           device.deviceId,
                           nameHint: device.name,
@@ -201,17 +213,21 @@ class _ProLockedCard extends ConsumerWidget {
             children: [
               Row(
                 children: [
-                  Icon(Icons.lock_outline,
-                      color: Theme.of(context).colorScheme.primary),
+                  Icon(
+                    Icons.lock_outline,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
                   const SizedBox(width: 8),
-                  const Text('Pro feature',
-                      style: TextStyle(fontWeight: FontWeight.bold)),
+                  const Text(
+                    'Pro feature',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
                 ],
               ),
               const SizedBox(height: 8),
               const Text(
-                'Sync a physical Chessnut Move board with the app — piece '
-                'moves on the board move in the reader, and vice versa. '
+                'Sync a physical Chessnut board with the app. Move supports automatic '
+                'movement; Evo, Air and Go use LED guidance. '
                 'Part of the Pro upgrade, alongside play vs computer.',
               ),
               const SizedBox(height: 12),

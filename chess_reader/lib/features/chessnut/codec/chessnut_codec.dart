@@ -233,6 +233,17 @@ class ChessnutCodec {
   }
 
   /// Encodes command to highlight specific Chessnut square indices in red (e.g. for mismatch).
+  static Uint8List encodeBitmapLedsCommand(Set<int> squares) {
+    final command = Uint8List(10)
+      ..[0] = 0x0a
+      ..[1] = 0x08;
+    for (final square in squares) {
+      if (square < 0 || square >= 64) continue;
+      command[2 + square ~/ 8] |= 1 << (square % 8);
+    }
+    return command;
+  }
+
   static Uint8List encodeMismatchLedsCommand(Set<int> redSquareIndices) {
     final leds = <int, int>{};
     for (final sq in redSquareIndices) {

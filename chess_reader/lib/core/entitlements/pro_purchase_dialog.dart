@@ -77,7 +77,7 @@ class _ProFeatureIntroDialog extends StatelessWidget {
             Text(featureDescription),
             const SizedBox(height: 12),
             const Text(
-              'Part of the Pro upgrade, alongside Chessnut Move board sync, '
+              'Part of the Pro upgrade, alongside Chessnut board sync, '
               'Play vs Computer, and Guess the Move training — sharing a pool '
               'of $kProTrialCredits free sessions before a one-time Pro '
               'Unlock.',
@@ -164,7 +164,7 @@ class _ProPurchaseDialogState extends ConsumerState<_ProPurchaseDialog> {
                       'purchase Pro — this direct-download build can\'t '
                       'process purchases itself.'
                   : "You've used all $kProTrialCredits free Pro sessions. "
-                      'Unlock Pro to keep syncing a Chessnut Move board and '
+                      'Unlock Pro to keep syncing a Chessnut board and '
                       'playing vs computer, on this device and any other '
                       'you sign in on.',
             ),

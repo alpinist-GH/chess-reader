@@ -366,13 +366,13 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
         actions: [
           if (chessnutController.isSupported)
             Tooltip(
-              message: 'Chessnut Move board: ${_chessnutTooltip(chessnutState)}',
+              message: 'Chessnut board: ${_chessnutTooltip(chessnutState)}',
               child: TextButton.icon(
                 icon: !isChessnutPro
                     ? const Icon(Icons.lock_outline, size: 20)
                     : _chessnutToolbarIcon(context, chessnutState),
                 label: Text(
-                  'Chessnut Move${!isChessnutPro
+                  'Chessnut${!isChessnutPro
                       ? ' (Pro)'
                       : chessnutState.isConnected
                           ? ''

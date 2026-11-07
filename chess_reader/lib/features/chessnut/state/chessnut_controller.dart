@@ -13,11 +13,13 @@ import '../codec/chessnut_codec.dart';
 import '../model/chessnut_constants.dart';
 import '../model/chessnut_state.dart';
 import '../transport/chessnut_transport.dart';
-import '../transport/universal_ble_transport.dart';
+import '../transport/auto_chessnut_transport.dart';
+import '../transport/evo_board_channel.dart';
+import '../model/chessnut_board_model.dart';
 
 /// Provider for the underlying BLE transport. Overridable in tests.
 final chessnutTransportProvider = Provider<ChessnutTransport>((ref) {
-  final transport = UniversalBleTransport();
+  final transport = AutoChessnutTransport();
   ref.onDispose(transport.dispose);
   return transport;
 });
@@ -27,6 +29,9 @@ final chessnutTransportProvider = Provider<ChessnutTransport>((ref) {
 class ChessnutController extends Notifier<ChessnutState>
     with WidgetsBindingObserver {
   ChessnutTransport get _transport => ref.read(chessnutTransportProvider);
+
+  ChessnutBoardModel get boardModel =>
+      ChessnutBoardModel.fromAdvertisedName(state.connectedDeviceName);
 
   bool _disposed = false;
   bool _foreground = true;
@@ -171,7 +176,10 @@ class ChessnutController extends Notifier<ChessnutState>
       if (_disposed || !_foreground || !_featureEngaged) return;
       final settings = ref.read(settingsProvider);
       if (settings.chessnutAutoReconnect && settings.chessnutDeviceId != null) {
-        connectToDevice(settings.chessnutDeviceId!, nameHint: 'Chessnut Move');
+        connectToDevice(
+          settings.chessnutDeviceId!,
+          nameHint: settings.chessnutDeviceName,
+        );
       }
     });
   }
@@ -231,7 +239,7 @@ class ChessnutController extends Notifier<ChessnutState>
     // Computer-opponent moves fall through to the normal sync logic below,
     // so the engine's move drives the physical board exactly like any other
     // app-origin position change.
-    _latestReportedPlacement = null;
+    if (boardModel.canMovePieces) _latestReportedPlacement = null;
     state = state.copyWith(
       canSendDiagramAnyway: false,
       clearUnvalidatedPlacement: true,
@@ -283,7 +291,7 @@ class ChessnutController extends Notifier<ChessnutState>
     discoveredDevices.clear();
     state = state.copyWith(
       connectionState: ChessnutConnectionState.scanning,
-      statusMessage: 'Scanning for Chessnut Move boards...',
+      statusMessage: 'Scanning for Chessnut boards...',
       clearLastError: true,
     );
 
@@ -299,7 +307,14 @@ class ChessnutController extends Notifier<ChessnutState>
 
     _scanSubscription?.cancel();
     _scanSubscription = _transport.scanResults.listen((device) {
-      if (!current()) return;
+      if (!current() ||
+          !isChessnutAdvertisement(
+            name: device.name,
+            rawName: device.rawName,
+            services: device.services,
+          )) {
+        return;
+      }
       final existingIndex = discoveredDevices.indexWhere(
         (d) => d.deviceId == device.deviceId,
       );
@@ -366,7 +381,18 @@ class ChessnutController extends Notifier<ChessnutState>
       state = state.copyWith(
         connectionState: ChessnutConnectionState.connecting,
         connectedDeviceId: deviceId,
-        connectedDeviceName: nameHint ?? 'Chessnut Board',
+        connectedDeviceName:
+            nameHint ??
+            discoveredDevices
+                .where((d) => d.deviceId == deviceId)
+                .firstOrNull
+                ?.name ??
+            (ref.read(settingsProvider).chessnutDeviceId == deviceId
+                ? ref.read(settingsProvider).chessnutDeviceName
+                : null) ??
+            (deviceId == EvoBoardChannel.deviceId
+                ? 'Chessnut Evo'
+                : 'Chessnut'),
         statusMessage: 'Connecting to board...',
         clearLastError: true,
       );
@@ -414,7 +440,8 @@ class ChessnutController extends Notifier<ChessnutState>
           ChessnutConstants.desiredAndroidMtu,
         );
         if (!current()) return;
-        if (mtu < ChessnutConstants.pieceStatusReportMinMtu) {
+        if (boardModel.canMovePieces &&
+            mtu < ChessnutConstants.pieceStatusReportMinMtu) {
           // One retry after a short delay: negotiation can still be
           // settling immediately after service discovery completes.
           await Future<void>.delayed(const Duration(milliseconds: 500));
@@ -447,7 +474,9 @@ class ChessnutController extends Notifier<ChessnutState>
 
         if (!current()) return;
         // Remember device in settings
-        ref.read(settingsProvider.notifier).setChessnutDevice(deviceId);
+        ref
+            .read(settingsProvider.notifier)
+            .setChessnutDevice(deviceId, name: state.connectedDeviceName);
 
         _reconnectAttempts = 0;
         _autoSyncEligible = true;
@@ -603,6 +632,7 @@ class ChessnutController extends Notifier<ChessnutState>
       );
       if (!_disposed &&
           epoch == _connectionEpoch &&
+          boardModel.canMovePieces &&
           (state.negotiatedMtu ?? 0) >=
               ChessnutConstants.pieceStatusReportMinMtu) {
         await _transport.writeCommand(
@@ -620,7 +650,9 @@ class ChessnutController extends Notifier<ChessnutState>
   /// unchanged (typically still null / last-known) on timeout or failure;
   /// the caller treats null as unverified and refuses to move.
   Future<void> _refreshAvailablePieces(String deviceId) async {
-    if ((state.negotiatedMtu ?? 0) < ChessnutConstants.pieceStatusReportMinMtu) {
+    if (!boardModel.canMovePieces) return;
+    if ((state.negotiatedMtu ?? 0) <
+        ChessnutConstants.pieceStatusReportMinMtu) {
       return;
     }
     final completer = Completer<void>();
@@ -745,7 +777,10 @@ class ChessnutController extends Notifier<ChessnutState>
   Future<void> stop() async {
     final wasMoving = _inFlightTargetPlacement != null;
     await pause();
-    if (!wasMoving && state.isConnected && _transport.motionProtocolVerified) {
+    if (!wasMoving &&
+        boardModel.canMovePieces &&
+        state.isConnected &&
+        _transport.motionProtocolVerified) {
       await _writeLedOrStop(ChessnutCodec.encodeStopCommand());
     }
     _clearBoardLeds();
@@ -792,6 +827,10 @@ class ChessnutController extends Notifier<ChessnutState>
   }
 
   void _queueTargetPosition(String placement) {
+    if (!boardModel.canMovePieces) {
+      unawaited(_sendTargetCommand(placement));
+      return;
+    }
     // Placement deduplication: same piece placement requires zero motion
     if ((_inFlightTargetPlacement ?? _currentSynchronizedPlacement) ==
         placement) {
@@ -827,6 +866,10 @@ class ChessnutController extends Notifier<ChessnutState>
     if (deviceId == null || !state.isConnected) return;
 
     if (!_foreground) return;
+    if (!boardModel.canMovePieces) {
+      _alignByHand(placement);
+      return;
+    }
     final inventory = ChessnutCodec.validateInventory(placement);
     String? error;
     if (!inventory.isValid) {
@@ -1056,6 +1099,12 @@ class ChessnutController extends Notifier<ChessnutState>
         );
         _clearBoardLeds();
       }
+      return;
+    }
+
+    if (!boardModel.canMovePieces &&
+        state.syncState == ChessnutSyncState.aligning) {
+      _alignByHand(appPlacement);
       return;
     }
 
@@ -1340,12 +1389,43 @@ class ChessnutController extends Notifier<ChessnutState>
       mismatchedPlacement: reportedPlacement,
       mismatchedSquares: diff,
       clearIntermediateHint: true,
-      statusMessage: 'Physical pieces do not match app position.',
+      statusMessage: boardModel.canMovePieces
+          ? 'Physical pieces do not match app position.'
+          : 'Move the lit squares to match the app position.',
     );
 
     if (diff.isNotEmpty) {
-      _writeLedOrStop(ChessnutCodec.encodeMismatchLedsCommand(diff));
+      _writeLedOrStop(_ledCommand(diff));
     }
+  }
+
+  Uint8List _ledCommand(Set<int> squares) => boardModel.usesBitmapLeds
+      ? ChessnutCodec.encodeBitmapLedsCommand(squares)
+      : ChessnutCodec.encodeMismatchLedsCommand(squares);
+
+  void _alignByHand(String placement) {
+    final reported = _latestReportedPlacement;
+    if (reported == null) {
+      state = state.copyWith(
+        syncState: ChessnutSyncState.aligning,
+        statusMessage: 'Waiting for the board position...',
+      );
+      return;
+    }
+    final diff = ChessnutCodec.diffPlacements(placement, reported);
+    if (diff.isEmpty) _currentSynchronizedPlacement = placement;
+    state = state.copyWith(
+      syncState: diff.isEmpty
+          ? ChessnutSyncState.synchronized
+          : ChessnutSyncState.aligning,
+      mismatchedSquares: diff,
+      clearLastError: true,
+      clearMismatchedPlacement: true,
+      statusMessage: diff.isEmpty
+          ? 'Board and app are synchronized.'
+          : 'Move the lit squares to match the app position.',
+    );
+    _writeLedOrStop(_ledCommand(diff));
   }
 
   Future<void> _writeLedOrStop(Uint8List command) async {
@@ -1361,7 +1441,7 @@ class ChessnutController extends Notifier<ChessnutState>
   }
 
   void _clearBoardLeds() {
-    _writeLedOrStop(ChessnutCodec.encodeClearLedsCommand());
+    _writeLedOrStop(_ledCommand(const {}));
   }
 
   /// Clears all square LEDs on the physical board.
