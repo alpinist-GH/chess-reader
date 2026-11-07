@@ -28,6 +28,7 @@ import '../data/epub_book.dart';
 import '../data/pdf_html_builder.dart';
 import '../state/book_providers.dart';
 import '../state/conversion_provider.dart';
+import '../state/diagram_corrections_provider.dart';
 import 'epub_book_view.dart';
 import 'move_strip.dart';
 import 'pdf_book_view.dart';
@@ -301,6 +302,12 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
     });
   }
 
+  Future<Map<String, String>> _loadedCorrections(String path) async {
+    final notifier = ref.read(diagramCorrectionsProvider(path).notifier);
+    await notifier.loaded;
+    return ref.read(diagramCorrectionsProvider(path));
+  }
+
   Future<void> _exportProcessed(String path) async {
     final messenger = ScaffoldMessenger.of(context);
     final origin = _shareOrigin();
@@ -309,7 +316,14 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
     );
     try {
       final conversion = await ref.read(conversionProvider(path).future);
-      final bytes = await exportProcessedBook(path, conversion);
+      // Corrections travel beside the detected FENs, so the importing device
+      // can still reset a diagram to what was detected.
+      final corrections = await _loadedCorrections(path);
+      final bytes = await exportProcessedBook(
+        path,
+        conversion,
+        corrections: corrections,
+      );
       final name = '${p.basenameWithoutExtension(path)}.chessbook.zip';
       if (Platform.isIOS || Platform.isAndroid) {
         final dir = await (await getTemporaryDirectory()).createTemp(
@@ -348,7 +362,9 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
     final shareOrigin = _shareOrigin();
     messenger.showSnackBar(const SnackBar(content: Text('Preparing export…')));
     try {
-      final conversion = await ref.read(conversionProvider(path).future);
+      final conversion = await ref.read(
+        correctedConversionProvider(path).future,
+      );
       final chapters = _isEpub(path)
           ? (await loadEpubBook(path, diagrams: conversion)).chapters
           : buildPdfChapters(conversion);

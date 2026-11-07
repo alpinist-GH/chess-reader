@@ -3,6 +3,7 @@ import '../domain/figurine_map.dart';
 import '../domain/move_resolver.dart';
 import '../domain/san_tokenizer.dart';
 import 'book_conversion.dart';
+import 'diagram_corrections.dart';
 import 'epub_book.dart';
 
 /// Turns a PDF [BookConversion] into the same `EpubChapter` shape the EPUB
@@ -29,7 +30,7 @@ List<EpubChapter> buildPdfChapters(BookConversion conversion) {
     final moves = [for (final t in resolvedTokens) resolvedByToken[t]!];
     chapters.add(EpubChapter(
       title: 'Page ${page.index}',
-      html: _buildPageHtml(text, resolvedTokens, page.diagrams),
+      html: _buildPageHtml(text, resolvedTokens, page.diagrams, page.index),
       moves: moves,
     ));
   }
@@ -40,6 +41,7 @@ String _buildPageHtml(
   String text,
   List<MoveToken> resolvedTokens,
   List<ConvertedDiagram> diagrams,
+  int pageIndex,
 ) {
   final sortedDiagrams = [...diagrams]
     ..sort((a, b) => a.anchor.compareTo(b.anchor));
@@ -53,7 +55,7 @@ String _buildPageHtml(
       final at = sortedDiagrams[di].anchor.clamp(cursor, text.length);
       buf.write(_formatText(text.substring(cursor, at)));
       buf.write('</p>');
-      buf.write(_diagramHtml(sortedDiagrams[di]));
+      buf.write(_diagramHtml(sortedDiagrams[di], pageIndex));
       buf.write('<p>');
       cursor = at;
       di++;
@@ -82,8 +84,10 @@ String _buildPageHtml(
   return buf.toString();
 }
 
-String _diagramHtml(ConvertedDiagram d) =>
+String _diagramHtml(ConvertedDiagram d, int pageIndex) =>
     '<chessdiagram fen="${_escapeAttr(d.fen)}"'
+    ' dkey="${diagramKey(pageIndex, d)}"'
+    '${d.corrected ? ' corrected="1"' : ''}'
     '${d.annotations.isEmpty ? '' : ' ann="${_escapeAttr(d.annotations)}"'}>'
     '<img src="data:image/png;base64,${d.cropPngBase64}"></chessdiagram>';
 

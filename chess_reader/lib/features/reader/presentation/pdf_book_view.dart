@@ -6,9 +6,11 @@ import '../../../core/persistence/library_store.dart';
 import '../../../core/state/game_session.dart';
 import '../../computer_opponent/state/computer_opponent_provider.dart';
 import '../data/book_conversion.dart';
+import '../data/diagram_corrections.dart';
 import '../data/page_moves_service.dart';
 import '../state/book_providers.dart';
 import '../state/conversion_provider.dart';
+import '../state/diagram_corrections_provider.dart';
 import '../state/reader_nav.dart';
 
 /// PDF viewer with clickable chess moves overlaid on each page. Attaches its
@@ -187,9 +189,18 @@ class _DiagramAnchorsOverlay extends ConsumerWidget {
     // Read the incremental conversion so diagrams appear as their page finishes
     // converting in the background (not only when the whole book is done).
     final conversion = ref.watch(effectiveConversionProvider(path));
+    final corrections = ref.watch(diagramCorrectionsProvider(path));
     final diagrams =
         conversion?.diagramsFor(page.pageNumber) ?? const <ConvertedDiagram>[];
     if (diagrams.isEmpty) return const SizedBox.shrink();
+    // The user's corrections win over the detected FEN.
+    final shown = [
+      for (final raw in diagrams)
+        if (corrections[diagramKey(page.pageNumber, raw)] case final fen?)
+          raw.withFen(fen)
+        else
+          raw,
+    ];
 
     // Raster pixels (200 dpi) → page-widget coordinates.
     final toWidget = pageSize.width / (page.width * 200 / 72);
@@ -197,7 +208,7 @@ class _DiagramAnchorsOverlay extends ConsumerWidget {
 
     return Stack(
       children: [
-        for (final d in diagrams)
+        for (final d in shown)
           Positioned(
             left: d.left * toWidget,
             top: d.top * toWidget,
@@ -218,6 +229,16 @@ class _DiagramAnchorsOverlay extends ConsumerWidget {
                     .loadFen(d.fen, turnRecoverable: true);
                 if (ok) {
                   ref.read(activeLineProvider.notifier).clear();
+                  ref
+                      .read(activeDiagramProvider.notifier)
+                      .set(
+                        ActiveDiagram(
+                          path: path,
+                          key: diagramKey(page.pageNumber, d),
+                          fen: d.fen,
+                          corrected: d.corrected,
+                        ),
+                      );
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
                       content:

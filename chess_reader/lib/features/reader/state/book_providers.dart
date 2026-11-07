@@ -7,6 +7,7 @@ import '../../computer_opponent/state/computer_opponent_provider.dart';
 import '../../library/book_import.dart';
 import '../data/page_moves_service.dart';
 import '../domain/move_resolver.dart';
+import 'diagram_corrections_provider.dart';
 import 'reader_nav.dart';
 import 'reading_analysis.dart';
 
@@ -44,6 +45,7 @@ class OpenedBook extends Notifier<String?> {
     // state this method is in the middle of resetting for the new book.
     ref.read(computerOpponentProvider.notifier).abandonGame();
     ref.read(activeLineProvider.notifier).clear();
+    ref.read(activeDiagramProvider.notifier).set(null);
     ref.read(currentPageProvider.notifier).set(1);
     ref.read(epubJumpProvider.notifier).consumed();
     ref

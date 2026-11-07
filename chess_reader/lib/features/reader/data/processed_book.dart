@@ -9,12 +9,14 @@ import 'package:path_provider/path_provider.dart';
 
 import '../../../core/util/fnv_hash.dart';
 import 'book_conversion.dart';
+import 'diagram_corrections.dart';
 
 /// A portable ZIP containing the original book and hydrated detection results.
 Future<Uint8List> exportProcessedBook(
   String path,
-  BookConversion conversion,
-) async {
+  BookConversion conversion, {
+  Map<String, String> corrections = const {},
+}) async {
   return Isolate.run(() {
     final json = conversion.toJson()..remove('sourcePath');
     final metadata = utf8.encode(
@@ -23,6 +25,8 @@ Future<Uint8List> exportProcessedBook(
         'version': 1,
         'name': p.basename(path),
         'conversion': json,
+        // User-corrected diagram FENs by diagramKey; absent in older exports.
+        if (corrections.isNotEmpty) 'corrections': corrections,
       }),
     );
     final source = File(path).readAsBytesSync();
@@ -72,7 +76,13 @@ Future<String> importProcessedBook(String path) async {
         base64Decode(diagram.cropPngBase64);
       }
     }
-    return (name, conversion, Uint8List.fromList(source.content));
+    final rawCorrections = json['corrections'];
+    final corrections = <String, String>{
+      if (rawCorrections is Map)
+        for (final e in rawCorrections.entries)
+          if (e.key is String && e.value is String) e.key: e.value as String,
+    };
+    return (name, conversion, Uint8List.fromList(source.content), corrections);
   });
   final support = await getApplicationSupportDirectory();
   final root = Directory(p.join(support.path, 'books'));
@@ -111,6 +121,12 @@ Future<String> importProcessedBook(String path) async {
         sourcePath: book.path,
       ),
     );
+    // Merge rather than replace: corrections made on this device win over the
+    // bundle's for the same diagram, and none are lost.
+    if (decoded.$4.isNotEmpty) {
+      final mine = await loadDiagramCorrections(book.path);
+      await saveDiagramCorrections(book.path, {...decoded.$4, ...mine});
+    }
     return book.path;
   } catch (_) {
     if (!existed && directory.existsSync()) {

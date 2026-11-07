@@ -22,7 +22,12 @@ class ConvertedDiagram {
     required this.size,
     required this.anchor,
     this.annotations = '',
+    this.corrected = false,
   });
+
+  /// Whether [fen] is a user correction rather than the detected position.
+  /// Runtime-only: corrections are stored separately, never in the cache.
+  final bool corrected;
 
   /// Detected position. Empty for a training diagram that couldn't be
   /// reconstructed: the reader shows the crop image as printed instead.
@@ -45,6 +50,18 @@ class ConvertedDiagram {
   /// diagram should be inserted; for EPUB, the occurrence index of the board
   /// `<img>` within the chapter.
   final int anchor;
+
+  /// This diagram showing [newFen] (a user correction); all else unchanged.
+  ConvertedDiagram withFen(String newFen) => ConvertedDiagram(
+    fen: newFen,
+    cropPngBase64: cropPngBase64,
+    left: left,
+    top: top,
+    size: size,
+    anchor: anchor,
+    annotations: annotations,
+    corrected: true,
+  );
 
   Map<String, dynamic> toJson() => {
     'fen': fen,

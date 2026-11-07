@@ -12,6 +12,7 @@ import '../../../core/models/move_token.dart';
 import '../domain/move_resolver.dart';
 import '../domain/san_tokenizer.dart';
 import 'book_conversion.dart';
+import 'diagram_corrections.dart';
 
 /// One spine chapter, preprocessed: every resolved move is wrapped in a
 /// `<chessmove idx="...">` element and every recognized diagram image in a
@@ -127,7 +128,7 @@ Future<EpubBook> loadEpubBook(String path, {BookConversion? diagrams}) async {
     final moves = [for (final t in tokensHere) resolvedByToken[t]!];
     _wrapTokens(chapterNodeIndexes[c], tokensHere);
     if (diagrams != null) {
-      _wrapDiagrams(documents[c], diagrams.diagramsFor(c));
+      _wrapDiagrams(documents[c], diagrams.diagramsFor(c), c);
     }
     final titleEl = documents[c].querySelector('h1, h2, h3, title');
     chapters.add(EpubChapter(
@@ -309,7 +310,11 @@ void _wrapTokens(
 
 /// Wraps the board `<img>`s of a chapter (identified by their occurrence index,
 /// stored as the diagram's `anchor`) in `<chessdiagram fen="...">`.
-void _wrapDiagrams(dom.Document doc, List<ConvertedDiagram> diagrams) {
+void _wrapDiagrams(
+  dom.Document doc,
+  List<ConvertedDiagram> diagrams,
+  int chapter,
+) {
   if (diagrams.isEmpty) return;
   final imgs = doc.querySelectorAll('img');
   for (final d in diagrams) {
@@ -318,7 +323,10 @@ void _wrapDiagrams(dom.Document doc, List<ConvertedDiagram> diagrams) {
     final parent = img.parentNode;
     if (parent == null) continue;
     final at = parent.nodes.indexOf(img);
-    final wrapper = dom.Element.tag('chessdiagram')..attributes['fen'] = d.fen;
+    final wrapper = dom.Element.tag('chessdiagram')
+      ..attributes['fen'] = d.fen
+      ..attributes['dkey'] = diagramKey(chapter, d);
+    if (d.corrected) wrapper.attributes['corrected'] = '1';
     if (d.annotations.isNotEmpty) {
       wrapper.attributes['ann'] = d.annotations;
     }

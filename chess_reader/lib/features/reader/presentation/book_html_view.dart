@@ -17,6 +17,7 @@ import '../../computer_opponent/state/computer_opponent_provider.dart';
 import '../../vision/domain/board_annotations.dart';
 import '../data/epub_book.dart';
 import '../state/book_providers.dart';
+import '../state/diagram_corrections_provider.dart';
 import '../state/reader_nav.dart';
 
 /// A scrollable list of [EpubChapter]s rendered with [ChapterHtml]. Shared by
@@ -89,6 +90,7 @@ class _HtmlChapterListState extends ConsumerState<HtmlChapterList> {
           : 0,
       itemCount: widget.chapters.length,
       itemBuilder: (context, i) => ChapterHtml(
+        path: widget.path,
         chapter: widget.chapters[i],
         sourceKey: '${widget.sourceKeyPrefix}$i',
       ),
@@ -112,10 +114,13 @@ class _HtmlChapterListState extends ConsumerState<HtmlChapterList> {
 class ChapterHtml extends ConsumerStatefulWidget {
   const ChapterHtml({
     super.key,
+    required this.path,
     required this.chapter,
     required this.sourceKey,
   });
 
+  /// The open book, so a diagram's correction is saved against it.
+  final String path;
   final EpubChapter chapter;
   final Object sourceKey;
 
@@ -200,10 +205,23 @@ class _ChapterHtmlState extends ConsumerState<ChapterHtml> {
     );
 
     final children = <Widget>[];
+    final corrections = ref.watch(diagramCorrectionsProvider(widget.path));
     for (final seg in _segments) {
       if (seg.fen != null) {
-        if (seg.fen!.isNotEmpty) {
-          children.add(_DiagramTile(fen: seg.fen!, ann: seg.ann));
+        // A saved correction wins over the detected FEN (and turns an
+        // unreconstructable as-printed diagram into a real board).
+        final fixed = seg.dkey.isEmpty ? null : corrections[seg.dkey];
+        final fen = fixed ?? seg.fen!;
+        if (fen.isNotEmpty) {
+          children.add(
+            _DiagramTile(
+              path: widget.path,
+              fen: fen,
+              ann: seg.ann,
+              dkey: seg.dkey,
+              corrected: fixed != null || seg.corrected,
+            ),
+          );
         } else if (seg.imgBase64 != null) {
           // Unreconstructable training diagram: show it as printed.
           children.add(_FallbackDiagramTile(pngBase64: seg.imgBase64!));
@@ -239,9 +257,16 @@ class _Segment {
   const _Segment.html(this.html)
       : fen = null,
         ann = '',
-        imgBase64 = null;
-  const _Segment.diagram(this.fen, {this.ann = '', this.imgBase64})
-      : html = null;
+        imgBase64 = null,
+        dkey = '',
+        corrected = false;
+  const _Segment.diagram(
+    this.fen, {
+    this.ann = '',
+    this.imgBase64,
+    this.dkey = '',
+    this.corrected = false,
+  }) : html = null;
 
   final String? html;
   final String? fen;
@@ -252,6 +277,12 @@ class _Segment {
   /// The diagram's crop PNG (base64), used only when [fen] is empty — an
   /// unreconstructable training diagram rendered as printed.
   final String? imgBase64;
+
+  /// The diagram's stable key (see `diagramKey`); '' for older HTML.
+  final String dkey;
+
+  /// Whether [fen] is the user's correction rather than the detected position.
+  final bool corrected;
 }
 
 final _diagramRe = RegExp(
@@ -261,6 +292,8 @@ final _diagramRe = RegExp(
 );
 
 final _fenAttrRe = RegExp(r'\bfen="([^"]*)"', caseSensitive: false);
+final _dkeyAttrRe = RegExp(r'\bdkey="([^"]*)"', caseSensitive: false);
+final _correctedAttrRe = RegExp(r'\bcorrected="1"', caseSensitive: false);
 final _annAttrRe = RegExp(r'\bann="([^"]*)"', caseSensitive: false);
 final _dataPngRe = RegExp('data:image/[^;]+;base64,([^"\']+)');
 
@@ -281,6 +314,8 @@ List<_Segment> _splitSegments(String html) {
       ann: _unescapeAttr(_annAttrRe.firstMatch(attrs)?.group(1) ?? ''),
       imgBase64:
           fen.isEmpty ? _dataPngRe.firstMatch(body)?.group(1) : null,
+      dkey: _dkeyAttrRe.firstMatch(attrs)?.group(1) ?? '',
+      corrected: _correctedAttrRe.hasMatch(attrs),
     ));
     cursor = m.end;
   }
@@ -307,9 +342,20 @@ const _markColor = Color(0xB3C62828);
 /// training annotations (arrows, ✕ marks) drawn on top — the FEN caption, and
 /// a tap target that loads the position onto the side board.
 class _DiagramTile extends ConsumerWidget {
-  const _DiagramTile({required this.fen, this.ann = ''});
+  const _DiagramTile({
+    required this.path,
+    required this.fen,
+    this.ann = '',
+    this.dkey = '',
+    this.corrected = false,
+  });
 
+  final String path;
   final String fen;
+
+  /// Stable diagram key and whether [fen] is a user correction.
+  final String dkey;
+  final bool corrected;
 
   /// Encoded training annotations; '' when the diagram has none.
   final String ann;
@@ -353,6 +399,18 @@ class _DiagramTile extends ConsumerWidget {
           .loadFen(fen, turnRecoverable: true);
       if (ok) {
         ref.read(activeLineProvider.notifier).clear();
+        ref
+            .read(activeDiagramProvider.notifier)
+            .set(
+              dkey.isEmpty
+                  ? null
+                  : ActiveDiagram(
+                      path: path,
+                      key: dkey,
+                      fen: fen,
+                      corrected: corrected,
+                    ),
+            );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
             content: Text('Could not read this diagram reliably')));
@@ -402,6 +460,14 @@ class _DiagramTile extends ConsumerWidget {
                   padding: const EdgeInsets.fromLTRB(8, 4, 8, 8),
                   child: Row(
                     children: [
+                      if (corrected) ...[
+                        Icon(
+                          Icons.edit_note,
+                          size: 18,
+                          color: theme.colorScheme.primary,
+                        ),
+                        const SizedBox(width: 4),
+                      ],
                       Expanded(
                         child: Text(
                           fen,

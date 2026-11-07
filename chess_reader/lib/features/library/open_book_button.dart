@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../reader/state/book_providers.dart';
 import '../reader/data/processed_book.dart';
 import '../reader/state/conversion_provider.dart';
+import '../reader/state/diagram_corrections_provider.dart';
 
 class OpenBookButton extends ConsumerWidget {
   const OpenBookButton({super.key, this.filled = false, this.tooltip});
@@ -44,6 +45,8 @@ class OpenBookButton extends ConsumerWidget {
             // The import can replace a conversion already held for this path.
             ref.invalidate(conversionCachedProvider(path));
             ref.invalidate(conversionProvider(path));
+            // ...and the bundle's corrections were just merged into the file.
+            ref.invalidate(diagramCorrectionsProvider(path));
           }
           await ref.read(openedBookProvider.notifier).open(path);
         } catch (e) {
