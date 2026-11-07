@@ -20,8 +20,11 @@ import '../guess_move/domain/guess_move_models.dart';
 import '../guess_move/presentation/guess_move_bar.dart';
 import '../guess_move/state/guess_move_provider.dart';
 import '../reader/state/book_providers.dart';
+import '../reader/state/reader_nav.dart';
+import '../reader/state/reading_analysis.dart';
 import 'external_links.dart';
 import 'fen_anchor_dialog.dart';
+import 'reading_analysis_bar.dart';
 
 /// Interactive chessground board bound to the [gameSessionProvider].
 ///
@@ -186,6 +189,8 @@ class _BoardPanelState extends ConsumerState<BoardPanel> {
                   ref.read(gameSessionProvider.notifier).backToBook(),
             ),
           ),
+        if (!opponent.ownsBoard && guess.phase == GuessMovePhase.idle)
+          const ReadingAnalysisBar(),
         const ChessnutStatusWidget(),
         Wrap(
           alignment: WrapAlignment.center,
@@ -202,13 +207,22 @@ class _BoardPanelState extends ConsumerState<BoardPanel> {
                   ? null
                   : () => ref.read(gameSessionProvider.notifier).undo(),
             ),
-            IconButton(
-              tooltip: 'Reset board',
+            TextButton.icon(
               icon: const Icon(Icons.restart_alt),
+              label: const Text('New game'),
               onPressed:
                   opponent.ownsBoard || guess.phase != GuessMovePhase.idle
                   ? null
-                  : () => ref.read(gameSessionProvider.notifier).reset(),
+                  : () {
+                      final source =
+                          ref.read(activeLineProvider)?.sourceKey ??
+                          ref.read(currentPageProvider) ??
+                          1;
+                      ref.read(activeLineProvider.notifier).clear();
+                      ref
+                          .read(readingAnalysisProvider.notifier)
+                          .newGame(source);
+                    },
             ),
             IconButton(
               tooltip: 'Flip board',

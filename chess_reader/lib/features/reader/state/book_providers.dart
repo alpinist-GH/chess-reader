@@ -8,6 +8,7 @@ import '../../library/book_import.dart';
 import '../data/page_moves_service.dart';
 import '../domain/move_resolver.dart';
 import 'reader_nav.dart';
+import 'reading_analysis.dart';
 
 /// Path of the currently opened book, or null when no book is open.
 final openedBookProvider = NotifierProvider<OpenedBook, String?>(
@@ -26,6 +27,7 @@ class OpenedBook extends Notifier<String?> {
     ref.read(libraryStoreProvider.notifier).recordOpened(localPath);
     _resetReadingState();
     state = localPath;
+    ref.read(readingAnalysisProvider.notifier).open(localPath);
   }
 
   void close() {
@@ -36,6 +38,7 @@ class OpenedBook extends Notifier<String?> {
   /// Clears per-book transient state so switching books doesn't carry over the
   /// previous book's board, selected move, or scroll/jump intent.
   void _resetReadingState() {
+    ref.read(readingAnalysisProvider.notifier).open(null);
     // Abandon rather than return to book: the saved reader context belongs to
     // the book being closed, and restoring it asynchronously would clobber the
     // state this method is in the middle of resetting for the new book.
@@ -135,6 +138,9 @@ class ActiveLineNotifier extends Notifier<ActiveLine?> {
     final line = state;
     if (line == null) return;
     final resolved = line.moves[line.index];
+    ref
+        .read(readingAnalysisProvider.notifier)
+        .selectBookMoves(line.moves, line.index, line.sourceKey);
     ref
         .read(gameSessionProvider.notifier)
         .setPosition(

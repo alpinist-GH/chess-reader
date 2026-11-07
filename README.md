@@ -37,6 +37,14 @@ high-resolution PDFs. Diagram recognition runs fully on-device.
 - **Clickable moves** — tap a move in the book and the side board jumps to that
   position; step through lines and explore your own variations, then snap back
   to the book.
+- **New game while reading** — use **New game** below the board to return to
+  the starting position without closing the book. Earlier games and diagram
+  analysis remain in **Saved lines**. Branch choices appear below the board.
+- **Saved reading lines** — book moves and your own variations are saved locally
+  for each book location. Use **Saved lines** below the board to revisit any
+  branch, the arrows to step through saved moves, and **Return to main line**
+  to leave a variation without undoing it. Reopening the book restores the
+  selected board position.
 - **Two reading views for PDF** — the original printed pages, or a reflowed HTML
   reading view (easier on small screens). Choose at open, switch anytime; EPUB
   is always HTML.

@@ -4,6 +4,16 @@ All notable changes to ChessBook Reader are documented here. The project loosely
 follows [Keep a Changelog](https://keepachangelog.com/) and
 [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Added
+- Labeled New game control to start from the initial position while keeping the
+  book open and preserving earlier games; inline move choices show main-line
+  continuations and variations.
+- Automatically saved reading analysis with preserved main lines and variations,
+  a saved-line picker, previous/next navigation, and direct return to the main
+  line. Analysis and the selected board position are restored per book.
+
 ## [2.1.0] — 2026-09-11
 
 ### Changed
