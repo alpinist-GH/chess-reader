@@ -6,6 +6,8 @@ follows [Keep a Changelog](https://keepachangelog.com/) and
 
 ## [Unreleased]
 
+## [2.2.0] — 2026-11-07
+
 ### Added
 - Labeled New game control to start from the initial position while keeping the
   book open and preserving earlier games; inline move choices show main-line
