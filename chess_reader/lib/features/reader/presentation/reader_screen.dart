@@ -16,6 +16,7 @@ import '../../chessnut/presentation/chessnut_icon.dart';
 import '../../chessnut/presentation/chessnut_quick_settings_screen.dart';
 import '../../chessnut/state/chessnut_controller.dart';
 import '../../library/about.dart';
+import '../../library/book_suggestions.dart';
 import '../../library/converted_library_screen.dart';
 import '../../library/library_home.dart';
 import '../../library/open_book_button.dart';
@@ -465,6 +466,8 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
                   if (bookPath != null) _exportProcessed(bookPath);
                 case 'export':
                   if (bookPath != null) _exportConverted(bookPath);
+                case 'suggestions':
+                  showBookSuggestions(context);
                 case 'library':
                   Navigator.of(context).push(
                     MaterialPageRoute(
@@ -480,6 +483,13 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
               }
             },
             itemBuilder: (context) => [
+              const PopupMenuItem(
+                value: 'suggestions',
+                child: ListTile(
+                  leading: Icon(Icons.travel_explore),
+                  title: Text('Find chess books…'),
+                ),
+              ),
               if (bookPath != null)
                 const PopupMenuItem(
                   value: 'processed',
