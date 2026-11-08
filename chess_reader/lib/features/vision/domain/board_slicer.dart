@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:image/image.dart' as img;
@@ -126,11 +127,105 @@ img.Image cropInsideFrame(img.Image page, LocatedBoard board) {
     right--;
   }
 
+  // The dark-edge peel stops at a white gap, so a frame drawn as thick line +
+  // gap + thin inner line leaves the grid offset by up to ~half a cell. Fit the
+  // 8x8 lattice to the checkerboard to trim what is left.
+  final pw = right - left + 1, ph = bottom - top + 1;
+  final px = Uint8List(pw * ph);
+  for (var y = 0; y < ph; y++) {
+    for (var x = 0; x < pw; x++) {
+      px[y * pw + x] = gray.getPixel(left + x, top + y).r.toInt();
+    }
+  }
+  final rect = refineGridRect(px, pw, ph);
+
   return img.copyCrop(
     page,
-    x: board.left + left,
-    y: board.top + top,
-    width: right - left + 1,
-    height: bottom - top + 1,
+    x: board.left + left + rect.left,
+    y: board.top + top + rect.top,
+    width: rect.right - rect.left,
+    height: rect.bottom - rect.top,
+  );
+}
+
+/// Sub-rectangle `(left, top, right, bottom)` (right/bottom exclusive) of a
+/// frame-peeled board [gray] (row-major, [w]x[h]) whose 8x8 cell means best fit
+/// an alternating light/dark checkerboard. Hatched or filled dark squares are
+/// always darker than light ones; pieces only perturb a few cells.
+///
+/// MUST mirror `refine_rect_scaled` in tool/vision_train/grid_refine.py: the
+/// search runs on a block-mean copy no larger than ~352px, then maps back.
+({int left, int top, int right, int bottom}) refineGridRect(
+    Uint8List gray, int w, int h) {
+  const maxTrim = 0.6, step = 2, searchSide = 352;
+  final k = math.max(1, (math.min(w, h) / searchSide).round());
+  final sw = w ~/ k, sh = h ~/ k;
+  // Block-mean downscale.
+  final small = Float64List(sw * sh);
+  for (var y = 0; y < sh; y++) {
+    for (var x = 0; x < sw; x++) {
+      var sum = 0;
+      for (var dy = 0; dy < k; dy++) {
+        final row = (y * k + dy) * w + x * k;
+        for (var dx = 0; dx < k; dx++) {
+          sum += gray[row + dx];
+        }
+      }
+      small[y * sw + x] = (sum / (k * k)).floorToDouble();
+    }
+  }
+  // Integral image, (sh+1) x (sw+1).
+  final iw = sw + 1;
+  final ii = Float64List(iw * (sh + 1));
+  for (var y = 0; y < sh; y++) {
+    var rowSum = 0.0;
+    for (var x = 0; x < sw; x++) {
+      rowSum += small[y * sw + x];
+      ii[(y + 1) * iw + x + 1] = ii[y * iw + x + 1] + rowSum;
+    }
+  }
+  double box(int x0, int y0, int x1, int y1) =>
+      ii[y1 * iw + x1] - ii[y0 * iw + x1] - ii[y1 * iw + x0] + ii[y0 * iw + x0];
+
+  final mx = (sw / 8 * maxTrim).floor(), my = (sh / 8 * maxTrim).floor();
+  var best = -1.0;
+  var bx0 = 0, by0 = 0, bx1 = sw, by1 = sh;
+  final xs = List<int>.filled(9, 0), ys = List<int>.filled(9, 0);
+  for (var x0 = 0; x0 <= mx; x0 += step) {
+    for (var x1 = sw - mx; x1 <= sw; x1 += step) {
+      for (var i = 0; i < 9; i++) {
+        xs[i] = (x0 + (x1 - x0) * i / 8).round();
+      }
+      for (var y0 = 0; y0 <= my; y0 += step) {
+        for (var y1 = sh - my; y1 <= sh; y1 += step) {
+          for (var i = 0; i < 9; i++) {
+            ys[i] = (y0 + (y1 - y0) * i / 8).round();
+          }
+          var score = 0.0;
+          for (var r = 0; r < 8; r++) {
+            for (var f = 0; f < 8; f++) {
+              final area = (xs[f + 1] - xs[f]) * (ys[r + 1] - ys[r]);
+              if (area <= 0) continue;
+              final m = box(xs[f], ys[r], xs[f + 1], ys[r + 1]) / area;
+              score += (r + f).isEven ? m : -m;
+            }
+          }
+          score = score.abs();
+          if (score > best) {
+            best = score;
+            bx0 = x0;
+            by0 = y0;
+            bx1 = x1;
+            by1 = y1;
+          }
+        }
+      }
+    }
+  }
+  return (
+    left: bx0 * k,
+    top: by0 * k,
+    right: math.min(w, bx1 * k),
+    bottom: math.min(h, by1 * k),
   );
 }
