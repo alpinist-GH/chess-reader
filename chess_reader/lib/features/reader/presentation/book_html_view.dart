@@ -12,11 +12,11 @@ import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 import '../../../core/persistence/library_store.dart';
 import '../../../core/settings/app_settings.dart';
-import '../../../core/state/game_session.dart';
 import '../../computer_opponent/state/computer_opponent_provider.dart';
 import '../../vision/domain/board_annotations.dart';
 import '../data/epub_book.dart';
 import '../state/book_providers.dart';
+import '../state/reading_analysis.dart';
 import '../state/diagram_corrections_provider.dart';
 import '../state/reader_nav.dart';
 
@@ -395,8 +395,12 @@ class _DiagramTile extends ConsumerWidget {
         return;
       }
       final ok = ref
-          .read(gameSessionProvider.notifier)
-          .loadFen(fen, turnRecoverable: true);
+          .read(readingAnalysisProvider.notifier)
+          .loadStartingPosition(
+            fen,
+            diagramKey: dkey.isEmpty ? null : dkey,
+            turnRecoverable: true,
+          );
       if (ok) {
         ref.read(activeLineProvider.notifier).clear();
         ref

@@ -1,5 +1,7 @@
 import 'package:chess_reader/core/entitlements/purchase_service.dart';
+
 import 'fakes/fake_pro_store_gateway.dart';
+
 import 'package:chess_reader/core/models/move_token.dart';
 import 'package:chess_reader/core/settings/app_settings.dart';
 import 'package:chess_reader/core/state/game_session.dart';
@@ -102,12 +104,12 @@ void main() {
         child: const MaterialApp(home: Scaffold(body: ReadingAnalysisBar())),
       ),
     );
-    await tester.tap(find.text('Return to main line'));
+    await tester.tap(find.text('Moves'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Main line'));
     await tester.pump();
     expect(c.read(gameSessionProvider).fen, moves.first.positionAfter.fen);
-    await tester.tap(find.text('Saved lines'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('1...c5'));
+    await tester.tap(find.text('1... c5'));
     await tester.pumpAndSettle();
     expect(c.read(gameSessionProvider).fen, variationFen);
     expect(c.read(activeLineProvider), isNull);
@@ -150,31 +152,122 @@ void main() {
     },
   );
 
-  testWidgets(
-    'branches are visible and selectable without opening saved lines',
-    (tester) async {
-      final moves = line(['e4', 'e5']);
-      c.read(activeLineProvider.notifier).select(moves, 0, 1);
-      c.read(gameSessionProvider.notifier).playMove(Move.parse('c7c5')!);
-      c.read(readingAnalysisProvider.notifier).backToMain();
-      await tester.pumpWidget(
-        UncontrolledProviderScope(
-          container: c,
-          child: const MaterialApp(home: Scaffold(body: ReadingAnalysisBar())),
-        ),
-      );
-      expect(find.text('Branches:'), findsOneWidget);
-      expect(find.text('1...e5 · Main'), findsOneWidget);
-      await tester.tap(find.text('1...c5 · Variation'));
-      await tester.pump();
-      expect(c.read(gameSessionProvider).lastMove!.uci, 'c7c5');
-      expect(find.text('Alternatives:'), findsOneWidget);
-      await tester.tap(find.text('1...e5 · Main'));
-      await tester.pump();
-      expect(c.read(gameSessionProvider).lastMove!.uci, 'e7e5');
-      await tester.pumpWidget(const SizedBox());
-    },
-  );
+  testWidgets('Moves shows numbered branches and keeps the preview open', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 680);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    c.read(activeLineProvider.notifier).select(line(['e4', 'e5']), 0, 1);
+    c.read(gameSessionProvider.notifier).playMove(Move.parse('c7c5')!);
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: c,
+        child: const MaterialApp(home: Scaffold(body: ReadingAnalysisBar())),
+      ),
+    );
+    await tester.tap(find.text('Moves'));
+    await tester.pumpAndSettle();
+    expect(find.text('V1'), findsOneWidget);
+    await tester.tap(find.text('1. e4'));
+    await tester.pumpAndSettle();
+    final arrows = tester
+        .widget<StaticChessboard>(find.byType(StaticChessboard))
+        .shapes
+        .whereType<Arrow>();
+    expect(
+      arrows.map((arrow) => (arrow.orig, arrow.dest)),
+      unorderedEquals([
+        (Square.e2, Square.e4),
+        (Square.e7, Square.e5),
+        (Square.c7, Square.c5),
+      ]),
+    );
+    expect(arrows.map((arrow) => arrow.color).toSet(), hasLength(3));
+    await tester.tap(find.text('1... e5'));
+    await tester.pumpAndSettle();
+    expect(c.read(gameSessionProvider).lastMove!.uci, 'e7e5');
+    expect(
+      tester.widget<StaticChessboard>(find.byType(StaticChessboard)).fen,
+      c.read(gameSessionProvider).fen,
+    );
+    await tester.tap(find.text('Go to start'));
+    await tester.pumpAndSettle();
+    expect(c.read(gameSessionProvider).fen, Chess.initial.fen);
+  });
+
+  test('diagram PGN preserves nested branches, promotion and move numbers', () {
+    final analysis = c.read(readingAnalysisProvider.notifier);
+    final session = c.read(gameSessionProvider.notifier);
+    final fen = line(['e4']).single.positionAfter.fen
+        .replaceFirst(' 0 1', ' 0 12');
+    analysis.loadStartingPosition(fen, diagramKey: '12:0');
+    session.playMove(Move.parse('e7e5')!);
+    analysis.goToStart();
+    session.playMove(Move.parse('c7c5')!);
+    final fork = c.read(readingAnalysisProvider).cursor!;
+    session.playMove(Move.parse('g1f3')!);
+    analysis.select(fork);
+    session.playMove(Move.parse('d2d4')!);
+    final selectedFen = c.read(gameSessionProvider).fen;
+    analysis.promoteToMain(c.read(readingAnalysisProvider).cursor!);
+    expect(c.read(gameSessionProvider).fen, selectedFen);
+    final pgn = analysis.exportPgn();
+    expect(pgn, contains('[FEN "$fen"]'));
+    expect(pgn, contains('12... c5 (12... e5) 13. d4 (13. Nf3)'));
+    final parsed = PgnGame.parsePgn(pgn);
+    expect(parsed.moves.children.length, 2);
+    expect(parsed.moves.children.first.children.length, 2);
+    analysis.open('book.pdf');
+    expect(analysis.exportPgn(), pgn);
+    expect(c.read(gameSessionProvider).fen, selectedFen);
+  });
+
+  test('undo removes entered moves and clear affects only the active root', () {
+    final analysis = c.read(readingAnalysisProvider.notifier);
+    final session = c.read(gameSessionProvider.notifier);
+    analysis.newGame(1);
+    session.playMove(Move.parse('e2e4')!);
+    session.playMove(Move.parse('e7e5')!);
+    analysis.undoEntry();
+    analysis.undoEntry();
+    expect(c.read(gameSessionProvider).fen, Chess.initial.fen);
+    expect(c.read(readingAnalysisProvider).nodes, hasLength(1));
+    session.playMove(Move.parse('d2d4')!);
+    analysis.newGame(2);
+    session.playMove(Move.parse('g1f3')!);
+    analysis.clearAnalysis();
+    final state = c.read(readingAnalysisProvider);
+    expect(state.children(state.root), isEmpty);
+    expect(state.children(0), hasLength(1));
+    expect(c.read(gameSessionProvider).fen, Chess.initial.fen);
+  });
+
+  test('a copied diagram starts its own tree even on the printed line', () {
+    final moves = line(['e4', 'e5']);
+    c.read(activeLineProvider.notifier).select(moves, 0, 1);
+    final analysis = c.read(readingAnalysisProvider.notifier);
+    final rootFen = moves.first.positionAfter.fen;
+    analysis.loadStartingPosition(rootFen, diagramKey: '1:0');
+    final state = c.read(readingAnalysisProvider);
+    expect(state.nodes[state.root].fen, rootFen);
+    expect(state.children(state.root), isEmpty);
+    c.read(gameSessionProvider.notifier).playMove(Move.parse('c7c5')!);
+    expect(analysis.exportPgn(), contains('1... c5'));
+    analysis.loadStartingPosition(rootFen, diagramKey: '1:1');
+    expect(
+      c
+          .read(readingAnalysisProvider)
+          .children(c.read(readingAnalysisProvider).root),
+      isEmpty,
+    );
+    analysis.loadStartingPosition(rootFen, diagramKey: '1:0');
+    expect(analysis.exportPgn(), contains('1... c5'));
+    analysis.clearAnalysis();
+    c.read(activeLineProvider.notifier).select(moves, 0, 1);
+    expect(analysis.exportPgn(), contains('1. e4 e5'));
+  });
 
   test('manual new-game main line survives exploring an alternative', () {
     final analysis = c.read(readingAnalysisProvider.notifier);

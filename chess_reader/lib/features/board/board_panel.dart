@@ -24,6 +24,7 @@ import '../reader/state/reader_nav.dart';
 import '../reader/state/reading_analysis.dart';
 import 'external_links.dart';
 import 'fen_anchor_dialog.dart';
+import 'reading_analysis_arrows.dart';
 import 'reading_analysis_bar.dart';
 
 const _kShortPanelHeight = 480.0;
@@ -141,8 +142,18 @@ class _BoardPanelState extends ConsumerState<BoardPanel> {
     });
 
     final session = ref.watch(gameSessionProvider);
+    final analysis = ref.watch(readingAnalysisProvider);
+    final analysisActions = ref.read(readingAnalysisProvider.notifier);
     final opponent = ref.watch(computerOpponentProvider);
     final guess = ref.watch(guessMoveProvider);
+    final cursor = analysis.cursor;
+    final arrows =
+        cursor != null &&
+            analysis.nodes[cursor].fen == session.fen &&
+            !opponent.ownsBoard &&
+            guess.phase == GuessMovePhase.idle
+        ? readingAnalysisArrows(analysis)
+        : const <Shape>{};
     final activeLine = ref.watch(activeLineProvider);
     final guessHasProAccess = ref.watch(proEntitlementProvider);
     final canStartGuess =
@@ -174,6 +185,7 @@ class _BoardPanelState extends ConsumerState<BoardPanel> {
                     size: min(constraints.maxWidth, constraints.maxHeight),
                     settings: boardSettings,
                     orientation: _orientation,
+                    shapes: arrows,
                     onMove: (move, {viaDragAndDrop}) =>
                         ref.read(gameSessionProvider.notifier).playMove(move),
                   ),
@@ -196,7 +208,7 @@ class _BoardPanelState extends ConsumerState<BoardPanel> {
                 ),
               ),
             if (!opponent.ownsBoard && guess.phase == GuessMovePhase.idle)
-              ReadingAnalysisBar(compact: short),
+              ReadingAnalysisBar(orientation: _orientation),
             const ChessnutStatusWidget(),
             _Toolbar(
               singleRow: short,
@@ -208,9 +220,17 @@ class _BoardPanelState extends ConsumerState<BoardPanel> {
                   onPressed:
                       (opponent.ownsBoard ||
                           guess.phase != GuessMovePhase.idle ||
-                          !session.canUndo)
+                          (!analysisActions.canUndoEntry &&
+                              (analysis.cursor != null || !session.canUndo)))
                       ? null
-                      : () => ref.read(gameSessionProvider.notifier).undo(),
+                      : () {
+                          if (analysisActions.canUndoEntry) {
+                            ref.read(activeLineProvider.notifier).clear();
+                            analysisActions.undoEntry();
+                          } else {
+                            ref.read(gameSessionProvider.notifier).undo();
+                          }
+                        },
                 ),
                 TextButton.icon(
                   icon: const Icon(Icons.restart_alt),
@@ -288,8 +308,7 @@ class _BoardPanelState extends ConsumerState<BoardPanel> {
                             context,
                             ref,
                             featureName: 'Guess the Move',
-                            featureDescription:
-                                "Test yourself by predicting each move before it's revealed.",
+                            featureDescription: "Test yourself by predicting each move before it's revealed.",
                           );
                           if (!context.mounted || !proceed) return;
                           ref.read(guessMoveProvider.notifier).start();

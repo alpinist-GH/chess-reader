@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/state/game_session.dart';
 import '../reader/data/diagram_corrections.dart';
 import '../reader/state/book_providers.dart';
+import '../reader/state/reading_analysis.dart';
 import '../reader/state/conversion_provider.dart';
 import '../reader/state/diagram_corrections_provider.dart';
 
@@ -78,8 +79,7 @@ Future<void> showFenAnchorDialog(BuildContext context, WidgetRef ref) async {
                           // Detection of this page is still running; resetting
                           // now would drop the correction but leave it shown.
                           setState(
-                            () => error =
-                                'Detection is still running; try again shortly.',
+                            () => error = 'Detection is still running; try again shortly.',
                           );
                           return;
                         }
@@ -92,8 +92,12 @@ Future<void> showFenAnchorDialog(BuildContext context, WidgetRef ref) async {
                           return;
                         }
                         ref
-                            .read(gameSessionProvider.notifier)
-                            .loadFen(detected, turnRecoverable: true);
+                            .read(readingAnalysisProvider.notifier)
+                            .loadStartingPosition(
+                              detected,
+                              diagramKey: d.key,
+                              turnRecoverable: true,
+                            );
                         ref.read(activeLineProvider.notifier).clear();
                         ref
                             .read(activeDiagramProvider.notifier)
@@ -121,13 +125,18 @@ Future<void> showFenAnchorDialog(BuildContext context, WidgetRef ref) async {
           FilledButton(
             onPressed: () async {
               final fen = controller.text.trim();
-              final ok = ref.read(gameSessionProvider.notifier).loadFen(fen);
+              final d = diagram;
+              final ok = ref
+                  .read(readingAnalysisProvider.notifier)
+                  .loadStartingPosition(
+                    fen,
+                    diagramKey: remember ? d?.key : null,
+                  );
               if (!ok) {
                 setState(() => error = 'Invalid FEN');
                 return;
               }
               ref.read(activeLineProvider.notifier).clear();
-              final d = diagram;
               if (d != null && remember) {
                 try {
                   await ref

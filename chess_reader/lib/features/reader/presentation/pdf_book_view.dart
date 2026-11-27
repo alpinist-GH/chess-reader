@@ -3,12 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pdfrx/pdfrx.dart';
 
 import '../../../core/persistence/library_store.dart';
-import '../../../core/state/game_session.dart';
 import '../../computer_opponent/state/computer_opponent_provider.dart';
 import '../data/book_conversion.dart';
 import '../data/diagram_corrections.dart';
 import '../data/page_moves_service.dart';
 import '../state/book_providers.dart';
+import '../state/reading_analysis.dart';
 import '../state/conversion_provider.dart';
 import '../state/diagram_corrections_provider.dart';
 import '../state/reader_nav.dart';
@@ -225,8 +225,12 @@ class _DiagramAnchorsOverlay extends ConsumerWidget {
                   return;
                 }
                 final ok = ref
-                    .read(gameSessionProvider.notifier)
-                    .loadFen(d.fen, turnRecoverable: true);
+                    .read(readingAnalysisProvider.notifier)
+                    .loadStartingPosition(
+                      d.fen,
+                      diagramKey: diagramKey(page.pageNumber, d),
+                      turnRecoverable: true,
+                    );
                 if (ok) {
                   ref.read(activeLineProvider.notifier).clear();
                   ref

@@ -4,6 +4,7 @@ import 'package:dartchess/dartchess.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/settings/app_settings.dart';
+import '../../../core/state/board_loader.dart';
 import '../../../core/state/game_session.dart';
 import '../../computer_opponent/state/computer_opponent_provider.dart';
 import '../../guess_move/domain/guess_move_models.dart';
@@ -13,12 +14,29 @@ import '../domain/move_resolver.dart';
 /// Nodes use parent IDs rather than FEN identity: transpositions in different
 /// branches remain separate, and the first child always retains the main line.
 class ReadingMove {
-  const ReadingMove(this.parent, this.fen, this.label, this.location, this.uci);
+  const ReadingMove(
+    this.parent,
+    this.fen,
+    this.label,
+    this.location,
+    this.uci, [
+    this.variation,
+  ]);
   final int? parent;
   final String fen;
   final String label;
   final String location;
   final String? uci;
+  final int? variation;
+
+  ReadingMove withParent(int? parent, {int? variation}) => ReadingMove(
+    parent,
+    fen,
+    label,
+    location,
+    uci,
+    variation ?? this.variation,
+  );
 
   Map<String, dynamic> toJson() => {
     'parent': parent,
@@ -26,6 +44,7 @@ class ReadingMove {
     'label': label,
     'location': location,
     'uci': uci,
+    'variation': variation,
   };
 }
 
@@ -34,6 +53,14 @@ class ReadingAnalysisState {
   final List<ReadingMove> nodes;
   final int? cursor;
   final int? main;
+  int get root {
+    var id = cursor!;
+    while (nodes[id].parent != null) {
+      id = nodes[id].parent!;
+    }
+    return id;
+  }
+
   List<int> children(int id) => [
     for (var i = 0; i < nodes.length; i++)
       if (nodes[i].parent == id) i,
@@ -43,6 +70,15 @@ class ReadingAnalysisState {
 class ReadingAnalysis extends Notifier<ReadingAnalysisState> {
   String? _book;
   bool _navigating = false;
+  int _nextVariation = 1;
+  final _enteredMoves = <int>[];
+
+  bool get canUndoEntry =>
+      _enteredMoves.isNotEmpty && _enteredMoves.last == state.cursor;
+
+  void undoEntry() {
+    if (canUndoEntry) _removeBelow(_enteredMoves.last, includeStart: true);
+  }
 
   @override
   ReadingAnalysisState build() {
@@ -64,6 +100,7 @@ class ReadingAnalysis extends Notifier<ReadingAnalysisState> {
         _recordMove(before, next);
         return;
       }
+      _enteredMoves.clear();
       // Takebacks and jumps navigate without deleting any continuation.
       final known = _locate(state.nodes, next.fen);
       if (known != null) {
@@ -115,6 +152,7 @@ class ReadingAnalysis extends Notifier<ReadingAnalysisState> {
       from = nodes.length;
       nodes.add(_startNode(before.fen, 'Diagram / position'));
     }
+    final beforeAppend = nodes.length;
     final id = _append(
       nodes,
       from,
@@ -123,6 +161,14 @@ class ReadingAnalysis extends Notifier<ReadingAnalysisState> {
       nodes[from].location,
       next.lastMove!.uci,
     );
+    if (id == beforeAppend) {
+      if (_enteredMoves.isNotEmpty && _enteredMoves.last != from) {
+        _enteredMoves.clear();
+      }
+      _enteredMoves.add(id);
+    } else {
+      _enteredMoves.clear();
+    }
     // Extend the main line only along its first-child path; alternatives
     // retain the last main-line position for direct return.
     state = ReadingAnalysisState(
@@ -167,6 +213,8 @@ class ReadingAnalysis extends Notifier<ReadingAnalysisState> {
 
   void open(String? book) {
     _book = book;
+    _enteredMoves.clear();
+    _nextVariation = 1;
     state = const ReadingAnalysisState();
     if (book == null) return;
     try {
@@ -199,8 +247,26 @@ class ReadingAnalysis extends Notifier<ReadingAnalysisState> {
             j['label'] as String,
             j['location'] as String,
             uci,
+            j['variation'] as int?,
           ),
         );
+      }
+      _nextVariation = data['nextVariation'] as int? ?? 1;
+      for (final node in nodes) {
+        final number = node.variation;
+        if (number != null && number >= _nextVariation) {
+          _nextVariation = number + 1;
+        }
+      }
+      final seenParents = <int>{};
+      for (var id = 0; id < nodes.length; id++) {
+        final node = nodes[id];
+        final parent = node.parent;
+        if (parent != null &&
+            !seenParents.add(parent) &&
+            node.variation == null) {
+          nodes[id] = node.withParent(parent, variation: _nextVariation++);
+        }
       }
       final cursor = data['cursor'] as int?;
       final main = data['main'] as int?;
@@ -218,8 +284,63 @@ class ReadingAnalysis extends Notifier<ReadingAnalysisState> {
     }
   }
 
+  /// Give a copied position its own tree, even when it also occurs in a
+  /// printed or manually entered line in this book.
+  bool loadStartingPosition(
+    String fen, {
+    String? diagramKey,
+    bool turnRecoverable = false,
+  }) {
+    final session = ref.read(gameSessionProvider.notifier);
+    final loaded = tryLoadFen(fen);
+    if (loaded == null) return false;
+    if (_book == null || loaded.position == null) {
+      return session.loadFen(fen, turnRecoverable: turnRecoverable);
+    }
+
+    final position = loaded.position!;
+    final nodes = [...state.nodes];
+    final location = diagramKey == null ? 'FEN' : 'Diagram:$diagramKey';
+    var id = nodes.indexWhere(
+      (node) =>
+          node.parent == null &&
+          node.location == location &&
+          node.fen == position.fen,
+    );
+    if (id < 0) {
+      // Older versions stored standalone diagrams without a source key.
+      id = nodes.indexWhere(
+        (node) =>
+            node.parent == null &&
+            node.location == 'Diagram / position' &&
+            node.fen == position.fen,
+      );
+      if (id < 0) {
+        id = nodes.length;
+        nodes.add(_startNode(position.fen, location));
+      } else {
+        nodes[id] = _startNode(position.fen, location);
+      }
+    }
+    _enteredMoves.clear();
+    _navigating = true;
+    try {
+      session.setPosition(position, turnRecoverable: turnRecoverable);
+    } finally {
+      _navigating = false;
+    }
+    state = ReadingAnalysisState(
+      nodes: nodes,
+      cursor: id,
+      main: _retainedMain(nodes, id),
+    );
+    _save();
+    return true;
+  }
+
   /// Start a separate game without discarding the book or earlier analysis.
   void newGame(Object sourceKey) {
+    _enteredMoves.clear();
     if (_book == null) {
       ref.read(gameSessionProvider.notifier).reset();
       return;
@@ -248,6 +369,7 @@ class ReadingAnalysis extends Notifier<ReadingAnalysisState> {
   /// Seed the resolved page/chapter so alternatives never replace its moves.
   void selectBookMoves(List<ResolvedMove> moves, int index, Object sourceKey) {
     if (_book == null || moves.isEmpty) return;
+    _enteredMoves.clear();
     final location = '${sourceKey.runtimeType}:$sourceKey';
     final nodes = [...state.nodes];
     int? selected;
@@ -341,14 +463,154 @@ class ReadingAnalysis extends Notifier<ReadingAnalysisState> {
       (n) => n.parent == parent && n.uci == uci,
     );
     if (existing >= 0) return existing;
-    nodes.add(ReadingMove(parent, fen, label, location, uci));
+    final variation = nodes.any((node) => node.parent == parent)
+        ? _nextVariation++
+        : null;
+    nodes.add(ReadingMove(parent, fen, label, location, uci, variation));
     return nodes.length - 1;
   }
 
-  void select(int id) => _select(id);
+  void select(int id) {
+    _enteredMoves.clear();
+    _select(id);
+  }
+
+  void goToStart() => select(state.root);
+
+  void clearAnalysis() => _removeBelow(state.root, includeStart: false);
+
+  void deleteMove(int id) {
+    if (state.nodes[id].parent != null) _removeBelow(id, includeStart: true);
+  }
+
+  void _removeBelow(int id, {required bool includeStart}) {
+    final undoingEntry = includeStart && canUndoEntry && state.cursor == id;
+    if (undoingEntry) {
+      _enteredMoves.removeLast();
+    } else {
+      _enteredMoves.clear();
+    }
+    final removed = <int>{};
+    final order = <int>[];
+    for (var index = 0; index < state.nodes.length; index++) {
+      if ((index == id && includeStart) ||
+          removed.contains(state.nodes[index].parent) ||
+          (!includeStart && state.nodes[index].parent == id)) {
+        removed.add(index);
+      } else {
+        order.add(index);
+      }
+    }
+    final cursor = state.cursor!;
+    final selected = !includeStart || removed.contains(cursor)
+        ? (includeStart ? state.nodes[id].parent! : id)
+        : cursor;
+    _replaceNodes(state.nodes, order, selected);
+  }
+
+  void promoteToMain(int id) {
+    final nodes = [...state.nodes];
+    final order = List<int>.generate(nodes.length, (index) => index);
+    for (int? current = id; current != null;) {
+      final parent = nodes[current].parent;
+      if (parent == null) break;
+      final first = state.children(parent).first;
+      if (current != first) {
+        final formerMain = nodes[first];
+        if (formerMain.variation == null) {
+          nodes[first] = formerMain.withParent(
+            parent,
+            variation: _nextVariation++,
+          );
+        }
+        order.remove(current);
+        order.insert(order.indexOf(first), current);
+      }
+      current = parent;
+    }
+    _enteredMoves.clear();
+    _replaceNodes(nodes, order, state.cursor!, promoted: id);
+  }
+
+  void _replaceNodes(
+    List<ReadingMove> previous,
+    List<int> order,
+    int selected, {
+    int? promoted,
+  }) {
+    final indices = {for (var i = 0; i < order.length; i++) order[i]: i};
+    final nodes = [
+      for (final id in order)
+        previous[id].withParent(indices[previous[id].parent]),
+    ];
+    final entries = _enteredMoves.map((id) => indices[id]!).toList();
+    _enteredMoves
+      ..clear()
+      ..addAll(entries);
+    final cursor = indices[selected]!;
+    var main = indices[promoted] ?? cursor;
+    while (!_onMain(nodes, main)) {
+      main = nodes[main].parent!;
+    }
+    state = ReadingAnalysisState(nodes: nodes, cursor: cursor, main: main);
+    _apply(cursor);
+    _save();
+  }
+
+  String exportPgn() {
+    final root = state.root;
+    final fen = state.nodes[root].fen;
+    final tokens = <String>[];
+    void writeLine(int id, {required bool includeAlternatives}) {
+      var first = true;
+      while (true) {
+        final node = state.nodes[id];
+        final before = _parsePosition(state.nodes[node.parent!].fen);
+        final san = before.makeSan(Move.parse(node.uci!)!).$2;
+        if (before.turn == Side.white) {
+          tokens.add('${before.fullmoves}.');
+        } else if (first) {
+          tokens.add('${before.fullmoves}...');
+        }
+        tokens.add(san);
+        final siblings = state.children(node.parent!);
+        if (includeAlternatives) {
+          for (final alternative in siblings.skip(1)) {
+            tokens.add('(');
+            writeLine(alternative, includeAlternatives: false);
+            tokens.add(')');
+          }
+        }
+        final children = state.children(id);
+        if (children.isEmpty) break;
+        first = includeAlternatives && siblings.length > 1;
+        includeAlternatives = true;
+        id = children.first;
+      }
+    }
+
+    final children = state.children(root);
+    if (children.isNotEmpty) {
+      writeLine(children.first, includeAlternatives: true);
+    }
+    tokens.add('*');
+    return [
+      '[Event "?"]',
+      '[Site "?"]',
+      '[Date "????.??.??"]',
+      '[Round "?"]',
+      '[White "?"]',
+      '[Black "?"]',
+      '[Result "*"]',
+      if (fen != Chess.initial.fen) ...['[SetUp "1"]', '[FEN "$fen"]'],
+      '',
+      tokens.join(' ').replaceAll('( ', '(').replaceAll(' )', ')'),
+    ].join('\n');
+  }
+
   void backToMain() {
     final main = state.main;
-    if (main != null) _select(main);
+    if (main != null) select(main);
   }
 
   void _select(int id, {bool apply = true}) {
@@ -387,6 +649,7 @@ class ReadingAnalysis extends Notifier<ReadingAnalysisState> {
             'nodes': [for (final node in state.nodes) node.toJson()],
             'cursor': state.cursor,
             'main': state.main,
+            'nextVariation': _nextVariation,
           }),
         );
   }
