@@ -1,40 +1,14 @@
-import 'dart:math';
-
-import 'package:chessground/chessground.dart';
 import 'package:dartchess/dartchess.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../core/settings/app_settings.dart';
 import '../reader/state/book_providers.dart';
 import '../reader/state/reading_analysis.dart';
-import 'reading_analysis_arrows.dart';
 
 void _selectMove(WidgetRef ref, int id) {
   ref.read(activeLineProvider.notifier).clear();
   ref.read(readingAnalysisProvider.notifier).select(id);
-}
-
-class ReadingAnalysisBar extends ConsumerWidget {
-  const ReadingAnalysisBar({super.key, this.orientation = Side.white});
-
-  final Side orientation;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    if (ref.watch(readingAnalysisProvider).cursor == null) {
-      return const SizedBox.shrink();
-    }
-    return TextButton.icon(
-      icon: const Icon(Icons.account_tree_outlined),
-      label: const Text('Moves'),
-      onPressed: () => showDialog<void>(
-        context: context,
-        builder: (_) => _MovesDialog(orientation: orientation),
-      ),
-    );
-  }
 }
 
 /// One centered row that scrolls sideways instead of wrapping when too wide.
@@ -57,19 +31,21 @@ class ScrollingRow extends StatelessWidget {
   );
 }
 
-class _MovesDialog extends ConsumerStatefulWidget {
-  const _MovesDialog({required this.orientation});
-
-  final Side orientation;
+class ReadingAnalysisPanel extends ConsumerStatefulWidget {
+  const ReadingAnalysisPanel({super.key});
 
   @override
-  ConsumerState<_MovesDialog> createState() => _MovesDialogState();
+  ConsumerState<ReadingAnalysisPanel> createState() =>
+      _ReadingAnalysisPanelState();
 }
 
 enum _MoveAction { promote, delete }
 
-class _MovesDialogState extends ConsumerState<_MovesDialog> {
+enum _AnalysisAction { start, main, copy, clear }
+
+class _ReadingAnalysisPanelState extends ConsumerState<ReadingAnalysisPanel> {
   final _selectedKey = GlobalKey();
+  String? _sideError;
 
   void _revealSelection() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -135,7 +111,6 @@ class _MovesDialogState extends ConsumerState<_MovesDialog> {
       _revealSelection();
     });
     final actions = ref.read(readingAnalysisProvider.notifier);
-    final settings = ref.watch(settingsProvider);
     final isEpub =
         ref.watch(openedBookProvider)?.toLowerCase().endsWith('.epub') ?? false;
     final root = tree.root;
@@ -145,7 +120,12 @@ class _MovesDialogState extends ConsumerState<_MovesDialog> {
       if (parent != null) (children[parent] ??= []).add(id);
     }
     final hasMoves = children.containsKey(root);
-    final selected = tree.nodes[cursor];
+    final location = tree.nodes[root].location;
+    final editableSide =
+        location == 'FEN' ||
+        location == 'Diagram / position' ||
+        location.startsWith('Diagram:');
+    final startingSide = Setup.parseFen(tree.nodes[root].fen).turn;
     final mainLine = <int>{root};
     var main = root;
     while (children.containsKey(main)) {
@@ -165,24 +145,27 @@ class _MovesDialogState extends ConsumerState<_MovesDialog> {
         key: id == cursor ? _selectedKey : null,
         mainAxisSize: MainAxisSize.min,
         children: [
-          TextButton(
-            style: id == cursor
-                ? TextButton.styleFrom(
-                    backgroundColor: Theme.of(context)
-                        .colorScheme
-                        .secondaryContainer,
-                    foregroundColor: Theme.of(context)
-                        .colorScheme
-                        .onSecondaryContainer,
-                  )
-                : null,
-            onPressed: () => _selectMove(ref, id),
-            child: Text(label),
+          Flexible(
+            child: TextButton(
+              style: TextButton.styleFrom(
+                minimumSize: const Size(0, 40),
+                padding: const EdgeInsets.symmetric(horizontal: 6),
+                backgroundColor: id == cursor
+                    ? Theme.of(context).colorScheme.secondaryContainer
+                    : null,
+                foregroundColor: id == cursor
+                    ? Theme.of(context).colorScheme.onSecondaryContainer
+                    : null,
+              ),
+              onPressed: () => _selectMove(ref, id),
+              child: Text(label),
+            ),
           ),
           if (!rootMove)
             PopupMenuButton<_MoveAction>(
               tooltip: 'Options for ${node.label}',
               iconSize: 17,
+              padding: EdgeInsets.zero,
 
               itemBuilder: (_) => [
                 if (!mainLine.contains(id))
@@ -287,128 +270,132 @@ class _MovesDialogState extends ConsumerState<_MovesDialog> {
       }
       addLine(firstMoves.first, 0);
     }
-    final screen = MediaQuery.sizeOf(context);
-    return Dialog(
-      insetPadding: const EdgeInsets.all(12),
-      child: SizedBox(
-        width: min(580.0, screen.width - 24),
-        height: min(720.0, screen.height - 24),
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('Moves', style: Theme.of(context).textTheme.titleLarge),
-              DropdownButton<int>(
-                value: root,
-                isExpanded: true,
-                items: [
-                  for (var id = 0; id < tree.nodes.length; id++)
-                    if (tree.nodes[id].parent == null)
-                      DropdownMenuItem(
-                        value: id,
-                        child: Text(
-                          '${tree.nodes[id].label} · ${_formatLocation(tree.nodes[id].location, isEpub: isEpub)}',
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                ],
-                onChanged: (id) {
-                  if (id != null) _selectMove(ref, id);
-                },
-              ),
-              Expanded(
-                child: LayoutBuilder(
-                  builder: (context, constraints) => Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Center(
-                        child: StaticChessboard(
-                          size: min(
-                            constraints.maxWidth,
-                            constraints.maxHeight * 0.52,
+    return Card(
+      margin: EdgeInsets.zero,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: DropdownButton<int>(
+                    value: root,
+                    isExpanded: true,
+                    items: [
+                      for (var id = 0; id < tree.nodes.length; id++)
+                        if (tree.nodes[id].parent == null)
+                          DropdownMenuItem(
+                            value: id,
+                            child: Text(
+                              '${tree.nodes[id].label} · ${_formatLocation(tree.nodes[id].location, isEpub: isEpub)}',
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
-                          orientation: widget.orientation,
-                          fen: selected.fen,
-                          shapes: readingAnalysisArrows(tree),
-                          lastMove: selected.uci == null
-                              ? null
-                              : Move.parse(selected.uci!),
-                          settings: StaticChessboardSettings(
-                            pieceAssets: settings.pieceSet.assets,
-                            colorScheme: settings.boardColors,
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        child: SingleChildScrollView(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: rows,
-                          ),
-                        ),
-                      ),
                     ],
+                    onChanged: (id) {
+                      if (id != null) {
+                        setState(() => _sideError = null);
+                        _selectMove(ref, id);
+                      }
+                    },
                   ),
                 ),
-              ),
-              Wrap(
-                alignment: WrapAlignment.end,
+                PopupMenuButton<_AnalysisAction>(
+                  tooltip: 'Analysis actions',
+                  itemBuilder: (_) => [
+                    PopupMenuItem(
+                      value: _AnalysisAction.start,
+                      enabled: cursor != root,
+                      child: const Text('Go to start'),
+                    ),
+                    PopupMenuItem(
+                      value: _AnalysisAction.main,
+                      enabled: tree.main != null && cursor != tree.main,
+                      child: const Text('Main line'),
+                    ),
+                    PopupMenuItem(
+                      value: _AnalysisAction.copy,
+                      enabled: hasMoves,
+                      child: const Text('Copy PGN'),
+                    ),
+                    PopupMenuItem(
+                      value: _AnalysisAction.clear,
+                      enabled: hasMoves,
+                      child: const Text('Clear analysis…'),
+                    ),
+                  ],
+                  onSelected: (action) async {
+                    if (!mounted ||
+                        !identical(ref.read(readingAnalysisProvider), tree)) {
+                      return;
+                    }
+                    switch (action) {
+                      case _AnalysisAction.start:
+                        _selectMove(ref, root);
+                      case _AnalysisAction.main:
+                        _selectMove(ref, tree.main!);
+                      case _AnalysisAction.copy:
+                        await Clipboard.setData(
+                          ClipboardData(text: actions.exportPgn()),
+                        );
+                        if (context.mounted) {
+                          ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+                            const SnackBar(content: Text('PGN copied')),
+                          );
+                        }
+                      case _AnalysisAction.clear:
+                        if (await _confirm(
+                              'Clear analysis?',
+                              'All moves and variations for this starting position will be removed.',
+                              'Clear',
+                            ) &&
+                            mounted &&
+                            identical(
+                              ref.read(readingAnalysisProvider),
+                              tree,
+                            )) {
+                          actions.clearAnalysis();
+                        }
+                    }
+                  },
+                ),
+              ],
+            ),
+            if (editableSide)
+              Row(
                 children: [
-                  TextButton(
-                    onPressed: cursor == root
-                        ? null
-                        : () => _selectMove(ref, root),
-                    child: const Text('Go to start'),
-                  ),
-                  TextButton(
-                    onPressed: cursor == tree.main || tree.main == null
-                        ? null
-                        : () => _selectMove(ref, tree.main!),
-                    child: const Text('Main line'),
-                  ),
-                  TextButton(
-                    onPressed: hasMoves
-                        ? () async {
-                            await Clipboard.setData(
-                              ClipboardData(text: actions.exportPgn()),
-                            );
-                            if (context.mounted) {
-                              ScaffoldMessenger.maybeOf(context)?.showSnackBar(
-                                const SnackBar(content: Text('PGN copied')),
-                              );
-                            }
-                          }
-                        : null,
-                    child: const Text('Copy PGN'),
-                  ),
-                  TextButton(
-                    onPressed: hasMoves
-                        ? () async {
-                            if (await _confirm(
-                                  'Clear analysis?',
-                                  'All moves and variations for this starting position will be removed.',
-                                  'Clear',
-                                ) &&
-                                mounted &&
-                                identical(
-                                  ref.read(readingAnalysisProvider),
-                                  tree,
-                                )) {
-                              actions.clearAnalysis();
-                            }
-                          }
-                        : null,
-                    child: const Text('Clear analysis…'),
-                  ),
-                  TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: const Text('Close'),
+                  const Expanded(child: Text('Starting side to move')),
+                  DropdownButton<Side>(
+                    value: startingSide,
+                    items: const [
+                      DropdownMenuItem(value: Side.white, child: Text('White')),
+                      DropdownMenuItem(value: Side.black, child: Text('Black')),
+                    ],
+                    onChanged: (side) {
+                      if (side == null || side == startingSide) return;
+                      ref.read(activeLineProvider.notifier).clear();
+                      final changed = actions.setStartingSide(side);
+                      setState(() {
+                        _sideError = changed
+                            ? null
+                            : '${side == Side.white ? 'White' : 'Black'} cannot move first in this position.';
+                      });
+                    },
                   ),
                 ],
               ),
-            ],
-          ),
+            if (editableSide && _sideError != null) Text(_sideError!),
+            Expanded(
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: rows,
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

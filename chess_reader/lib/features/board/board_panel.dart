@@ -44,6 +44,7 @@ class BoardPanel extends ConsumerStatefulWidget {
 class _BoardPanelState extends ConsumerState<BoardPanel> {
   late final ChessboardController _controller;
   Side _orientation = Side.white;
+  bool _movesOpen = false;
 
   @override
   void initState() {
@@ -154,6 +155,12 @@ class _BoardPanelState extends ConsumerState<BoardPanel> {
             guess.phase == GuessMovePhase.idle
         ? readingAnalysisArrows(analysis)
         : const <Shape>{};
+    final canShowMoves =
+        cursor != null &&
+        session.legal &&
+        !opponent.ownsBoard &&
+        guess.phase == GuessMovePhase.idle;
+    final showMoves = canShowMoves && _movesOpen;
     final activeLine = ref.watch(activeLineProvider);
     final guessHasProAccess = ref.watch(proEntitlementProvider);
     final canStartGuess =
@@ -175,21 +182,40 @@ class _BoardPanelState extends ConsumerState<BoardPanel> {
         final short = panel.maxHeight < _kShortPanelHeight;
         return Column(
           children: [
-            const EnginePanel(),
+            if (!showMoves || !short) const EnginePanel(),
             const SizedBox(height: 8),
             Expanded(
-              child: Center(
-                child: LayoutBuilder(
-                  builder: (context, constraints) => Chessboard(
-                    controller: _controller,
-                    size: min(constraints.maxWidth, constraints.maxHeight),
-                    settings: boardSettings,
-                    orientation: _orientation,
-                    shapes: arrows,
-                    onMove: (move, {viaDragAndDrop}) =>
-                        ref.read(gameSessionProvider.notifier).playMove(move),
+              child: Flex(
+                direction:
+                    panel.maxWidth >= 560 || short && panel.maxWidth >= 370
+                    ? Axis.horizontal
+                    : Axis.vertical,
+                children: [
+                  Expanded(
+                    flex: 3,
+                    child: Center(
+                      child: LayoutBuilder(
+                        builder: (context, constraints) => Chessboard(
+                          controller: _controller,
+                          size: min(
+                            constraints.maxWidth,
+                            constraints.maxHeight,
+                          ),
+                          settings: boardSettings,
+                          orientation: _orientation,
+                          shapes: arrows,
+                          onMove: (move, {viaDragAndDrop}) => ref
+                              .read(gameSessionProvider.notifier)
+                              .playMove(move),
+                        ),
+                      ),
+                    ),
                   ),
-                ),
+                  if (showMoves) ...[
+                    const SizedBox(width: 8, height: 8),
+                    const Expanded(flex: 2, child: ReadingAnalysisPanel()),
+                  ],
+                ],
               ),
             ),
             const SizedBox(height: 8),
@@ -197,7 +223,7 @@ class _BoardPanelState extends ConsumerState<BoardPanel> {
               const GuessMoveBar()
             else if (opponent.showsGameBar)
               const ComputerGameBar()
-            else if (!session.onBookLine)
+            else if (!session.onBookLine && (!short || !showMoves))
               Padding(
                 padding: const EdgeInsets.only(bottom: 4),
                 child: FilledButton.tonalIcon(
@@ -207,12 +233,18 @@ class _BoardPanelState extends ConsumerState<BoardPanel> {
                       ref.read(gameSessionProvider.notifier).backToBook(),
                 ),
               ),
-            if (!opponent.ownsBoard && guess.phase == GuessMovePhase.idle)
-              ReadingAnalysisBar(orientation: _orientation),
             const ChessnutStatusWidget(),
             _Toolbar(
               singleRow: short,
               children: [
+                if (canShowMoves)
+                  TextButton.icon(
+                    icon: Icon(
+                      showMoves ? Icons.close : Icons.account_tree_outlined,
+                    ),
+                    label: Text(showMoves ? 'Hide moves' : 'Moves'),
+                    onPressed: () => setState(() => _movesOpen = !showMoves),
+                  ),
                 const ChessnutConnectIconButton(),
                 IconButton(
                   tooltip: 'Undo move',

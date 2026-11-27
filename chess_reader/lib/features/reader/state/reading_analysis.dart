@@ -284,6 +284,26 @@ class ReadingAnalysis extends Notifier<ReadingAnalysisState> {
     }
   }
 
+  bool setStartingSide(Side side) {
+    final root = state.nodes[state.root];
+    final setup = Setup.parseFen(root.fen);
+    if (setup.turn == side) return true;
+    final candidate = Setup(
+      board: setup.board,
+      turn: side,
+      castlingRights: setup.castlingRights,
+      halfmoves: setup.halfmoves,
+      fullmoves: setup.fullmoves,
+    );
+    try {
+      final position = Chess.fromSetup(candidate, ignoreImpossibleCheck: true);
+      _activateStart(position, root.location);
+      return true;
+    } on PositionSetupException {
+      return false;
+    }
+  }
+
   /// Give a copied position its own tree, even when it also occurs in a
   /// printed or manually entered line in this book.
   bool loadStartingPosition(
@@ -298,9 +318,20 @@ class ReadingAnalysis extends Notifier<ReadingAnalysisState> {
       return session.loadFen(fen, turnRecoverable: turnRecoverable);
     }
 
-    final position = loaded.position!;
+    _activateStart(
+      loaded.position!,
+      diagramKey == null ? 'FEN' : 'Diagram:$diagramKey',
+      turnRecoverable: turnRecoverable,
+    );
+    return true;
+  }
+
+  void _activateStart(
+    Position position,
+    String location, {
+    bool turnRecoverable = false,
+  }) {
     final nodes = [...state.nodes];
-    final location = diagramKey == null ? 'FEN' : 'Diagram:$diagramKey';
     var id = nodes.indexWhere(
       (node) =>
           node.parent == null &&
@@ -325,7 +356,9 @@ class ReadingAnalysis extends Notifier<ReadingAnalysisState> {
     _enteredMoves.clear();
     _navigating = true;
     try {
-      session.setPosition(position, turnRecoverable: turnRecoverable);
+      ref
+          .read(gameSessionProvider.notifier)
+          .setPosition(position, turnRecoverable: turnRecoverable);
     } finally {
       _navigating = false;
     }
@@ -335,7 +368,6 @@ class ReadingAnalysis extends Notifier<ReadingAnalysisState> {
       main: _retainedMain(nodes, id),
     );
     _save();
-    return true;
   }
 
   /// Start a separate game without discarding the book or earlier analysis.

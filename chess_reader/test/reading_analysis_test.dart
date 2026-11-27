@@ -11,7 +11,6 @@ import 'package:chess_reader/features/reader/state/reading_analysis.dart';
 import 'package:dartchess/dartchess.dart';
 import 'package:flutter/material.dart';
 import 'package:chess_reader/features/board/board_panel.dart';
-import 'package:chess_reader/features/board/reading_analysis_bar.dart';
 import 'package:chessground/chessground.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -101,14 +100,18 @@ void main() {
     await tester.pumpWidget(
       UncontrolledProviderScope(
         container: c,
-        child: const MaterialApp(home: Scaffold(body: ReadingAnalysisBar())),
+        child: const MaterialApp(home: Scaffold(body: BoardPanel())),
       ),
     );
     await tester.tap(find.text('Moves'));
     await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Analysis actions'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Main line'));
     await tester.pump();
     expect(c.read(gameSessionProvider).fen, moves.first.positionAfter.fen);
+    await tester.ensureVisible(find.text('1... c5'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('1... c5'));
     await tester.pumpAndSettle();
     expect(c.read(gameSessionProvider).fen, variationFen);
@@ -152,7 +155,7 @@ void main() {
     },
   );
 
-  testWidgets('Moves shows numbered branches and keeps the preview open', (
+  testWidgets('Moves shows numbered branches and updates the same board', (
     tester,
   ) async {
     tester.view.physicalSize = const Size(390, 680);
@@ -164,16 +167,18 @@ void main() {
     await tester.pumpWidget(
       UncontrolledProviderScope(
         container: c,
-        child: const MaterialApp(home: Scaffold(body: ReadingAnalysisBar())),
+        child: const MaterialApp(home: Scaffold(body: BoardPanel())),
       ),
     );
     await tester.tap(find.text('Moves'));
     await tester.pumpAndSettle();
     expect(find.text('V1'), findsOneWidget);
+    await tester.ensureVisible(find.text('1. e4'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('1. e4'));
     await tester.pumpAndSettle();
     final arrows = tester
-        .widget<StaticChessboard>(find.byType(StaticChessboard))
+        .widget<Chessboard>(find.byType(Chessboard))
         .shapes
         .whereType<Arrow>();
     expect(
@@ -185,13 +190,17 @@ void main() {
       ]),
     );
     expect(arrows.map((arrow) => arrow.color).toSet(), hasLength(3));
+    await tester.ensureVisible(find.text('1... e5'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('1... e5'));
     await tester.pumpAndSettle();
     expect(c.read(gameSessionProvider).lastMove!.uci, 'e7e5');
     expect(
-      tester.widget<StaticChessboard>(find.byType(StaticChessboard)).fen,
+      tester.widget<Chessboard>(find.byType(Chessboard)).controller.game.fen,
       c.read(gameSessionProvider).fen,
     );
+    await tester.tap(find.byTooltip('Analysis actions'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Go to start'));
     await tester.pumpAndSettle();
     expect(c.read(gameSessionProvider).fen, Chess.initial.fen);
@@ -267,6 +276,49 @@ void main() {
     analysis.clearAnalysis();
     c.read(activeLineProvider.notifier).select(moves, 0, 1);
     expect(analysis.exportPgn(), contains('1. e4 e5'));
+  });
+
+  testWidgets('play inside Moves and choose Black from a copied diagram', (
+    tester,
+  ) async {
+    final analysis = c.read(readingAnalysisProvider.notifier);
+    analysis.loadStartingPosition(Chess.initial.fen, diagramKey: '1:0');
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: c,
+        child: const MaterialApp(home: Scaffold(body: BoardPanel())),
+      ),
+    );
+    final board = find.byType(Chessboard);
+    final controller = tester.widget<Chessboard>(board).controller;
+    await tester.tap(find.text('Moves'));
+    await tester.pumpAndSettle();
+    expect(board, findsOneWidget);
+    expect(tester.widget<Chessboard>(board).controller, same(controller));
+    final rect = tester.getRect(board);
+    final square = rect.width / 8;
+    Future<void> play(int file, int fromRank, int toRank) async {
+      await tester.tapAt(
+        rect.topLeft + Offset(square * (file + 0.5), square * (7.5 - fromRank)),
+      );
+      await tester.pumpAndSettle();
+      await tester.tapAt(
+        rect.topLeft + Offset(square * (file + 0.5), square * (7.5 - toRank)),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    await play(4, 1, 3);
+    expect(analysis.exportPgn(), contains('1. e4'));
+    await tester.tap(find.text('White'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Black').last);
+    await tester.pumpAndSettle();
+    expect(c.read(gameSessionProvider).position.turn, Side.black);
+    await play(2, 6, 4);
+    expect(analysis.exportPgn(), contains('1... c5'));
+    expect(analysis.setStartingSide(Side.white), isTrue);
+    expect(analysis.exportPgn(), contains('1. e4'));
   });
 
   test('manual new-game main line survives exploring an alternative', () {
@@ -467,6 +519,11 @@ void main() {
     );
     await tester.pump();
     expect(tester.takeException(), isNull);
+    expect(tester.getSize(find.byType(Chessboard)).width, greaterThan(120));
+    await tester.tap(find.text('Moves'));
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    expect(find.byType(Chessboard), findsOneWidget);
     expect(tester.getSize(find.byType(Chessboard)).width, greaterThan(120));
     await tester.pumpWidget(const SizedBox());
   });
