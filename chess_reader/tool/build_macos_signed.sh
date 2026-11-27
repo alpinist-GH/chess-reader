@@ -54,6 +54,40 @@ du -sh "$APP"
 echo "=== Contents/Frameworks (expect FlutterMacOS, multistockfish, onnxruntime) ==="
 ls -la "$APP/Contents/Frameworks/" || echo "NO Frameworks dir — app is hollow"
 
+# Stage a clean copy before signing. Finder metadata can invalidate a bundle.
+STAGE=$(mktemp -d)
+trap 'rm -rf "$STAGE"' EXIT
+SOURCE_APP="$APP"
+APP="$STAGE/ChessBook Reader.app"
+ditto --norsrc --noextattr --noqtn "$SOURCE_APP" "$APP"
+ln -s /Applications "$STAGE/Applications"
+
+# CocoaPods and Flutter's native asset use different casing for PDFium.
+# Match the executable's load command and folder casing to the embedded dylib.
+EXECUTABLE="$APP/Contents/MacOS/ChessBook Reader"
+for FRAMEWORK in "$APP"/Contents/Frameworks/[Pp][Dd][Ff][Ii][Uu][Mm].framework; do
+  [ -d "$FRAMEWORK" ] || continue
+  for LIBRARY in "$FRAMEWORK"/[Pp][Dd][Ff][Ii][Uu][Mm]; do
+    [ -f "$LIBRARY" ] || continue
+    INSTALL_NAMES=$(otool -arch all -D "$LIBRARY" | grep '^@rpath/' | sort -u)
+    case "$INSTALL_NAMES" in
+      '@rpath/PDFium.framework/PDFium') OLD_NAME='@rpath/pdfium.framework/pdfium' ;;
+      '@rpath/pdfium.framework/pdfium') OLD_NAME='@rpath/PDFium.framework/PDFium' ;;
+      *) echo "Unexpected PDFium install name: $INSTALL_NAMES" >&2; exit 1 ;;
+    esac
+    if otool -arch all -L "$EXECUTABLE" | grep -F "$OLD_NAME" >/dev/null; then
+      install_name_tool -change "$OLD_NAME" "$INSTALL_NAMES" "$EXECUTABLE"
+    fi
+    EXPECTED_FRAMEWORK="$APP/Contents/Frameworks/${INSTALL_NAMES#@rpath/}"
+    EXPECTED_FRAMEWORK="${EXPECTED_FRAMEWORK%/*}"
+    if [ "$FRAMEWORK" != "$EXPECTED_FRAMEWORK" ]; then
+      mv "$FRAMEWORK" "$FRAMEWORK.staging"
+      mv "$FRAMEWORK.staging" "$EXPECTED_FRAMEWORK"
+    fi
+    break
+  done
+done
+
 echo "Signing app + embedded frameworks..."
 codesign --force --deep --options runtime --timestamp \
   --entitlements macos/Runner/Release.entitlements \
@@ -66,14 +100,8 @@ codesign --verify --deep --strict "$APP"
 mkdir -p "$DIST"
 rm -f "$DMG"
 
-# Stage the .app alongside an /Applications symlink for drag-to-install.
-STAGE=$(mktemp -d)
-cp -R "$APP" "$STAGE/"
-ln -s /Applications "$STAGE/Applications"
-
 hdiutil create -volname "ChessBook Reader" -srcfolder "$STAGE" \
   -ov -format UDZO "$DMG"
-rm -rf "$STAGE"
 
 # Fail loudly instead of notarizing/shipping a hollow image.
 DMG_SIZE=$(stat -f%z "$DMG")
