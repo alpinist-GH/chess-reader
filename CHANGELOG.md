@@ -6,6 +6,19 @@ follows [Keep a Changelog](https://keepachangelog.com/) and
 
 ## [Unreleased]
 
+## [2.2.1]
+
+### Changed
+- Explore saved book analysis in the Moves panel. Tap a move to jump to
+  it, and use numbered variations and board arrows to see continuations.
+- When analyzing a copied diagram, choose which side moves first, undo a
+  move, delete a branch, or promote a variation to the main line. Copy PGN
+  includes the starting position and all variations.
+
+### Fixed
+- Keep the analysis board visible while browsing moves and variations.
+- Fix a PDFium framework loading issue in the direct-download macOS DMG.
+
 ## [2.2.0] — 2026-11-07
 
 ### Added
