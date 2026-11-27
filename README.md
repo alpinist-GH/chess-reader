@@ -10,21 +10,18 @@ The Flutter app lives in [`chess_reader/`](chess_reader/).
 
 ## Download
 
-**Windows:** download the installer from the latest release —
+**Windows:** download the 2.1.0 installer.
 [**chessbook-reader-setup-2.1.0.exe**](https://github.com/alpinist-GH/chess-reader/releases/download/chessbook-v2.1.0/chessbook-reader-setup-2.1.0.exe)
-([all releases](https://github.com/alpinist-GH/chess-reader/releases/latest)).
+([all releases](https://github.com/alpinist-GH/chess-reader/releases)).
 
 It's a per‑user install (no administrator rights needed). The installer is
 unsigned, so Windows SmartScreen may warn — choose **More info → Run anyway**.
 The Stockfish engine and the diagram‑recognition model are bundled; everything
 runs offline.
 
-**macOS:** download the signed, notarized DMG from the latest release —
-[**chessbook-reader-2.2.0.dmg**](https://github.com/alpinist-GH/chess-reader/releases/download/chessbook-v2.2.0/chessbook-reader-2.2.0.dmg)
-([all releases](https://github.com/alpinist-GH/chess-reader/releases/latest)).
-
-Requires macOS 14+ and a Mac with a Metal‑capable GPU. The app is Developer
-ID-signed and notarized — no Gatekeeper warning on first launch.
+**macOS:** [Download ChessBook Reader 2.2.1](https://github.com/alpinist-GH/chess-reader/releases/download/chessbook-v2.2.1/chessbook-reader-2.2.1-macos.dmg).
+The DMG is Developer ID-signed and notarized. It supports Apple silicon and
+Intel Macs running macOS 14 or later with a Metal-capable GPU.
 
 Other platforms: build from source (see [Building](#building)).
 
@@ -37,14 +34,15 @@ high-resolution PDFs. Diagram recognition runs fully on-device.
 - **Clickable moves** — tap a move in the book and the side board jumps to that
   position; step through lines and explore your own variations, then snap back
   to the book.
-- **New game while reading** — use **New game** below the board to return to
-  the starting position without closing the book. Earlier games and diagram
-  analysis remain in **Saved lines**. Branch choices appear below the board.
-- **Saved reading lines** — book moves and your own variations are saved locally
-  for each book location. Use **Saved lines** below the board to revisit any
-  branch, the arrows to step through saved moves, and **Return to main line**
-  to leave a variation without undoing it. Reopening the book restores the
-  selected board position.
+- **Analysis while reading** — open **Moves** beside the board to play and
+  browse a saved tree. Tap any move to jump to it. Numbered variations and
+  board arrows show the continuations from the current position.
+- **Copied diagram analysis** — choose White or Black to move, undo an entered
+  move, delete a branch, or promote a variation to the main line. **Copy PGN**
+  includes the starting position and all variations. **Go to start** and
+  **Clear analysis** let you return to the diagram or start over.
+- **New game while reading** — start a separate analysis without closing the
+  book. Your earlier games and diagram analyses stay saved locally.
 - **Two reading views for PDF** — the original printed pages, or a reflowed HTML
   reading view (easier on small screens). Choose at open, switch anytime; EPUB
   is always HTML.
